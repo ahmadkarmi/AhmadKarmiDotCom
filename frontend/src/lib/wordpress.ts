@@ -498,6 +498,7 @@ export interface Work {
     slug: string;
     status: 'completed' | 'proposal' | 'concept' | 'in_progress' | 'backlog';
     featured: boolean;
+    publishDate?: string;
     brief?: string;
     scope?: string;
     details?: string;
@@ -694,6 +695,13 @@ export async function fetchWorks(options?: { featured?: boolean; limit?: number 
             );
 
             let works = dedupeBySlug(hydratedPosts.map(transformWork));
+
+            // Sort by publishDate descending (most recent first)
+            works.sort((a, b) => {
+                const dateA = a.publishDate ? new Date(a.publishDate).getTime() : 0;
+                const dateB = b.publishDate ? new Date(b.publishDate).getTime() : 0;
+                return dateB - dateA;
+            });
 
             if (options?.featured !== undefined) {
                 works = works.filter((w: Work) => w.featured === options.featured);
@@ -1339,6 +1347,7 @@ function transformWork(post: any): Work {
         slug: post.slug,
         status: acf.status || 'backlog',
         featured: parseAcfBoolean(acf.featured),
+        publishDate: post.date || post.date_gmt,
         brief: processMarkdownContent(acf.brief),
         scope: processMarkdownContent(acf.scope),
         details: processMarkdownContent(acf.details || post.content?.rendered),
