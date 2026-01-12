@@ -1,0 +1,322 @@
+
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchInsights, fetchInsightBySlug, getMediaUrl } from '../../lib/wordpress';
+import { marked } from 'marked';
+import ShareButtons from '../../components/ShareButtons.astro';
+import NewsletterForm from '../../components/NewsletterForm.astro';
+import RelatedInsights from '../../components/RelatedInsights.astro';
+
+export async function getStaticPaths() {
+  const insights = await fetchInsights();
+  return insights.map((insight) => ({
+    params: { slug: insight.slug },
+    props: { insight, allInsights: insights },
+  }));
+}
+
+const { slug } = Astro.params;
+const { insight, allInsights = [] } = Astro.props;
+
+// Fallback fetch if props are empty (for dev mode)
+const insightData = insight || await fetchInsightBySlug(slug as string);
+
+if (!insightData) {
+  return Astro.redirect('/404');
+}
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
+const shareUrl = new URL(Astro.url.pathname, siteUrl).toString();
+
+const heroMedia = insightData.mainImage || insightData.thumbnailImage;
+const heroImageUrl = getMediaUrl(heroMedia);
+
+// Format date
+function formatDate(dateString?: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+}
+
+// Calculate read time (rough estimate)
+function calculateReadTime(text?: string): number {
+  if (!text) return 1;
+  const wordsPerMinute = 200;
+  const words = text.replace(/<[^>]+>/g, '').split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / wordsPerMinute));
+}
+
+const readTime = calculateReadTime(insightData.body);
+
+// Configure marked to preserve HTML (iframes, videos, etc.)
+marked.setOptions({
+  gfm: true,
+  breaks: true
+});
+
+function hasMarkdownTableDelimiter(text: string): boolean {
+  return /(^|\n)\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*(\n|$)/m.test(text);
+}
+
+function hasMarkdownSignals(text: string): boolean {
+  return /\*\*[^*\n]{2,}\*\*/.test(text)
+    || /__[^_\n]{2,}__/.test(text)
+    || /(^|\n)\s*#{1,6}\s+\S/m.test(text)
+    || /(^|\n)\s*[-–—*+]\s+\S/m.test(text)
+    || /(^|\n)\s*>\s+\S/m.test(text);
+}
+
+function decodeLooseHtmlEntities(text: string): string {
+  return String(text)
+    .replace(/&#x([0-9a-fA-F]+);/g, (_m, hex) => {
+      const n = Number.parseInt(hex, 16);
+      return Number.isFinite(n) ? String.fromCodePoint(n) : _m;
+    })
+    .replace(/&#(\d+);/g, (_m, num) => {
+      const n = Number.parseInt(num, 10);
+      return Number.isFinite(n) ? String.fromCodePoint(n) : _m;
+    })
+    .replace(/&ndash;/gi, '–')
+    .replace(/&mdash;/gi, '—')
+    .replace(/&gt;/gi, '>')
+    .replace(/&lt;/gi, '<')
+    .replace(/&amp;/gi, '&')
+    .replace(/&nbsp;|&#160;|&#xA0;/gi, ' ');
+}
+
+function unwrapHtmlWrappedMarkdownTables(html: string): string {
+  return html.replace(/<(p|h[1-6])\b[^>]*>([\s\S]*?)<\/\1>/gi, (full, _tag, inner) => {
+    const innerDecoded = decodeLooseHtmlEntities(String(inner))
+      .replace(/<a\b[^>]*\bhref=(['"])([^'"]+)\1[^>]*>([\s\S]*?)<\/a>/gi, (_m, _q, href, text) => {
+        const label = String(text || '').replace(/<[^>]+>/g, '').trim();
+        return label ? `[${label}](${href})` : href;
+      })
+      .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+      .replace(/<\/?span\b[^>]*>/gi, '')
+      .trim();
+
+    const innerText = innerDecoded
+      .replace(/<[^>]+>/g, '')
+      .trim();
+
+    if (!innerText) return full;
+
+    const pipeCount = (innerText.match(/\|/g) || []).length;
+    const looksLikeTableDelimiter = /\|\s*:?-{3,}:?\s*(\||$)/.test(innerText);
+    const looksLikeTableRow = pipeCount >= 2 && (looksLikeTableDelimiter || innerText.startsWith('|') || /\n/.test(innerText));
+
+    const looksLikeHeading = /^#{1,6}\s+\S/.test(innerText);
+    const looksLikeListItem = /^[-–—*+]\s+\S/.test(innerText);
+    const looksLikeBlockquote = /^>\s+\S/.test(innerText);
+    const looksLikeMarkdown = looksLikeTableRow
+      || looksLikeHeading
+      || looksLikeListItem
+      || looksLikeBlockquote
+      || /\*\*[^*\n]{2,}\*\*/.test(innerText)
+      || /__[^_\n]{2,}__/.test(innerText);
+    if (!looksLikeMarkdown) return full;
+
+    const normalizedForMarkdown = innerText
+      .replace(/^(&ndash;|&mdash;|&#8211;|&#8212;)\s*/i, '- ')
+      .replace(/^[-–—]\s+/, '- ')
+      .replace(/\n(&ndash;|&mdash;|&#8211;|&#8212;)\s*/gi, '\n- ')
+      .replace(/\n[-–—]\s+/g, '\n- ');
+
+    if (looksLikeTableRow) return `\n${normalizedForMarkdown}\n`;
+    if (looksLikeListItem) return `\n${normalizedForMarkdown}\n`;
+    if (looksLikeBlockquote) return `\n\n${normalizedForMarkdown}\n\n`;
+    if (looksLikeHeading) return `\n\n${normalizedForMarkdown}\n\n`;
+    return `\n\n${normalizedForMarkdown}\n\n`;
+  });
+}
+
+function wrapTablesInOverflow(html: string): string {
+  if (!/<\s*table\b/i.test(html)) return html;
+  return html
+    .replace(/<table\b/gi, '<div class="overflow-x-auto my-10 rounded-xl overflow-hidden"><table')
+    .replace(/<\/table>/gi, '</table></div>');
+}
+
+const rawBody = insightData.body || '';
+const containsHtml = /<\s*[a-z][\s\S]*>/i.test(rawBody);
+const hasTable = hasMarkdownTableDelimiter(rawBody);
+const signalsCandidate = containsHtml
+  ? decodeLooseHtmlEntities(rawBody)
+      .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+      .replace(/<\s*\/\s*p\s*>/gi, '\n\n')
+      .replace(/<\s*p\b[^>]*>/gi, '')
+      .replace(/<\s*\/\s*li\s*>/gi, '\n')
+      .replace(/<\s*li\b[^>]*>/gi, '')
+      .replace(/<\s*\/\s*blockquote\s*>/gi, '\n\n')
+      .replace(/<\s*blockquote\b[^>]*>/gi, '')
+      .replace(/<[^>]+>/g, '')
+  : rawBody;
+const hasSignals = containsHtml && hasMarkdownSignals(signalsCandidate);
+const bodyCandidate = containsHtml && (hasTable || hasSignals) ? unwrapHtmlWrappedMarkdownTables(rawBody) : rawBody;
+const bodyHtmlRaw = !containsHtml || hasTable || hasSignals
+  ? await marked.parse(bodyCandidate)
+  : rawBody;
+const bodyHtml = wrapTablesInOverflow(bodyHtmlRaw);
+
+---
+<BaseLayout 
+  title={insightData.name} 
+  description={insightData.description || insightData.body?.slice(0, 160)}
+  ogImage={heroImageUrl || undefined}
+  ogType="article"
+  ogImageWidth={heroMedia?.width}
+  ogImageHeight={heroMedia?.height}
+  ogImageAlt={heroMedia?.alternativeText || insightData.name}
+  publishDate={insightData.publishDate}
+  tags={insightData.tags}
+>
+  <!-- Hero -->
+  <section class="section pt-32 pb-8">
+    <div class="container-custom">
+      <article class="max-w-3xl mx-auto">
+        <!-- Back Link -->
+        <a 
+          href="/insights" 
+          class="inline-flex items-center gap-2 text-foreground-secondary hover:text-foreground transition-colors mb-8"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Insights
+        </a>
+        
+        <!-- Meta -->
+        <div class="flex flex-wrap items-center gap-4 mb-6 text-sm text-foreground-secondary">
+          {insightData.publishDate && (
+            <time datetime={insightData.publishDate}>
+              {formatDate(insightData.publishDate)}
+            </time>
+          )}
+          <span class="w-1 h-1 rounded-full bg-foreground-muted" />
+          <span>{readTime} min read</span>
+        </div>
+        
+        <!-- Title -->
+        <h1 
+          class="font-display text-display-md md:text-display-lg text-foreground mb-6"
+        >
+          {insightData.name}
+        </h1>
+        
+        <!-- Tags -->
+        {insightData.tags && insightData.tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mb-6">
+            {insightData.tags.map(tag => (
+              <a 
+                href={`/insights?tag=${encodeURIComponent(tag)}`}
+                class="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm hover:bg-accent hover:text-white transition-colors"
+              >
+                {tag}
+              </a>
+            ))}
+          </div>
+        )}
+        
+        <!-- Share Section (Top) -->
+        <div class="flex flex-wrap items-center gap-4 mb-8">
+          <span class="text-foreground-muted text-sm shrink-0">Share:</span>
+          <ShareButtons 
+            title={insightData.name}
+            url={shareUrl}
+            description={insightData.description}
+          />
+        </div>
+        
+        <!-- Description -->
+        <!-- Description (Removed to avoid duplication with body) -->
+        {/* insightData.description && (
+          <p class="text-foreground-secondary text-xl leading-relaxed mb-8">
+            {insightData.description}
+          </p>
+        ) */}
+      </article>
+    </div>
+  </section>
+
+  <!-- Featured Image -->
+  {heroImageUrl && (
+    <section class="container-custom mb-12">
+      <div class="max-w-4xl mx-auto">
+        <div
+          class="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-background-secondary"
+          transition:name={`insight-${insightData.slug}`}
+        >
+          <img 
+            src={heroImageUrl}
+            alt={insightData.name}
+            class="absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Article Body -->
+  <section class="section pt-0">
+    <div class="container-custom">
+      <article class="max-w-3xl mx-auto">
+        {insightData.body && (
+          <div 
+            class="prose prose-lg max-w-none 
+                   prose-headings:font-display prose-headings:text-foreground prose-headings:font-bold
+                   prose-h1:text-3xl prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-xl
+                   prose-p:text-foreground-secondary prose-p:leading-relaxed prose-p:mb-6
+                   prose-a:text-accent prose-a:font-medium prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-accent-hover
+                   prose-strong:text-foreground prose-strong:font-semibold
+                   prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:bg-background-secondary/50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:italic prose-blockquote:text-foreground-secondary
+                   prose-ul:list-disc prose-ul:pl-6 prose-ul:text-foreground-secondary
+                   prose-ol:list-decimal prose-ol:pl-6 prose-ol:text-foreground-secondary
+                   prose-li:mb-2
+                   prose-code:text-accent prose-code:bg-background-secondary prose-code:px-2 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+                   prose-pre:bg-foreground prose-pre:text-background prose-pre:border prose-pre:border-border prose-pre:rounded-xl prose-pre:p-6 prose-pre:overflow-x-auto
+                   prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8 prose-img:mx-auto prose-img:max-w-full
+                   prose-figure:my-8
+                   prose-figcaption:text-center prose-figcaption:text-foreground-muted prose-figcaption:text-sm prose-figcaption:mt-3
+                   prose-hr:border-border prose-hr:my-12
+                   prose-table:border-collapse prose-table:w-full
+                   prose-th:bg-[#5F7A82] prose-th:text-white prose-th:p-4 prose-th:text-left prose-th:font-semibold prose-th:border-0
+                   prose-td:bg-[#F5EED9] prose-td:p-4 prose-td:border-0
+                   [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:rounded-xl [&_iframe]:my-8
+                   [&_video]:w-full [&_video]:rounded-xl [&_video]:my-8
+                   [&_.video-container]:relative [&_.video-container]:pb-[56.25%] [&_.video-container]:h-0 [&_.video-container]:overflow-hidden [&_.video-container]:rounded-xl [&_.video-container]:my-8
+                   [&_.video-container_iframe]:absolute [&_.video-container_iframe]:inset-0 [&_.video-container_iframe]:w-full [&_.video-container_iframe]:h-full"
+            set:html={bodyHtml} 
+          />
+        )}
+        
+        <!-- Newsletter Signup -->
+        <div class="mt-16 mb-12">
+          <NewsletterForm />
+        </div>
+        
+        <!-- Share Section -->
+        <div class="mt-12 pt-8 border-t border-border">
+          <p class="text-foreground-muted text-sm mb-4">Share this article</p>
+          <ShareButtons 
+            title={insightData.name}
+            url={shareUrl}
+            description={insightData.description}
+          />
+        </div>
+      </article>
+    </div>
+  </section>
+  
+  <!-- Related Articles -->
+  <RelatedInsights 
+    currentSlug={insightData.slug}
+    currentTags={insightData.tags}
+    allInsights={allInsights}
+  />
+  
+  <script src="https://f.convertkit.com/ckjs/ck.5.js" defer></script>
+</BaseLayout>

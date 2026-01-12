@@ -1,0 +1,257 @@
+---
+---
+<div id="form-container">
+  <!-- Form -->
+  <form
+    id="contact-form"
+    class="space-y-6"
+    method="post"
+    onsubmit="return false;"
+  >
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Name -->
+      <div class="space-y-2">
+        <label for="name" class="text-sm font-medium text-foreground">Name</label>
+        <input 
+          type="text" 
+          id="name" 
+          name="name" 
+          required 
+          placeholder="John Doe"
+          class="w-full px-4 py-3 rounded-xl bg-background-secondary border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all placeholder:text-foreground-muted disabled:opacity-50"
+        />
+      </div>
+
+      <!-- Email -->
+      <div class="space-y-2">
+        <label for="email" class="text-sm font-medium text-foreground">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          required 
+          placeholder="john@example.com"
+          class="w-full px-4 py-3 rounded-xl bg-background-secondary border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all placeholder:text-foreground-muted disabled:opacity-50"
+        />
+      </div>
+    </div>
+
+    <!-- Subject -->
+    <div class="space-y-2">
+      <label for="subject" class="text-sm font-medium text-foreground">Subject</label>
+      <select 
+        id="subject" 
+        name="subject" 
+        required
+        class="w-full px-4 py-3 rounded-xl bg-background-secondary border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all text-foreground disabled:opacity-50"
+      >
+        <option value="" disabled selected>Select a topic</option>
+        <option value="consulting">Consulting Inquiry</option>
+        <option value="speaking">Speaking Engagement</option>
+        <option value="partnership">Partnership Opportunity</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <!-- Message -->
+    <div class="space-y-2">
+      <label for="message" class="text-sm font-medium text-foreground">Message</label>
+      <textarea 
+        id="message" 
+        name="message" 
+        required 
+        rows="4" 
+        placeholder="How can we work together?"
+        class="w-full px-4 py-3 rounded-xl bg-background-secondary border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all placeholder:text-foreground-muted resize-none disabled:opacity-50"
+      ></textarea>
+    </div>
+
+    <!-- Honeypot for spam protection -->
+    <div class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
+      <label for="bot_check">Do not fill this out if you are human</label>
+      <input type="text" name="bot_check" id="bot_check" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <!-- Submit Button -->
+    <button 
+      type="submit" 
+      id="submit-btn"
+      class="w-full md:w-auto px-8 py-3 bg-foreground text-background font-medium rounded-xl hover:bg-accent hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm flex items-center justify-center gap-2"
+    >
+      <span id="btn-text">Let's Talk</span>
+      <svg id="btn-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </button>
+  </form>
+
+  <!-- Success State -->
+  <div id="success-state" class="hidden text-center py-12 animate-fade-in">
+    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+      <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    <h3 class="font-display text-2xl font-bold text-foreground mb-2">Message Sent</h3>
+    <p class="text-foreground-secondary mb-6">Thanks for reaching out. I will get back to you within 1-3 business days.</p>
+    <button id="send-another-btn" class="text-accent hover:underline font-medium">
+      Send another message
+    </button>
+  </div>
+
+  <!-- Error State -->
+  <div id="error-state" class="hidden rounded-xl border border-red-200 bg-red-50 p-6 animate-fade-in">
+    <div class="flex items-start gap-4">
+      <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </div>
+      <div>
+        <h4 class="font-semibold text-red-800 mb-1">Something went wrong</h4>
+        <p class="text-red-700 text-sm mb-4">Your message could not be sent. Please try again or email me directly at <a href="mailto:info@ahmadkarmi.com" class="underline font-medium">info@ahmadkarmi.com</a>.</p>
+        <button id="try-again-btn" class="text-sm font-medium text-red-700 hover:text-red-900 underline">
+          Try again
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ CONTACT_ENDPOINT: (import.meta.env.PUBLIC_CONTACT_ENDPOINT || `${(import.meta.env.PUBLIC_WP_URL || 'https://admin.ahmadkarmi.com')}/wp-json/ak/v1/contact`) }}>
+  function initContactForm() {
+    const formContainer = document.getElementById('form-container');
+    const form = document.getElementById('contact-form');
+    const successState = document.getElementById('success-state');
+    const errorState = document.getElementById('error-state');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const sendAnotherBtn = document.getElementById('send-another-btn');
+    const tryAgainBtn = document.getElementById('try-again-btn');
+
+    if (!form) return;
+    if (form.dataset.contactFormBound === '1') return;
+    form.dataset.contactFormBound = '1';
+
+    function showForm() {
+      form?.classList.remove('hidden');
+      successState?.classList.add('hidden');
+      errorState?.classList.add('hidden');
+    }
+
+    function showSuccess() {
+      form?.classList.add('hidden');
+      successState?.classList.remove('hidden');
+      errorState?.classList.add('hidden');
+    }
+
+    function showError() {
+      form?.classList.remove('hidden');
+      successState?.classList.add('hidden');
+      errorState?.classList.remove('hidden');
+    }
+
+    function setLoading(loading) {
+      if (loading) {
+        if (btnText) btnText.textContent = 'Sending...';
+        btnSpinner?.classList.remove('hidden');
+        if (submitBtn) submitBtn.disabled = true;
+        form?.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+      } else {
+        if (btnText) btnText.textContent = "Let's Talk";
+        btnSpinner?.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+        form?.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Hide previous error state if visible
+      errorState?.classList.add('hidden');
+
+      // Collect data BEFORE disabling
+      const formData = new FormData(form);
+      const botCheck = formData.get('bot_check');
+
+      // Honeypot check
+      if (botCheck) {
+        // Silently fail for bots (pretend success)
+        form.reset();
+        showSuccess();
+        return;
+      }
+
+      const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message'),
+        bot_check: botCheck
+      };
+
+      setLoading(true);
+
+      try {
+        const response = await fetch(CONTACT_ENDPOINT, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          form.reset();
+          showSuccess();
+          // Track successful form submission
+          const win = window;
+          if (typeof win.trackEvent === 'function') {
+            win.trackEvent('generate_lead', {
+              event_category: 'contact',
+              event_label: data.subject || 'Contact Form',
+            });
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Submission failed:', errorData);
+          throw new Error('Server returned an error');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        showError();
+        // Track form submission error
+        const win = window;
+        if (typeof win.trackEvent === 'function') {
+          win.trackEvent('form_error', {
+            event_category: 'contact',
+            event_label: 'Submission Failed',
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Reset handlers
+    sendAnotherBtn?.addEventListener('click', showForm);
+    tryAgainBtn?.addEventListener('click', () => {
+      errorState?.classList.add('hidden');
+    });
+
+    // Ensure the form is visible on init
+    if (formContainer) {
+      showForm();
+    }
+  }
+
+  if (!window.__contactFormInitBound) {
+    window.__contactFormInitBound = true;
+    document.addEventListener('astro:page-load', initContactForm);
+  }
+  initContactForm();
+</script>

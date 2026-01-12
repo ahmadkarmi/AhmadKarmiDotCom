@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import GridLayout from '../../components/GridLayout.astro';
+import { fetchWorks } from '../../lib/wordpress';
+
+const works = await fetchWorks();
+---
+
+<BaseLayout 
+  title="Portfolio" 
+  description="Explore my portfolio of product management, digital transformation, and creative technology projects."
+>
+  <!-- Header -->
+  <section class="section pt-32 pb-16">
+    <div class="container-custom">
+      <div class="max-w-3xl">
+        <p class="text-accent font-medium mb-4 animate-fade-in">
+          Portfolio
+        </p>
+        <h1 class="font-display text-display-lg text-foreground mb-6 animate-slide-up">
+          My Work
+        </h1>
+        <p class="text-foreground-secondary text-lg animate-slide-up animation-delay-200">
+          A collection of projects showcasing product management, digital strategy, branding, and creative technology solutions across various industries.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio Grid -->
+  <section class="section pt-0">
+    <div class="container-custom">
+      {works.length > 0 ? (
+        <GridLayout>
+          {works.map((work, index) => (
+            <WorkCard work={work} index={index} />
+          ))}
+        </GridLayout>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-foreground-muted text-lg">
+            No projects available yet. Check back soon!
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

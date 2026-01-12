@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import InsightsFilter from '../../components/InsightsFilter';
+import { fetchInsights } from '../../lib/wordpress';
+
+const insights = await fetchInsights();
+
+// Get unique tags for filtering
+const allTags = insights.flatMap(insight => insight.tags || []);
+const uniqueTags = [...new Set(allTags)].sort();
+---
+
+<BaseLayout 
+  title="Insights" 
+  description="Articles and insights on product management, digital transformation, innovation, and technology."
+>
+  <!-- Header -->
+  <section class="section pt-32 pb-8">
+    <div class="container-custom">
+      <div class="max-w-3xl">
+        <p class="text-accent font-medium mb-4 animate-fade-in">
+          Blog
+        </p>
+        <div class="flex items-center gap-4 mb-6 animate-slide-up">
+          <h1 class="font-display text-display-lg text-foreground">
+            Insights
+          </h1>
+          <a 
+            href="/rss.xml" 
+            target="_blank"
+            class="p-2 text-accent hover:bg-accent/10 rounded-full transition-colors"
+            title="Subscribe via RSS"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rss"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+          </a>
+        </div>
+        <p class="text-foreground-secondary text-lg animate-slide-up animation-delay-200">
+          Thoughts on product management, digital transformation, technology trends, and lessons learned from building impactful products.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter & Grid -->
+  <section class="section pt-8">
+    <div class="container-custom">
+      <InsightsFilter 
+        client:load 
+        insights={insights} 
+        tags={uniqueTags} 
+      />
+    </div>
+  </section>
+</BaseLayout>

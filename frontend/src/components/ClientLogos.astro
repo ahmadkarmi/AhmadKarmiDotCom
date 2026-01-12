@@ -1,0 +1,36 @@
+---
+const clients = [
+  { name: 'Al Jazeera', logo: '/clients/aljazeera.png' },
+  { name: 'UULA', logo: '/clients/uula.png' },
+  { name: 'KFAS', logo: '/clients/kfas.png' },
+  { name: 'NBK', logo: '/clients/nbk.png' },
+  { name: 'Bleems', logo: '/clients/bleems.png' },
+];
+---
+
+<section class="section py-20 border-y border-border/40 bg-background-secondary/30 backdrop-blur-sm">
+  <div class="container-custom">
+    <div class="text-center mb-16">
+      <p class="text-accent font-bold tracking-widest uppercase text-xs mb-3">Proven Trust</p>
+      <h2 class="font-display text-3xl md:text-4xl text-foreground">
+        Strategic Partnerships
+      </h2>
+    </div>
+    
+    <div class="flex flex-wrap items-center justify-center gap-12 md:gap-20">
+      {clients.map((client) => (
+        <div 
+          class="group relative transition-all duration-300 hover:-translate-y-1"
+          title={client.name}
+        >
+          <img 
+            src={client.logo}
+            alt={client.name}
+            class="h-20 md:h-32 w-auto object-contain filter grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 ease-out"
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

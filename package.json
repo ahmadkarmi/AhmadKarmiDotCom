@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "migrate:complete": "node complete-migration.mjs",
+    "backfill:acf-media": "node backfill-acf-media.mjs --yes",
+    "sync:external-media:dry": "node sync-external-media-to-wp.mjs --yes --dry-run",
+    "sync:external-media": "node sync-external-media-to-wp.mjs --yes",
+    "backfill:work-gallery:dry": "node backfill-work-gallery.mjs",
+    "backfill:work-gallery": "node backfill-work-gallery.mjs --yes",
+    "reapply:insight-tags:dry": "node reapply-insight-tags.mjs",
+    "reapply:insight-tags": "node reapply-insight-tags.mjs --yes"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.6",
+    "typescript": "^5.9.3"
+  }
+}

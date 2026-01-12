@@ -1,0 +1,312 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchWorks, fetchWorkBySlug, getMediaUrl, normalizeWpRichText } from '../../lib/wordpress';
+import { marked } from 'marked';
+import type { GetStaticPaths } from 'astro';
+import ShareButtons from '../../components/ShareButtons.astro';
+import GalleryCarousel from '../../components/GalleryCarousel';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const works = await fetchWorks();
+
+  return works.map((work) => ({
+    params: { slug: work.slug },
+    props: { work },
+  }));
+};
+
+const { slug } = Astro.params;
+const { work } = Astro.props;
+
+const needsFetch = !work || !work.gallery || work.gallery.length === 0;
+const fetched = needsFetch ? await fetchWorkBySlug(slug as string) : null;
+const workData = fetched || work;
+
+if (!workData) {
+  return Astro.redirect('/404');
+}
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
+const shareUrl = new URL(Astro.url.pathname, siteUrl).toString();
+
+const mainImageUrl = getMediaUrl(workData.mainImage);
+const coverImageUrl = getMediaUrl(workData.coverImage);
+const clientLogoUrl = getMediaUrl(workData.clientLogo);
+
+const ogMedia = workData.mainImage || workData.coverImage;
+const ogImageUrl = getMediaUrl(ogMedia);
+
+const galleryImages = (workData.gallery || [])
+  .map((img) => ({ url: getMediaUrl(img) || '', alt: (img as any)?.alt_text || workData.name }))
+  .filter((img) => Boolean(img.url));
+
+marked.setOptions({
+  gfm: true,
+  breaks: true
+});
+
+const briefContent = normalizeWpRichText(workData.brief) || '';
+const scopeContent = normalizeWpRichText(workData.scope) || '';
+const detailsContent = normalizeWpRichText(workData.details) || '';
+
+const briefHtml = /<\s*[a-z][\s\S]*>/i.test(briefContent)
+  ? briefContent
+  : await marked.parse(briefContent);
+
+const scopeHtml = /<\s*[a-z][\s\S]*>/i.test(scopeContent)
+  ? scopeContent
+  : await marked.parse(scopeContent);
+
+const detailsHtml = /<\s*[a-z][\s\S]*>/i.test(detailsContent)
+  ? detailsContent
+  : await marked.parse(detailsContent);
+
+const metaDescription = (briefContent || detailsContent || '')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .slice(0, 180);
+
+const workProseClass = `prose prose-lg max-w-none
+  prose-headings:font-display prose-headings:text-foreground prose-headings:font-semibold
+  prose-p:text-foreground-secondary prose-p:leading-relaxed
+  prose-a:text-accent prose-a:underline prose-a:underline-offset-2
+  prose-strong:text-foreground prose-strong:font-semibold
+  prose-ul:text-foreground-secondary prose-ul:list-disc prose-ul:pl-6
+  prose-ol:text-foreground-secondary prose-ol:list-decimal prose-ol:pl-6
+  prose-li:mb-1
+  prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
+  prose-hr:border-border
+  prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:bg-background-secondary/50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:text-foreground-secondary
+  prose-pre:bg-foreground prose-pre:text-background prose-pre:rounded-xl prose-pre:p-6 prose-pre:overflow-x-auto
+  [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:rounded-xl [&_video]:w-full [&_video]:rounded-xl`;
+---
+
+<BaseLayout 
+  title={workData.name} 
+  description={metaDescription}
+  ogImage={ogImageUrl || undefined}
+  ogImageWidth={ogMedia?.width}
+  ogImageHeight={ogMedia?.height}
+  ogImageAlt={(ogMedia as any)?.alternativeText || workData.name}
+>
+  <!-- Hero -->
+  <section class="relative w-full min-h-[100dvh] lg:min-h-0 lg:h-auto flex flex-col">
+    <!-- Back Link (absolute on mobile) -->
+    <a 
+      href="/portfolio" 
+      class="absolute top-24 left-4 lg:static lg:mt-32 lg:mb-8 lg:container-custom z-20 inline-flex items-center gap-2 text-white lg:text-foreground-secondary hover:text-accent transition-colors bg-black/30 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none px-3 py-2 lg:px-0 lg:py-0 rounded-full lg:rounded-none"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      <span class="hidden lg:inline">Back to Portfolio</span>
+    </a>
+    
+    <!-- Featured Image (fullscreen on mobile) -->
+    <!-- Featured Image (coverImage on mobile, mainImage on desktop) -->
+    {(mainImageUrl || coverImageUrl) && (
+      <div 
+        class="absolute inset-0 lg:relative lg:container-custom lg:mt-8 w-full h-full lg:h-auto lg:aspect-[21/9] lg:rounded-2xl overflow-hidden bg-background-secondary lg:shadow-xl"
+        transition:name={`work-${workData.slug}`}
+      >
+        <!-- Mobile: Use coverImage if available, fallback to mainImage -->
+        <img 
+          src={coverImageUrl || mainImageUrl}
+          alt={workData.name}
+          class="lg:hidden absolute inset-0 w-full h-full object-cover"
+        />
+        <!-- Desktop: Always use mainImage -->
+        <img 
+          src={mainImageUrl || coverImageUrl}
+          alt={workData.name}
+          class="hidden lg:block absolute inset-0 w-full h-full object-cover"
+        />
+        <!-- Gradient overlay on mobile for readability -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/40 lg:hidden" />
+      </div>
+    )}
+    
+    <!-- Scroll Indicator (mobile only) -->
+    <div class="absolute bottom-20 inset-x-0 z-20 lg:hidden flex justify-center">
+      <div class="flex flex-col items-center gap-2 animate-bounce">
+        <span class="text-white/80 text-xs font-medium uppercase tracking-wider">Scroll</span>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </div>
+    </div>
+    
+    <!-- Project Title Overlay - Top Right (mobile only) -->
+    <div class="absolute top-24 right-0 left-0 px-4 z-10 lg:hidden text-right">
+      <h1 class="font-display text-2xl text-white font-bold leading-tight drop-shadow-lg">
+        {workData.name}
+      </h1>
+      {workData.client && (
+        <p class="text-white/80 text-sm mt-2">{workData.client}</p>
+      )}
+      <!-- Status Badge -->
+      <span class:list={[
+        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide mt-3',
+        workData.status === 'completed' && 'bg-green-500/80 text-white',
+        workData.status === 'proposal' && 'bg-yellow-500/80 text-white',
+        workData.status === 'concept' && 'bg-purple-500/80 text-white',
+        workData.status === 'in_progress' && 'bg-blue-500/80 text-white',
+        !['completed', 'proposal', 'concept', 'in_progress'].includes(workData.status) && 'bg-white/15 text-white',
+      ]}>
+        <span class="w-1.5 h-1.5 rounded-full bg-white" />
+        {workData.status.replace('_', ' ')}
+      </span>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="section pt-8">
+    <div class="container-custom">
+      <div class="flex flex-col lg:flex-row gap-12 lg:gap-16">
+        
+        <!-- Sidebar (shows first on mobile, second on desktop) -->
+        <aside class="w-full lg:w-80 flex-shrink-0 order-1 lg:order-2 space-y-6">
+          <!-- Project Title Card -->
+          <div class="bg-white border border-border rounded-2xl p-6 shadow-sm">
+            <!-- Status Badge -->
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-mono text-foreground-muted">PROJ-{workData.id}</span>
+              <span class:list={[
+                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide',
+                workData.status === 'completed' && 'bg-green-100 text-green-700',
+                workData.status === 'proposal' && 'bg-yellow-100 text-yellow-700',
+                workData.status === 'concept' && 'bg-purple-100 text-purple-700',
+                workData.status === 'in_progress' && 'bg-blue-100 text-blue-700',
+                !['completed', 'proposal', 'concept', 'in_progress'].includes(workData.status) && 'bg-gray-100 text-gray-700',
+              ]}>
+                <span class="w-1.5 h-1.5 rounded-full bg-current" />
+                {workData.status.replace('_', ' ')}
+              </span>
+            </div>
+            
+            <!-- Title -->
+            <h1 class="font-display text-2xl lg:text-3xl text-foreground mb-3 leading-tight font-bold">
+              {workData.name}
+            </h1>
+            
+            <!-- Brief Description -->
+            {workData.brief && (
+              <p class="text-foreground-secondary text-sm leading-relaxed line-clamp-3">
+                {workData.brief.replace(/<[^>]+>/g, '').slice(0, 150)}...
+              </p>
+            )}
+          </div>
+          
+          <!-- Client Card -->
+          {workData.client && (
+            <div class="bg-white border border-border rounded-2xl p-6 shadow-sm">
+              <h3 class="text-xs font-medium text-foreground-muted uppercase tracking-wider mb-3">Client</h3>
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-medium text-foreground">{workData.client}</span>
+                {clientLogoUrl && (
+                  <img 
+                    src={clientLogoUrl}
+                    alt={workData.client}
+                    class="h-10 w-auto object-contain"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+          
+          <!-- Quick Facts -->
+          <div class="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 class="text-xs font-medium text-foreground-muted uppercase tracking-wider">Project Details</h3>
+            
+            <div class="flex items-center justify-between py-2 border-b border-border/50">
+              <span class="text-sm text-foreground-secondary">Status</span>
+              <span class="text-sm font-medium text-foreground capitalize">{workData.status.replace('_', ' ')}</span>
+            </div>
+            
+            {workData.featured && (
+              <div class="flex items-center justify-between py-2 border-b border-border/50">
+                <span class="text-sm text-foreground-secondary">Featured</span>
+                <span class="text-sm font-medium text-amber-600">★ Yes</span>
+              </div>
+            )}
+            
+            <div class="flex items-center justify-between py-2">
+              <span class="text-sm text-foreground-secondary">Project ID</span>
+              <span class="text-xs font-mono text-foreground-muted">PROJ-{workData.id}</span>
+            </div>
+          </div>
+          
+          <!-- Share Section -->
+          <div class="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 class="text-xs font-medium text-foreground-muted uppercase tracking-wider">Share Project</h3>
+            <ShareButtons 
+              title={workData.name}
+              url={shareUrl}
+              description={workData.brief}
+            />
+          </div>
+        </aside>
+        
+        <!-- Main Content (shows second on mobile, first on desktop) -->
+        <div class="flex-1 order-2 lg:order-1 space-y-12">
+          {workData.brief && (
+            <div>
+              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+                Project Brief
+              </h2>
+              <div class={workProseClass} set:html={briefHtml} />
+            </div>
+          )}
+          
+          {workData.scope && (
+            <div>
+              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+                Scope of Work
+              </h2>
+              <div class={workProseClass} set:html={scopeHtml} />
+            </div>
+          )}
+          
+          {workData.details && (
+            <div>
+              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+                Project Details
+              </h2>
+              <div class={workProseClass} set:html={detailsHtml} />
+            </div>
+          )}
+          
+          {workData.videoUrl && (
+            <div>
+              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+                Video
+              </h2>
+              <div class="aspect-video rounded-xl overflow-hidden bg-background-secondary">
+                <iframe 
+                  src={workData.videoUrl.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
+                  class="w-full h-full"
+                  allowfullscreen
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <!-- Gallery -->
+      {galleryImages.length > 0 && (
+        <div class="mt-16">
+          <h2 class="font-display text-xl font-semibold text-foreground mb-8">
+            Project Gallery
+          </h2>
+          <GalleryCarousel 
+            client:load
+            images={galleryImages}
+          />
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

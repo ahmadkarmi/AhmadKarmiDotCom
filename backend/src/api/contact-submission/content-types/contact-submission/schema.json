@@ -1,0 +1,32 @@
+{
+    "kind": "collectionType",
+    "collectionName": "contact_submissions",
+    "info": {
+        "singularName": "contact-submission",
+        "pluralName": "contact-submissions",
+        "displayName": "Contact Submission",
+        "description": "Stores contact form submissions"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "email": {
+            "type": "email",
+            "required": true
+        },
+        "subject": {
+            "type": "string",
+            "required": true
+        },
+        "message": {
+            "type": "text",
+            "required": true
+        }
+    }
+}

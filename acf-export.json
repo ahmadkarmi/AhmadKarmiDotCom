@@ -1,0 +1,164 @@
+[
+    {
+        "key": "group_works",
+        "title": "Work Details",
+        "fields": [
+            {
+                "key": "field_status",
+                "label": "Status",
+                "name": "status",
+                "type": "select",
+                "choices": {
+                    "completed": "Completed",
+                    "proposal": "Proposal",
+                    "in_progress": "In Progress",
+                    "concept": "Concept"
+                },
+                "default_value": "completed",
+                "ui": 1
+            },
+            {
+                "key": "field_featured",
+                "label": "Featured",
+                "name": "featured",
+                "type": "true_false",
+                "ui": 1
+            },
+            {
+                "key": "field_brief",
+                "label": "Brief",
+                "name": "brief",
+                "type": "textarea"
+            },
+            {
+                "key": "field_scope",
+                "label": "Scope",
+                "name": "scope",
+                "type": "textarea"
+            },
+            {
+                "key": "field_details",
+                "label": "Details",
+                "name": "details",
+                "type": "wysiwyg"
+            },
+            {
+                "key": "field_client",
+                "label": "Client",
+                "name": "client",
+                "type": "text"
+            },
+            {
+                "key": "field_clientLogo",
+                "label": "Client Logo",
+                "name": "clientLogo",
+                "type": "image",
+                "return_format": "array"
+            },
+            {
+                "key": "field_videoUrl",
+                "label": "Video URL",
+                "name": "videoUrl",
+                "type": "url"
+            },
+            {
+                "key": "field_mainImage",
+                "label": "Main Image",
+                "name": "mainImage",
+                "type": "image",
+                "return_format": "array",
+                "instructions": "If empty, will use Featured Image"
+            },
+            {
+                "key": "field_coverImage",
+                "label": "Cover Image",
+                "name": "coverImage",
+                "type": "image",
+                "return_format": "array",
+                "instructions": "Used for mobile/hero where applicable"
+            },
+            {
+                "key": "field_gallery",
+                "label": "Gallery",
+                "name": "gallery",
+                "type": "post_object",
+                "post_type": [
+                    "attachment"
+                ],
+                "multiple": 1,
+                "return_format": "id",
+                "ui": 1
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "work"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "show_in_rest": true,
+        "description": ""
+    },
+    {
+        "key": "group_insights",
+        "title": "Insight Details",
+        "fields": [
+            {
+                "key": "field_insight_featured",
+                "label": "Featured",
+                "name": "featured",
+                "type": "true_false",
+                "ui": 1
+            },
+            {
+                "key": "field_description",
+                "label": "Description",
+                "name": "description",
+                "type": "textarea"
+            },
+            {
+                "key": "field_insight_mainImage",
+                "label": "Main Image",
+                "name": "mainImage",
+                "type": "image",
+                "return_format": "array",
+                "instructions": "If empty, will use Featured Image"
+            },
+            {
+                "key": "field_insight_thumbnailImage",
+                "label": "Thumbnail Image",
+                "name": "thumbnailImage",
+                "type": "image",
+                "return_format": "array"
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "insight"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "show_in_rest": true,
+        "description": ""
+    }
+]

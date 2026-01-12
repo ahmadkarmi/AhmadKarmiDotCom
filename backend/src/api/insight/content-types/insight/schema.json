@@ -1,0 +1,58 @@
+{
+    "kind": "collectionType",
+    "collectionName": "insights",
+    "info": {
+        "singularName": "insight",
+        "pluralName": "insights",
+        "displayName": "Insight",
+        "description": "Articles and blog posts"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true,
+            "maxLength": 255
+        },
+        "slug": {
+            "type": "uid",
+            "targetField": "name",
+            "required": true
+        },
+        "featured": {
+            "type": "boolean",
+            "default": false
+        },
+        "tags": {
+            "type": "json"
+        },
+        "publishDate": {
+            "type": "date"
+        },
+        "description": {
+            "type": "text"
+        },
+        "body": {
+            "type": "richtext"
+        },
+        "mainImage": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "images"
+            ]
+        },
+        "thumbnailImage": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "images"
+            ]
+        }
+    }
+}

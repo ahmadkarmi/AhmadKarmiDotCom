@@ -1,0 +1,113 @@
+---
+import type { Work } from '../lib/wordpress';
+import { getMediaUrl } from '../lib/wordpress';
+
+export interface Props {
+  work: Work;
+  index?: number;
+}
+
+const { work, index = 0 } = Astro.props;
+const imageUrl = getMediaUrl(work.coverImage || work.mainImage);
+const clientLogoUrl = getMediaUrl(work.clientLogo);
+
+function toPlainText(value?: string): string {
+  if (!value) return '';
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const descriptionText = toPlainText(work.brief) || toPlainText(work.details);
+---
+
+<a 
+  href={`/portfolio/${work.slug}`}
+  class="group relative flex flex-col h-full bg-white border border-border rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden hover:-translate-y-1"
+  style={`animation-delay: ${index * 100}ms`}
+>
+  <!-- Card Header: Key & Priority -->
+  <div class="px-4 py-3 flex items-center justify-between border-b border-border/40 bg-background-secondary/5">
+    <div class="flex items-center gap-2">
+      <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6z"/></svg>
+      <span class="text-xs font-mono text-foreground-muted font-medium">PROJ-{work.id || index + 1}</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+       <span class="w-2 h-2 rounded-full bg-red-500/80"></span>
+       <span class="text-[10px] uppercase font-bold text-foreground-muted">High</span>
+    </div>
+  </div>
+
+  <!-- Card Body -->
+  <div class="p-4 flex flex-col h-full relative">
+    <!-- Client & Meta -->
+    <div class="flex items-center justify-between mb-3 h-8">
+      {clientLogoUrl ? (
+        <img 
+          src={clientLogoUrl} 
+          alt={work.client || 'Client Logo'} 
+          class="h-6 w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+        />
+      ) : (
+        <span class="text-xs font-bold text-foreground-secondary uppercase tracking-wider">
+          {work.client || 'Internal Project'}
+        </span>
+      )}
+      
+      {/* Status Pill */}
+       <span class:list={[
+          "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide",
+          work.status === 'completed' && 'bg-green-100 text-green-700',
+          work.status === 'proposal' && 'bg-yellow-100 text-yellow-700',
+          work.status === 'in_progress' && 'bg-blue-100 text-blue-700',
+          work.status === 'concept' && 'bg-purple-100 text-purple-700',
+          !['completed', 'proposal', 'in_progress', 'concept'].includes(work.status) && 'bg-gray-100 text-gray-700'
+        ]}>
+          {work.status?.replace('_', ' ') || 'Backlog'}
+       </span>
+    </div>
+
+    <!-- Title -->
+    <h3 class="font-display font-bold text-xl text-foreground mb-2 leading-tight group-hover:text-accent transition-colors line-clamp-2 min-h-[3.2rem]">
+      {work.name}
+    </h3>
+
+    <!-- Cover Image (Thumbnail Style) -->
+    <div
+      class="relative w-full aspect-[16/9] rounded-md overflow-hidden bg-background-secondary/20 mb-4 border border-border/50 shadow-inner"
+      transition:name={`work-${work.slug}`}
+    >
+      {imageUrl ? (
+        <img 
+          src={imageUrl}
+          alt={work.name}
+          class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+      ) : (
+        <div class="absolute inset-0 flex items-center justify-center text-foreground-muted text-xs">
+          No Preview
+        </div>
+      )}
+    </div>
+
+    <!-- Tags / Description Snippet -->
+    <div class="mb-4 flex-grow">
+      {descriptionText && (
+        <p class="text-xs text-foreground-secondary line-clamp-2">
+          {descriptionText}
+        </p>
+      )}
+    </div>
+
+    <!-- Footer: Assignee -->
+    <div class="flex items-center justify-between pt-3 border-t border-border/40 mt-auto">
+       <div class="flex items-center gap-2">
+          <img src="/brand/avatar.jpg" alt="Ahmad Al-Karmi" class="w-6 h-6 rounded-full object-cover ring-2 ring-white" />
+          <span class="text-xs text-foreground-secondary font-medium">Ahmad Al-Karmi</span>
+       </div>
+       <div class="text-[10px] font-mono text-foreground-muted">PROJ-{work.id}</div>
+    </div>
+  </div>
+</a>

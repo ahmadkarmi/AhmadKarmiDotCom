@@ -1,0 +1,26 @@
+{
+    "name": "strapi-migration",
+    "version": "1.0.0",
+    "description": "Migration script for importing CSV data to Strapi",
+    "type": "module",
+    "scripts": {
+        "migrate": "tsx src/index.ts",
+        "migrate:works": "tsx src/index.ts --works-only",
+        "migrate:insights": "tsx src/index.ts --insights-only",
+        "migrate:dry": "tsx src/index.ts --dry-run"
+    },
+    "dependencies": {
+        "csv-parse": "^5.5.3",
+        "turndown": "^7.1.2",
+        "axios": "^1.6.5",
+        "form-data": "^4.0.0",
+        "dotenv": "^16.3.1",
+        "chalk": "^5.3.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.6",
+        "@types/turndown": "^5.0.4",
+        "typescript": "^5.3.3",
+        "tsx": "^4.7.0"
+    }
+}

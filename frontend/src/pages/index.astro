@@ -1,0 +1,491 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WorkCard from '../components/WorkCard.astro';
+import InsightCard from '../components/InsightCard.astro';
+import ClientLogos from '../components/ClientLogos.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import { fetchWorks, fetchInsights, fetchSiteSettings, fetchHomePage, getMediaUrl } from '../lib/wordpress';
+
+import MetricBento from '../components/MetricBento';
+
+// Fetch featured content
+const featuredWorks = await fetchWorks({ featured: true, limit: 3 });
+const latestInsights = await fetchInsights({ limit: 3 });
+
+const siteSettings = await fetchSiteSettings();
+const homePage = await fetchHomePage();
+
+// Get CV URL if available
+const cvUrl = siteSettings?.cv ? getMediaUrl(siteSettings.cv) : null;
+const cvButtonText = siteSettings?.cvButtonText || 'Download CV';
+
+// Availability Logic
+const availabilityStatus = siteSettings?.availabilityStatus || 'open';
+const availabilityText = siteSettings?.availabilityText || `Open for Select Projects, ${new Date().getFullYear()}`;
+
+const availabilityColors = {
+  open: 'bg-green-500',
+  limited: 'bg-amber-500',
+  busy: 'bg-red-500'
+};
+
+const availabilityColor = availabilityColors[availabilityStatus] || 'bg-green-500';
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
+
+// Expertise Matrix
+const expertise = {
+  strategy: ['Zero-to-One Innovation', 'Enterprise & SaaS Scaling', 'Go-to-Market (GTM) Strategy', 'Revenue Modeling & P&L'],
+  execution: ['High-Performance Team Building', 'Agile Transformation & Ops', 'Executive Stakeholder Consensus', 'OKRs & KPI Definition'],
+  tech: ['Generative AI Integration', 'Technical Product Management', 'End-to-End Architecture', 'Data Science & Analytics'],
+};
+
+// JSON-LD Schema
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Ahmad Al-Karmi",
+  "url": siteUrl,
+  "author": {
+    "@type": "Person",
+    "name": "Ahmad Al-Karmi",
+    "jobTitle": "Product Manager",
+    "url": siteUrl,
+    "sameAs": [
+      siteSettings?.linkedinUrl,
+      "https://www.threads.com/@karmi.csd"
+    ].filter(Boolean)
+  }
+};
+---
+
+<BaseLayout 
+  title="Strategic Growth Architect" 
+  description="Ahmad Al-Karmi - Senior Product Manager translating AI innovation into measurable business growth. Decade of experience in digital transformation and AI-driven products."
+  schema={schema}
+>
+  <!-- Hero Section: The Cover Story -->
+  <section class="relative box-border flex flex-col justify-end md:justify-end xl:justify-center pb-[calc(4rem+env(safe-area-inset-bottom,0px)+2.5rem)] md:pb-[100px] xl:pb-20 overflow-hidden" style="padding-top: calc(var(--header-h, 64px) + 1rem); height: 100vh; height: 100svh;">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <!-- Background Pattern -->
+      <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 32px 32px;"></div>
+      
+      <!-- Mobile-only: Jira-style Kanban Board Background with Parallax -->
+      <div id="mobile-roadmap" class="absolute inset-0 xl:hidden opacity-[0.30] md:opacity-[0.26] lg:opacity-[0.22]">
+        <svg class="w-full h-full" viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice">
+        
+        <!-- Column Headers -->
+        <rect x="15" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-foreground" opacity="0.3"/>
+        <rect x="142" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-accent" opacity="0.4"/>
+        <rect x="270" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-foreground" opacity="0.3"/>
+        
+        <!-- Column Dividers -->
+        <line x1="137" y1="25" x2="137" y2="880" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.15"/>
+        <line x1="265" y1="25" x2="265" y2="880" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.15"/>
+        
+        <!-- TO DO Column (Left) - Cards -->
+        <!-- Card 1 -->
+        <rect x="20" y="75" width="105" height="85" rx="8" fill="currentColor" class="text-foreground" opacity="0.12"/>
+        <rect x="20" y="75" width="105" height="85" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.3"/>
+        <rect x="28" y="85" width="50" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.4"/>
+        <rect x="28" y="100" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <rect x="28" y="110" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <circle cx="35" cy="145" r="8" fill="currentColor" class="text-foreground" opacity="0.25"/>
+        
+        <!-- Card 2 -->
+        <rect x="20" y="175" width="105" height="70" rx="8" fill="currentColor" class="text-foreground" opacity="0.1"/>
+        <rect x="20" y="175" width="105" height="70" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.25"/>
+        <rect x="28" y="185" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.35"/>
+        <rect x="28" y="200" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>
+        <rect x="28" y="210" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>
+        
+        <!-- Card 3 -->
+        <rect x="20" y="260" width="105" height="95" rx="8" fill="currentColor" class="text-foreground" opacity="0.08"/>
+        <rect x="20" y="260" width="105" height="95" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.2"/>
+        <rect x="28" y="270" width="45" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
+        <rect x="28" y="285" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        <rect x="28" y="295" width="65" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        <rect x="28" y="305" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        
+        <!-- Card 4 -->
+        <rect x="20" y="370" width="105" height="65" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.2"/>
+        <rect x="28" y="380" width="55" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
+        <rect x="28" y="395" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        
+        <!-- IN PROGRESS Column (Middle) - Cards with accent -->
+        <!-- Card 1 - Active/Featured -->
+        <rect x="147" y="75" width="105" height="100" rx="8" fill="currentColor" class="text-accent" opacity="0.15"/>
+        <rect x="147" y="75" width="105" height="100" rx="8" stroke="currentColor" stroke-width="2" class="text-accent" opacity="0.5"/>
+        <rect x="155" y="85" width="55" height="10" rx="2" fill="currentColor" class="text-accent" opacity="0.6"/>
+        <rect x="155" y="102" width="88" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.25"/>
+        <rect x="155" y="112" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.25"/>
+        <rect x="155" y="122" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <circle cx="162" cy="160" r="10" fill="currentColor" class="text-accent" opacity="0.4"/>
+        <rect x="180" y="155" width="40" height="10" rx="3" fill="currentColor" class="text-accent" opacity="0.3"/>
+        
+        <!-- Card 2 -->
+        <rect x="147" y="195" width="105" height="80" rx="8" fill="currentColor" class="text-accent" opacity="0.1"/>
+        <rect x="147" y="195" width="105" height="80" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.35"/>
+        <rect x="155" y="205" width="48" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.5"/>
+        <rect x="155" y="220" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <rect x="155" y="230" width="65" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <circle cx="162" cy="258" r="8" fill="currentColor" class="text-foreground" opacity="0.25"/>
+        
+        <!-- Card 3 -->
+        <rect x="147" y="295" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.3"/>
+        <rect x="155" y="305" width="60" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.45"/>
+        <rect x="155" y="320" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>
+        <rect x="155" y="330" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>
+        
+        <!-- Card 4 -->
+        <rect x="147" y="385" width="105" height="90" rx="8" fill="currentColor" class="text-accent" opacity="0.08"/>
+        <rect x="147" y="385" width="105" height="90" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.25"/>
+        <rect x="155" y="395" width="52" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.4"/>
+        <rect x="155" y="410" width="78" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        <rect x="155" y="420" width="88" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        <rect x="155" y="430" width="60" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        
+        <!-- DONE Column (Right) - Cards -->
+        <!-- Card 1 -->
+        <rect x="275" y="75" width="105" height="75" rx="8" fill="currentColor" class="text-foreground" opacity="0.08"/>
+        <rect x="275" y="75" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.2"/>
+        <rect x="283" y="85" width="55" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
+        <rect x="283" y="100" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        <rect x="283" y="110" width="60" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        <circle cx="365" cy="135" r="8" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.3"/>
+        <path d="M360 135 L364 139 L372 131" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.4"/>
+        
+        <!-- Card 2 -->
+        <rect x="275" y="165" width="105" height="85" rx="8" fill="currentColor" class="text-foreground" opacity="0.06"/>
+        <rect x="275" y="165" width="105" height="85" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.18"/>
+        <rect x="283" y="175" width="48" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.25"/>
+        <rect x="283" y="190" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.12"/>
+        <rect x="283" y="200" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.12"/>
+        <circle cx="365" cy="235" r="8" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.25"/>
+        <path d="M360 235 L364 239 L372 231" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.35"/>
+        
+        <!-- Card 3 -->
+        <rect x="275" y="265" width="105" height="70" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.15"/>
+        <rect x="283" y="275" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.22"/>
+        <rect x="283" y="290" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.1"/>
+        <rect x="283" y="300" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.1"/>
+        
+        <!-- Card 4 -->
+        <rect x="275" y="350" width="105" height="65" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.12"/>
+        <rect x="283" y="360" width="50" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <rect x="283" y="375" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.08"/>
+        
+        <!-- Additional cards extending below -->
+        <rect x="20" y="450" width="105" height="70" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.15"/>
+        <rect x="28" y="460" width="55" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.25"/>
+        
+        <rect x="147" y="490" width="105" height="80" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.22"/>
+        <rect x="155" y="500" width="50" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.35"/>
+        <rect x="155" y="515" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.12"/>
+        
+        <rect x="275" y="430" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.1"/>
+        <rect x="283" y="440" width="45" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.18"/>
+        
+        </svg>
+      </div>
+      
+      <!-- Mobile gradient overlay for better text readability -->
+      <div class="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/70 md:from-background/25 md:to-background/50 xl:hidden"></div>
+    </div>
+    
+    <div class="container-custom relative z-10 grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-0 items-end md:items-center">
+      <div class="xl:col-span-7 xl:pr-8">
+        <!-- Status / Date Line -->
+        <div class="flex items-center gap-3 md:gap-4 mb-4 md:mb-6 lg:mb-8 opacity-0 animate-fade-in">
+          <span class={`w-2 h-2 rounded-full ${availabilityColor} animate-pulse`}></span>
+          <p class="text-xs md:text-sm font-medium tracking-widest uppercase text-foreground-muted">
+            {availabilityText}
+          </p>
+        </div>
+        
+        <!-- Headline -->
+        <h1 class="font-display text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-display-xl text-foreground mb-4 md:mb-6 lg:mb-8 tracking-tight leading-[1.15] md:leading-[1.05] lg:leading-[0.95] text-balance opacity-0 animate-slide-up animation-delay-100">
+          <Fragment set:html={homePage?.heroTitle || `The <span class="italic text-accent font-medium">Science</span> <br /> of <span class="font-semibold">Scaling</span> <br /> <span class="font-sans font-light tracking-wide text-foreground-secondary">Digital Products.</span>`} />
+        </h1>
+        
+        <!-- Subheadline / Editorial summary -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-8 max-w-4xl opacity-0 animate-slide-up animation-delay-200">
+          <p class="text-lg md:text-lg lg:text-xl font-light leading-relaxed text-foreground-secondary">
+            {homePage?.heroSubtitle || "Decoding the complexity of growth. Precision strategy and product leadership for founders and enterprises."}
+          </p>
+          
+          <div class="hidden xl:block h-px w-full bg-border my-auto"></div>
+        </div>
+
+        <!-- Action Line -->
+        <div class="mt-4 md:mt-6 lg:mt-10 flex items-center gap-4 md:gap-6 opacity-0 animate-slide-up animation-delay-300">
+          <a href="/portfolio" class="group flex items-center gap-2 text-base md:text-lg font-medium border-b border-foreground hover:border-accent hover:text-accent transition-colors pb-0.5">
+            {homePage?.heroButtonText || "Examine Case Studies"}
+            <svg class="w-4 h-4 md:w-5 md:h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+          </a>
+          <span class="text-border">/</span>
+          <a href="/about" class="text-base md:text-lg text-foreground-muted hover:text-foreground transition-colors">
+            Read Bio
+          </a>
+        </div>
+      </div>
+
+      <!-- Hero Visual (Strategic Roadmap / Kanban) -->
+      <div class="xl:col-span-5 relative h-[520px] 2xl:h-[600px] w-full hidden xl:block opacity-0 animate-fade-in animation-delay-500 perspective-[2000px] mt-0">
+         <!-- Tilted Container for 3D Effect - Scaled Up -->
+         <div class="absolute inset-0 transform rotate-y-[-10deg] rotate-x-[5deg] scale-110 -translate-x-8">
+            
+            <!-- Column 1: Backlog/Analysis (Faded) -->
+            <div class="absolute top-20 -left-12 w-56 space-y-4 opacity-40 blur-[1px]">
+               <div class="h-8 w-24 bg-foreground-muted/20 rounded-md mb-6"></div>
+               <div class="h-32 w-full bg-white/10 border border-white/20 rounded-xl p-4">
+                  <div class="h-3 w-12 bg-white/30 rounded-full mb-3"></div>
+                  <div class="h-3 w-full bg-white/10 rounded-full mb-2"></div>
+                  <div class="h-3 w-2/3 bg-white/10 rounded-full"></div>
+               </div>
+               <div class="h-32 w-full bg-white/10 border border-white/20 rounded-xl p-4"></div>
+            </div>
+
+            <!-- Column 2: In Progress/Strategy (Active) -->
+            <div class="absolute top-0 left-52 w-64 space-y-6 z-10">
+               <div class="h-8 w-auto inline-flex bg-accent/20 rounded-md mb-6 items-center px-3">
+                  <div class="w-2.5 h-2.5 rounded-full bg-accent mr-3"></div>
+                  <span class="text-xs uppercase tracking-wider text-accent font-bold whitespace-nowrap">In Progress</span>
+               </div>
+               
+               <!-- Card 1: Floating Active Item -->
+               <div class="bg-background/90 backdrop-blur-xl border border-accent/40 rounded-2xl p-6 shadow-2xl shadow-accent/15 transform transition-transform hover:-translate-y-3 duration-500 ring-1 ring-accent/20">
+                  <div class="flex justify-between items-start mb-4">
+                     <div class="h-2.5 w-20 bg-accent/40 rounded-full"></div>
+                     <div class="h-5 w-auto px-2 bg-accent/10 rounded-md flex items-center justify-center text-[10px] uppercase font-bold text-accent">AI Strategy</div>
+                  </div>
+                  <div class="h-4 w-3/4 bg-foreground/80 rounded-full mb-3"></div>
+                  <div class="h-2.5 w-full bg-foreground/10 rounded-full mb-2"></div>
+                  <div class="h-2.5 w-1/2 bg-foreground/10 rounded-full mb-6 relative overflow-hidden">
+                     <div class="absolute inset-0 bg-accent/20 animate-pulse"></div>
+                  </div>
+                  <div class="flex items-center justify-between border-t border-border pt-4">
+                     <div class="flex -space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-background-secondary border-2 border-background flex items-center justify-center text-[10px] font-bold text-foreground">AK</div>
+                        <div class="w-8 h-8 rounded-full bg-accent/20 border-2 border-background flex items-center justify-center text-[10px] text-accent">AI</div>
+                     </div>
+                     <div class="h-6 w-20 bg-accent/5 rounded"></div>
+                  </div>
+               </div>
+
+               <!-- Card 2 -->
+               <div class="bg-white/40 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-xl opacity-80 mt-6">
+                  <div class="h-2.5 w-16 bg-purple-400/40 rounded-full mb-4"></div>
+                  <div class="h-3 w-2/3 bg-foreground/60 rounded-full mb-3"></div>
+                  <div class="h-2.5 w-full bg-foreground/10 rounded-full"></div>
+               </div>
+            </div>
+
+            <!-- Column 3: Done/Growth (Success) -->
+            <div class="absolute top-32 left-[32rem] w-56 space-y-4 opacity-60">
+               <div class="h-8 w-24 bg-green-500/10 rounded-md mb-6 flex items-center px-3">
+                   <div class="w-2.5 h-2.5 rounded-full bg-green-500 mr-3"></div>
+                   <span class="text-xs uppercase tracking-wider text-green-600 font-bold">Done</span>
+               </div>
+               <div class="bg-white/20 backdrop-blur-sm border border-green-500/20 rounded-2xl p-5 shadow-sm">
+                  <div class="flex items-center gap-3 mb-3">
+                     <div class="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                     </div>
+                     <div class="h-2.5 w-20 bg-green-900/10 rounded-full"></div>
+                  </div>
+                  <div class="h-2.5 w-full bg-green-900/5 rounded-full"></div>
+               </div>
+               <div class="bg-white/20 backdrop-blur-sm border border-white/20 rounded-2xl p-5 shadow-sm"></div>
+            </div>
+
+            <!-- Connector Lines (Roadmap feel) -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-20" style="z-index: -1;">
+               <path d="M100 220 C 180 220, 180 140, 260 140" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 6" />
+               <path d="M300 280 C 380 280, 380 340, 460 340" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 6" />
+            </svg>
+         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hard Numbers Gallery (Bento Grid / Mobile Swipe) -->
+  <section class="section bg-background-secondary/30 relative border-y border-border/50 py-16 md:py-32">
+    <div class="container-custom">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div>
+          <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">Proven Impact</p>
+          <h2 class="font-display text-4xl md:text-5xl text-foreground">
+            Results That Speak
+          </h2>
+        </div>
+        
+        {cvUrl && (
+          <a 
+            href={cvUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-secondary rounded-full inline-flex items-center gap-2"
+            download
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {cvButtonText}
+          </a>
+        )}
+      </div>
+      
+      <MetricBento client:load />
+    </div>
+  </section>
+
+  <!-- Client Logos Section -->
+  <ClientLogos />
+
+  <!-- Expertise Matrix -->
+  <section class="section">
+    <div class="container-custom">
+      <!-- Standard Header (matching other sections) -->
+      <div class="mb-12">
+        <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">Capabilities</p>
+        <h2 class="font-display text-4xl md:text-5xl text-foreground">
+          Areas of Expertise
+        </h2>
+      </div>
+      
+      <!-- Three Column Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Strategy -->
+        <div class="space-y-4">
+          <h3 class="font-semibold text-foreground text-lg border-b border-border pb-3">
+            Strategy
+          </h3>
+          <ul class="space-y-3">
+            {expertise.strategy.map(skill => (
+              <li class="flex items-start gap-3 text-foreground-secondary">
+                <span class="w-1 h-1 rounded-full bg-accent mt-2.5 flex-shrink-0"></span>
+                <span>{skill}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <!-- Execution -->
+        <div class="space-y-4">
+          <h3 class="font-semibold text-foreground text-lg border-b border-border pb-3">
+            Execution
+          </h3>
+          <ul class="space-y-3">
+            {expertise.execution.map(skill => (
+              <li class="flex items-start gap-3 text-foreground-secondary">
+                <span class="w-1 h-1 rounded-full bg-accent mt-2.5 flex-shrink-0"></span>
+                <span>{skill}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <!-- Modern Tech -->
+        <div class="space-y-4">
+          <h3 class="font-semibold text-foreground text-lg border-b border-border pb-3">
+            Modern Tech
+          </h3>
+          <ul class="space-y-3">
+            {expertise.tech.map(skill => (
+              <li class="flex items-start gap-3 text-foreground-secondary">
+                <span class="w-1 h-1 rounded-full bg-accent mt-2.5 flex-shrink-0"></span>
+                <span>{skill}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Lab - Product Portfolio (Swipe) -->
+  {featuredWorks.length > 0 && (
+    <section class="section bg-background-secondary/50 border-t border-border/50">
+      <div class="container-custom">
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">The Lab</p>
+            <h2 class="font-display text-4xl md:text-5xl text-foreground">
+              Products I've Built
+            </h2>
+            <p class="text-foreground-secondary mt-4 max-w-xl text-lg">
+              Understanding the "how" as much as the "why." From SaaS compliance tools to AI-powered calculators.
+            </p>
+          </div>
+          <a href="/portfolio" class="hidden md:flex items-center gap-2 text-foreground-secondary hover:text-accent transition-colors font-medium">
+            View All
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+        
+        <div class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-3 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll>
+          {featuredWorks.map((work, index) => (
+            <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-center">
+              <WorkCard work={work} index={index} />
+            </div>
+          ))}
+        </div>
+        
+        <div class="mt-8 text-center md:hidden">
+          <a href="/portfolio" class="btn-secondary rounded-full w-full">
+            View All Projects
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Latest Insights Section (Swipe) -->
+  {latestInsights.length > 0 && (
+    <section class="section">
+      <div class="container-custom">
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">Thought Leadership</p>
+            <h2 class="font-display text-4xl md:text-5xl text-foreground">
+              Insights & Strategy
+            </h2>
+          </div>
+          <a href="/insights" class="hidden md:flex items-center gap-2 text-foreground-secondary hover:text-accent transition-colors font-medium">
+            View All
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+        
+        <div class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-3 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll>
+          {latestInsights.map((insight, index) => (
+            <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-center">
+              <InsightCard insight={insight} index={index} />
+            </div>
+          ))}
+        </div>
+        
+        <div class="mt-8 text-center md:hidden">
+          <a href="/insights" class="btn-secondary rounded-full w-full">
+            View All Articles
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Newsletter Signup Section -->
+  <section id="newsletter" class="section">
+    <div class="container-custom">
+      <NewsletterForm 
+        title="Join the Newsletter" 
+        description="Get insights on AI, product strategy, and digital growth delivered to your inbox. No spam, just actionable ideas." 
+      />
+    </div>
+  </section>
+</BaseLayout>

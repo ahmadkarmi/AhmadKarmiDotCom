@@ -1,0 +1,37 @@
+{
+    "kind": "singleType",
+    "collectionName": "site_settings",
+    "info": {
+        "singularName": "site-setting",
+        "pluralName": "site-settings",
+        "displayName": "Site Settings",
+        "description": "Global site settings including CV and contact info"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "cv": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "files"
+            ]
+        },
+        "cvButtonText": {
+            "type": "string",
+            "default": "Download CV"
+        },
+        "email": {
+            "type": "email"
+        },
+        "linkedinUrl": {
+            "type": "string"
+        },
+        "twitterUrl": {
+            "type": "string"
+        }
+    }
+}

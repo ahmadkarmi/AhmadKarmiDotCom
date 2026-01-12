@@ -1,0 +1,371 @@
+---
+// Search component using Pagefind
+---
+
+<!-- Search Trigger Button -->
+<button 
+  id="search-trigger"
+  type="button"
+  class="p-2 text-foreground-secondary hover:text-foreground transition-colors rounded-lg hover:bg-background-secondary"
+  aria-label="Search"
+>
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+</button>
+
+<!-- Search Modal -->
+<div 
+  id="search-modal" 
+  class="fixed inset-0 z-[100] hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Site search"
+>
+  <!-- Backdrop -->
+  <div id="search-backdrop" class="absolute inset-0 bg-foreground/60 backdrop-blur-sm"></div>
+  
+  <!-- Modal Content -->
+  <div class="relative flex items-start justify-center pt-[10vh] md:pt-[15vh] px-4">
+    <div class="w-full max-w-2xl bg-background rounded-2xl shadow-2xl border border-border overflow-hidden animate-scale-in">
+      <!-- Search Header -->
+      <div class="flex items-center gap-3 p-4 border-b border-border">
+        <svg class="w-5 h-5 text-foreground-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input 
+          id="search-input"
+          type="text"
+          placeholder="Search insights, portfolio, pages..."
+          class="flex-1 bg-transparent text-lg text-foreground placeholder:text-foreground-muted outline-none"
+          autocomplete="off"
+        />
+        <button 
+          id="search-close"
+          type="button"
+          class="p-1.5 text-foreground-muted hover:text-foreground hover:bg-background-secondary rounded-lg transition-colors"
+          aria-label="Close search"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Search Results -->
+      <div id="search-results" class="max-h-[60vh] overflow-y-auto p-4">
+        <p class="text-center text-foreground-muted py-8">
+          Start typing to search...
+        </p>
+      </div>
+      
+      <!-- Search Footer -->
+      <div class="flex items-center justify-between px-4 py-3 border-t border-border bg-background-secondary/30 text-xs text-foreground-muted">
+        <div class="flex items-center gap-4">
+          <span class="flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 bg-background-secondary rounded text-[10px] font-mono">↑↓</kbd>
+            Navigate
+          </span>
+          <span class="flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 bg-background-secondary rounded text-[10px] font-mono">Enter</kbd>
+            Select
+          </span>
+          <span class="flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 bg-background-secondary rounded text-[10px] font-mono">Esc</kbd>
+            Close
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.15s ease-out;
+  }
+  
+  .search-result-item {
+    @apply block p-3 rounded-lg hover:bg-background-secondary transition-colors cursor-pointer;
+  }
+  
+  .search-result-item.active {
+    @apply bg-accent/10 ring-1 ring-accent/30;
+  }
+  
+  .search-result-title {
+    @apply font-medium text-foreground mb-1;
+  }
+  
+  .search-result-excerpt {
+    @apply text-sm text-foreground-secondary line-clamp-2;
+  }
+  
+  .search-result-excerpt mark {
+    @apply bg-accent/20 text-accent font-medium rounded px-0.5;
+  }
+  
+  .search-result-meta {
+    @apply text-xs text-foreground-muted mt-2 flex items-center gap-2;
+  }
+</style>
+
+<script>
+  // Search Modal Logic
+  const win = window;
+  const state = win.__searchModalState || (win.__searchModalState = {
+    pagefind: null,
+    activeIndex: -1,
+    results: [],
+    searchTimeout: null,
+  });
+
+  function getEls() {
+    const trigger = document.getElementById('search-trigger');
+    const modal = document.getElementById('search-modal');
+    const backdrop = document.getElementById('search-backdrop');
+    const closeBtn = document.getElementById('search-close');
+    const input = document.getElementById('search-input');
+    const resultsContainer = document.getElementById('search-results');
+
+    // Move modal to body so it's not constrained by header's stacking context
+    if (modal && modal.parentElement !== document.body) {
+      document.body.appendChild(modal);
+    }
+
+    return { trigger, modal, backdrop, closeBtn, input, resultsContainer };
+  }
+
+  // Open modal
+  function openSearch() {
+    const { modal, input } = getEls();
+    modal?.classList.remove('hidden');
+    input?.focus();
+    document.body.style.overflow = 'hidden';
+    loadPagefind();
+  }
+
+  // Close modal
+  function closeSearch() {
+    const { modal, input, resultsContainer } = getEls();
+    modal?.classList.add('hidden');
+    document.body.style.overflow = '';
+    if (input) input.value = '';
+    if (resultsContainer) {
+      resultsContainer.innerHTML = '<p class="text-center text-foreground-muted py-8">Start typing to search...</p>';
+    }
+    state.activeIndex = -1;
+    state.results = [];
+  }
+
+  // Load Pagefind dynamically (only available after production build)
+  async function loadPagefind() {
+    if (state.pagefind) return;
+    try {
+      // Check if pagefind exists before trying to import
+      const checkResponse = await fetch('/pagefind/pagefind.js', { method: 'HEAD' });
+      if (!checkResponse.ok) {
+        console.info('Pagefind not available yet - run a production build to enable search');
+        return;
+      }
+      // Dynamic import with variable to prevent Vite from bundling
+      const pagefindPath = '/pagefind/pagefind.js';
+      state.pagefind = await import(/* @vite-ignore */ pagefindPath);
+      await state.pagefind.init();
+    } catch (e) {
+      console.warn('Pagefind not available:', e);
+    }
+  }
+
+  // Perform search
+  async function performSearch(query) {
+    const { resultsContainer } = getEls();
+    if (!query.trim()) {
+      if (resultsContainer) {
+        resultsContainer.innerHTML = '<p class="text-center text-foreground-muted py-8">Start typing to search...</p>';
+      }
+      state.results = [];
+      state.activeIndex = -1;
+      return;
+    }
+
+    if (state.pagefind) {
+      try {
+        const search = await state.pagefind.search(query);
+        state.results = await Promise.all(search.results.slice(0, 10).map((r) => r.data()));
+        renderResults(state.results, query);
+        
+        // Track search query
+        if (typeof window.trackSearch === 'function') {
+          window.trackSearch(query, state.results.length);
+        }
+      } catch (e) {
+        renderFallbackMessage();
+      }
+    } else {
+      renderFallbackMessage();
+    }
+  }
+
+  // Render search results
+  function renderResults(results, query) {
+    const { resultsContainer } = getEls();
+    if (!resultsContainer) return;
+    
+    if (results.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="text-center py-8">
+          <p class="text-foreground-muted mb-2">No results found for "${query}"</p>
+          <p class="text-sm text-foreground-muted">Try different keywords or check your spelling</p>
+        </div>
+      `;
+      return;
+    }
+
+    resultsContainer.innerHTML = results.map((result, index) => `
+      <a 
+        href="${result.url}" 
+        class="search-result-item ${index === state.activeIndex ? 'active' : ''}"
+        data-index="${index}"
+      >
+        <div class="search-result-title">${result.meta?.title || 'Untitled'}</div>
+        <div class="search-result-excerpt">${result.excerpt || ''}</div>
+        <div class="search-result-meta">
+          <span>${getContentType(result.url)}</span>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  // Get content type from URL
+  function getContentType(url) {
+    if (url.includes('/insights/')) return '📝 Insight';
+    if (url.includes('/portfolio/')) return '💼 Portfolio';
+    if (url.includes('/about')) return '👤 About';
+    if (url.includes('/contact')) return '✉️ Contact';
+    return '📄 Page';
+  }
+
+  // Render fallback message
+  function renderFallbackMessage() {
+    const { resultsContainer } = getEls();
+    if (resultsContainer) {
+      resultsContainer.innerHTML = `
+        <div class="text-center py-8">
+          <p class="text-foreground-muted mb-2">Search index not available</p>
+          <p class="text-sm text-foreground-muted">Run a production build to enable search</p>
+        </div>
+      `;
+    }
+  }
+
+  // Navigate results with keyboard
+  function navigateResults(direction) {
+    const { resultsContainer } = getEls();
+    if (!resultsContainer) return;
+    if (state.results.length === 0) return;
+    
+    if (direction === 'down') {
+      state.activeIndex = state.activeIndex < state.results.length - 1 ? state.activeIndex + 1 : 0;
+    } else {
+      state.activeIndex = state.activeIndex > 0 ? state.activeIndex - 1 : state.results.length - 1;
+    }
+    
+    const items = resultsContainer.querySelectorAll('.search-result-item');
+    items.forEach((item, index) => {
+      item.classList.toggle('active', index === state.activeIndex);
+    });
+    
+    // Scroll into view
+    items[state.activeIndex]?.scrollIntoView({ block: 'nearest' });
+  }
+
+  // Select current result
+  function selectResult() {
+    if (state.activeIndex >= 0 && state.results[state.activeIndex]) {
+      window.location.href = state.results[state.activeIndex].url;
+    }
+  }
+
+  // Event Listeners
+  function bindDomListeners() {
+    const { trigger, backdrop, closeBtn, input } = getEls();
+    if (trigger && trigger.dataset.searchBound !== '1') {
+      trigger.dataset.searchBound = '1';
+      trigger.addEventListener('click', openSearch);
+    }
+    if (backdrop && backdrop.dataset.searchBound !== '1') {
+      backdrop.dataset.searchBound = '1';
+      backdrop.addEventListener('click', closeSearch);
+    }
+    if (closeBtn && closeBtn.dataset.searchBound !== '1') {
+      closeBtn.dataset.searchBound = '1';
+      closeBtn.addEventListener('click', closeSearch);
+    }
+
+    if (input && input.dataset.searchBound !== '1') {
+      input.dataset.searchBound = '1';
+      input.addEventListener('input', () => {
+        clearTimeout(state.searchTimeout);
+        state.searchTimeout = setTimeout(() => {
+          performSearch(input.value);
+        }, 200);
+      });
+    }
+  }
+
+  // Keyboard shortcut to open search (Cmd/Ctrl + K)
+  if (!win.__searchModalKeydownBound) {
+    win.__searchModalKeydownBound = true;
+    document.addEventListener('keydown', (e) => {
+      const { modal } = getEls();
+      if (!modal) return;
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (modal.classList.contains('hidden')) {
+          openSearch();
+        } else {
+          closeSearch();
+        }
+      }
+      
+      // Handle Escape
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeSearch();
+      }
+      
+      // Handle arrow keys and enter when modal is open
+      if (!modal.classList.contains('hidden')) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          navigateResults('down');
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          navigateResults('up');
+        } else if (e.key === 'Enter' && state.activeIndex >= 0) {
+          e.preventDefault();
+          selectResult();
+        }
+      }
+    });
+  }
+
+  if (!win.__searchModalPageLoadBound) {
+    win.__searchModalPageLoadBound = true;
+    document.addEventListener('astro:page-load', bindDomListeners);
+  }
+
+  bindDomListeners();
+</script>

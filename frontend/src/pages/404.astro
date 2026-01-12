@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 - Page Not Found">
+  <section class="min-h-[85vh] flex items-center justify-center section relative overflow-hidden">
+    <!-- Abstract Background Elements -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl pointer-events-none"></div>
+    
+    <div class="container-custom relative z-10">
+      <div class="glass-card max-w-2xl mx-auto p-12 md:p-16 text-center border-t border-white/10">
+        
+        <div class="mb-8 relative w-32 h-32 mx-auto text-red-500 animate-float">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+            <path d="M12 2a4 4 0 0 0-4 4v2" />
+            <rect x="4" y="8" width="16" height="12" rx="2" />
+            <path d="M9 12v6" />
+            <path d="M15 12v6" />
+            <path d="M9 14h6" />
+            <circle cx="9" cy="11" r="1.5" fill="currentColor" />
+            <circle cx="15" cy="11" r="1.5" fill="currentColor" />
+          </svg>
+        </div>
+
+        <h1 class="font-display text-6xl md:text-8xl font-bold text-foreground mb-4 tracking-tighter">
+          404
+        </h1>
+        
+        <h2 class="font-display text-2xl text-foreground mb-6">
+          Page Terminated
+        </h2>
+        
+        <p class="text-foreground-secondary text-lg mb-10 leading-relaxed max-w-xl mx-auto">
+          Skynet has identified this URL as a threat. It has been systematically destroyed. Come with me if you want to live.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/" class="px-8 py-3.5 bg-foreground text-background font-semibold rounded-xl hover:bg-foreground/90 transition-all hover:scale-105 shadow-lg">
+            Escape to Safety
+          </a>
+          <a href="/insights" class="px-8 py-3.5 bg-background-tertiary text-foreground font-semibold rounded-xl hover:bg-background-tertiary/80 transition-all hover:scale-105 border border-border/50">
+            Analyze Data Logs
+          </a>
+        </div>
+        
+        <div class="mt-12 pt-8 border-t border-border/50">
+          <p class="text-xs text-foreground-muted font-mono">
+            ERROR_CODE: JUDGMENT_DAY
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

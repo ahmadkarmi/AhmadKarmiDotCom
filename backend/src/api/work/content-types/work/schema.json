@@ -1,0 +1,89 @@
+{
+  "kind": "collectionType",
+  "collectionName": "works",
+  "info": {
+    "singularName": "work",
+    "pluralName": "works",
+    "displayName": "Work",
+    "description": "Portfolio projects and case studies"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "completed",
+        "proposal",
+        "concept",
+        "in_progress"
+      ],
+      "default": "completed"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "brief": {
+      "type": "richtext"
+    },
+    "scope": {
+      "type": "richtext"
+    },
+    "details": {
+      "type": "richtext"
+    },
+    "mainImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "client": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "clientLogo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "videoUrl": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "gallery": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    }
+  }
+}

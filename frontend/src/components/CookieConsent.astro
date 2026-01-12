@@ -1,0 +1,92 @@
+---
+// Cookie Consent Banner
+// Simple, GDPR-compliant consent banner that remembers user choice
+---
+
+<div 
+  id="cookie-consent" 
+  class="fixed bottom-0 left-0 right-0 z-[90] transform translate-y-full transition-transform duration-500 md:bottom-4 md:left-4 md:right-auto md:max-w-md"
+>
+  <div class="bg-foreground text-background p-4 md:p-6 md:rounded-2xl shadow-2xl border-t md:border border-white/10">
+    <div class="flex items-start gap-4">
+      <div class="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h4 class="font-semibold text-background mb-1">Cookie Notice</h4>
+        <p class="text-sm text-gray-400 mb-4">
+          I use cookies to analyze site traffic and improve your experience. By continuing, you agree to the 
+          <a href="/privacy" class="underline hover:text-accent transition-colors">Privacy Policy</a>.
+        </p>
+        <div class="flex items-center gap-3">
+          <button 
+            id="accept-cookies"
+            class="px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent/90 transition-colors"
+          >
+            Accept
+          </button>
+          <button 
+            id="decline-cookies"
+            class="px-4 py-2 text-gray-400 hover:text-background text-sm font-medium transition-colors"
+          >
+            Decline
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function() {
+    var consent = localStorage.getItem('cookie-consent');
+    var banner = document.getElementById('cookie-consent');
+    
+    if (!consent && banner) {
+      // Show banner after a short delay
+      setTimeout(function() {
+        banner.classList.remove('translate-y-full');
+        banner.classList.add('translate-y-0');
+      }, 1500);
+    }
+    
+    // Handle accept
+    var acceptBtn = document.getElementById('accept-cookies');
+    if (acceptBtn) {
+      acceptBtn.addEventListener('click', function() {
+        localStorage.setItem('cookie-consent', 'accepted');
+        hideBanner();
+        // Enable analytics if they were disabled
+        if (typeof gtag !== 'undefined') {
+          gtag('consent', 'update', {
+            'analytics_storage': 'granted'
+          });
+        }
+      });
+    }
+    
+    // Handle decline
+    var declineBtn = document.getElementById('decline-cookies');
+    if (declineBtn) {
+      declineBtn.addEventListener('click', function() {
+        localStorage.setItem('cookie-consent', 'declined');
+        hideBanner();
+        // Disable analytics
+        if (typeof gtag !== 'undefined') {
+          gtag('consent', 'update', {
+            'analytics_storage': 'denied'
+          });
+        }
+      });
+    }
+    
+    function hideBanner() {
+      if (banner) {
+        banner.classList.add('translate-y-full');
+        banner.classList.remove('translate-y-0');
+      }
+    }
+  })();
+</script>

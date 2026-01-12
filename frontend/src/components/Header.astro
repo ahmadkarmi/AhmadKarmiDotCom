@@ -1,0 +1,68 @@
+---
+import Search from './Search.astro';
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/insights', label: 'Insights' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm md:backdrop-blur-md border-b border-border">
+  <div class="container-custom">
+    <nav class="flex items-center justify-between h-16 md:h-20">
+      <!-- Logo -->
+      <a 
+        href="/" 
+        class="flex items-center gap-2 hover:opacity-80 transition-opacity touch-manipulation"
+        data-nav-prefetch
+        transition:name="logo"
+      >
+        <img 
+          src="/brand/logo-dark-horizontal.png" 
+          alt="Ahmad Karmi" 
+          class="h-8 md:h-10 w-auto"
+        />
+      </a>
+
+      <!-- Desktop Navigation -->
+      <ul class="hidden md:flex items-center gap-8">
+        {navLinks.map(link => (
+          <li>
+            <a 
+              href={link.href}
+              data-nav-prefetch
+              class:list={[
+                'text-sm font-medium transition-colors link-underline touch-manipulation',
+                currentPath === link.href 
+                  ? 'text-accent' 
+                  : 'text-foreground-secondary hover:text-foreground'
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <!-- Right Side Actions -->
+      <div class="hidden md:flex items-center gap-2">
+        <!-- Search Button -->
+        <Search />
+        
+        <!-- CTA Button -->
+        <a 
+          href="/contact" 
+          class="btn-secondary text-sm touch-manipulation"
+          data-nav-prefetch
+        >
+          Get in Touch
+        </a>
+      </div>
+    </nav>
+  </div>
+</header>

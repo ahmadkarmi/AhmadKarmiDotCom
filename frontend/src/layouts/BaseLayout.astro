@@ -1,0 +1,678 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BottomNav from '../components/BottomNav.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import ReadingProgress from '../components/ReadingProgress.astro';
+import { ClientRouter } from 'astro:transitions';
+
+export interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  ogImageWidth?: number;
+  ogImageHeight?: number;
+  ogImageAlt?: string;
+  publishDate?: string;
+  tags?: string[];
+  showHeader?: boolean;
+  showFooter?: boolean;
+  schema?: Record<string, any>;
+}
+
+const {
+  title,
+  description = 'Ahmad Al-Karmi - Product Manager, Digital Strategist, and Creative Technologist',
+  ogImage = '/og-image.jpg',
+  ogType = 'website',
+  ogImageWidth,
+  ogImageHeight,
+  ogImageAlt,
+  publishDate,
+  tags,
+  showHeader = true,
+  showFooter = true,
+  schema
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
+const fullOgImage = (() => {
+  try {
+    return new URL(ogImage, siteUrl).toString();
+  } catch {
+    return `${siteUrl}${ogImage}`;
+  }
+})();
+
+const metaDescription = String(description || '')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    
+    <!-- SEO -->
+    <title>{title} | Ahmad Al-Karmi</title>
+    <meta name="description" content={metaDescription} />
+    <meta name="author" content="Ahmad Al-Karmi" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={`${title} | Ahmad Al-Karmi`} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:image" content={fullOgImage} />
+    <meta property="og:image:secure_url" content={fullOgImage} />
+    {ogImageWidth && <meta property="og:image:width" content={String(ogImageWidth)} />}
+    {ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)} />}
+    <meta property="og:image:alt" content={ogImageAlt || title} />
+    <meta property="og:site_name" content="Ahmad Al-Karmi" />
+    
+    {/* Article Specific Metadata */}
+    {ogType === 'article' && (
+      <>
+        {publishDate && <meta property="article:published_time" content={publishDate} />}
+        <meta property="article:author" content="Ahmad Al-Karmi" />
+        {tags?.map(tag => (
+          <meta property="article:tag" content={tag} />
+        ))}
+      </>
+    )}
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | Ahmad Al-Karmi`} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:image" content={fullOgImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt || title} />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    
+    <!-- View Transitions -->
+    <ClientRouter />
+
+    <!-- Schema.org JSON-LD -->
+    {schema && (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    )}
+
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1SKBRGQJRM"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-1SKBRGQJRM');
+      
+      // Helper function for custom event tracking
+      window.trackEvent = function(eventName, params = {}) {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', eventName, params);
+        }
+      };
+    </script>
+
+  </head>
+  <body class="bg-background text-foreground overflow-x-hidden pb-16 md:pb-0">
+    <ReadingProgress />
+    {showHeader && <Header />}
+    
+    <main data-pagefind-body>
+      <slot />
+    </main>
+    
+    {showFooter && <Footer />}
+    {showFooter && <BottomNav />}
+    <CookieConsent />
+
+    <div
+      id="global-share-toast"
+      role="status"
+      aria-live="polite"
+      class="fixed z-[1000] max-w-[calc(100vw-20px)] px-4 py-2 rounded-lg text-sm font-medium shadow-lg bg-foreground text-background opacity-0 pointer-events-none transition-opacity duration-200 overflow-hidden"
+    >
+      <div class="toast-message break-words"></div>
+      <div class="toast-progress absolute left-0 bottom-0 h-0.5 w-full bg-accent opacity-90"></div>
+    </div>
+
+    <script is:inline>
+      (function () {
+        if (window.__copyLinkToastBound) return;
+        window.__copyLinkToastBound = true;
+
+        function getToastEls() {
+          const toast = document.getElementById('global-share-toast');
+          if (!toast) return null;
+          const msg = toast.querySelector('.toast-message');
+          const progress = toast.querySelector('.toast-progress');
+          if (!msg || !progress) return null;
+          return { toast, msg, progress };
+        }
+
+        async function copyTextToClipboard(text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return;
+          }
+
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          if (!ok) throw new Error('copy_failed');
+        }
+
+        let toastTimer;
+        function showToastNear(targetEl, message, variant) {
+          const els = getToastEls();
+          if (!els) return;
+
+          const durationMs = 2000;
+          const { toast, msg, progress } = els;
+          msg.textContent = message;
+
+          if (variant === 'error') {
+            toast.style.backgroundColor = '#dc2626';
+            toast.style.color = '#ffffff';
+            progress.style.backgroundColor = '#ffffff';
+          } else {
+            toast.style.backgroundColor = '';
+            toast.style.color = '';
+            progress.style.backgroundColor = '';
+          }
+
+          progress.style.transition = 'none';
+          progress.style.width = '100%';
+
+          toast.style.visibility = 'hidden';
+          toast.style.opacity = '0';
+          toast.style.pointerEvents = 'none';
+          toast.style.left = '0px';
+          toast.style.top = '0px';
+          toast.style.right = 'auto';
+          toast.style.bottom = 'auto';
+          void toast.offsetWidth;
+
+          try {
+            const rect = targetEl.getBoundingClientRect();
+            const margin = 10;
+            const toastRect = toast.getBoundingClientRect();
+            const toastWidth = toastRect.width || 160;
+            const toastHeight = toastRect.height || 40;
+
+            let left = rect.left + rect.width / 2 - toastWidth / 2;
+            left = Math.max(margin, Math.min(left, window.innerWidth - toastWidth - margin));
+
+            const topAbove = rect.top - toastHeight - margin;
+            const topBelow = rect.bottom + margin;
+            const canShowAbove = topAbove >= margin;
+            const canShowBelow = topBelow + toastHeight <= window.innerHeight - margin;
+
+            const top = canShowAbove
+              ? topAbove
+              : (canShowBelow ? topBelow : Math.max(margin, Math.min(topBelow, window.innerHeight - toastHeight - margin)));
+
+            toast.style.left = Math.round(left) + 'px';
+            toast.style.top = Math.round(top) + 'px';
+          } catch {
+            toast.style.left = '10px';
+            toast.style.top = '10px';
+          }
+
+          toast.style.visibility = 'visible';
+          toast.style.opacity = '1';
+
+          requestAnimationFrame(() => {
+            progress.style.transition = 'width ' + durationMs + 'ms linear';
+            progress.style.width = '0%';
+          });
+
+          if (toastTimer) window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.visibility = 'hidden';
+          }, durationMs);
+        }
+
+        document.addEventListener('click', async function (e) {
+          const target = e.target;
+          const btn = target && target.closest ? target.closest('.copy-btn') : null;
+          if (!btn) return;
+
+          const url = btn.dataset ? btn.dataset.copyUrl : '';
+          if (!url) return;
+
+          try {
+            await copyTextToClipboard(url);
+            btn.classList.add('text-accent');
+            setTimeout(() => btn.classList.remove('text-accent'), 2000);
+            showToastNear(btn, 'Link copied');
+          } catch (err) {
+            console.error('Failed to copy link: ', err);
+            showToastNear(btn, 'Failed to copy link', 'error');
+          }
+        });
+      })();
+    </script>
+
+    <script is:inline>
+      (function () {
+        if (window.__dragScrollBoundV6) return;
+        window.__dragScrollBoundV6 = true;
+
+        if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
+
+        function initDragScroll() {
+          document.querySelectorAll('[data-drag-scroll]').forEach(function (el) {
+            if (el.dataset.dragScrollBound === 'v6') return;
+            el.dataset.dragScrollBound = 'v6';
+            el.style.cursor = 'grab';
+
+            if (el.scrollWidth <= el.clientWidth) return;
+
+            let isDown = false;
+            let startX = 0;
+            let startY = 0;
+            let lastX = 0;
+            let lastT = 0;
+            let velocityX = 0;
+            let isDragging = false;
+            let suppressClick = false;
+            let momentumRaf = 0;
+            let rafId = 0;
+            let pendingScrollLeft = null;
+            let dragThreshold = 14;
+
+            function stopMomentum() {
+              if (momentumRaf) {
+                cancelAnimationFrame(momentumRaf);
+                momentumRaf = 0;
+              }
+            }
+
+            function stopRaf() {
+              if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = 0;
+              }
+              pendingScrollLeft = null;
+            }
+
+            function disableSnap() {
+              el.style.scrollSnapType = 'none';
+              el.style.scrollBehavior = 'auto';
+            }
+
+            function restoreSnap() {
+              el.style.scrollSnapType = '';
+              el.style.scrollBehavior = '';
+            }
+
+            function reset() {
+              isDown = false;
+              isDragging = false;
+              delete el.dataset.dragging;
+              el.style.cursor = 'grab';
+              el.style.userSelect = '';
+            }
+
+            function onMouseMove(e) {
+              if (!isDown) return;
+
+              const dxTotal = e.clientX - startX;
+              const dyTotal = e.clientY - startY;
+
+              if (!isDragging) {
+                if (Math.abs(dxTotal) < dragThreshold) return;
+                if (Math.abs(dyTotal) > Math.abs(dxTotal)) {
+                  onMouseUp();
+                  return;
+                }
+                isDragging = true;
+                el.dataset.dragging = 'true';
+                el.style.cursor = 'grabbing';
+                el.style.userSelect = 'none';
+                disableSnap();
+                lastX = e.clientX;
+                lastT = performance.now();
+                velocityX = 0;
+              }
+
+              e.preventDefault();
+
+              const now = performance.now();
+              const moveDx = e.clientX - lastX;
+              const dt = Math.max(1, now - lastT);
+              const v = moveDx / dt;
+              velocityX = velocityX * 0.8 + v * 0.2;
+              lastX = e.clientX;
+              lastT = now;
+
+              if (pendingScrollLeft === null) pendingScrollLeft = el.scrollLeft;
+              pendingScrollLeft = pendingScrollLeft - moveDx;
+
+              if (!rafId) {
+                rafId = requestAnimationFrame(function () {
+                  if (pendingScrollLeft !== null) {
+                    el.scrollLeft = pendingScrollLeft;
+                  }
+                  pendingScrollLeft = null;
+                  rafId = 0;
+                });
+              }
+            }
+
+            function onMouseUp() {
+              if (!isDown) return;
+              window.removeEventListener('mousemove', onMouseMove);
+              window.removeEventListener('mouseup', onMouseUp);
+              window.removeEventListener('blur', onMouseUp);
+              stopRaf();
+
+              if (isDragging) {
+                suppressClick = true;
+                setTimeout(function () {
+                  suppressClick = false;
+                }, 0);
+                const startVel = velocityX;
+                let v = startVel;
+                let last = performance.now();
+                const minV = 0.02;
+
+                if (Math.abs(startVel) > 0.08) {
+                  disableSnap();
+                  momentumRaf = requestAnimationFrame(function step() {
+                    const now = performance.now();
+                    const dt = now - last;
+                    last = now;
+                    el.scrollLeft = el.scrollLeft - v * dt;
+                    v *= Math.pow(0.94, dt / 16);
+                    if (Math.abs(v) > minV) {
+                      momentumRaf = requestAnimationFrame(step);
+                    } else {
+                      momentumRaf = 0;
+                      restoreSnap();
+                    }
+                  });
+                } else {
+                  restoreSnap();
+                }
+              } else {
+                suppressClick = false;
+                restoreSnap();
+              }
+
+              reset();
+            }
+
+            el.addEventListener('mousedown', function (e) {
+              if (e.button !== 0) return;
+              stopMomentum();
+              restoreSnap();
+              isDown = true;
+              startX = e.clientX;
+              startY = e.clientY;
+              lastX = e.clientX;
+              lastT = performance.now();
+              velocityX = 0;
+              isDragging = false;
+              suppressClick = false;
+              dragThreshold = (e.target && e.target.closest && e.target.closest('a,button,input,textarea,select,[role="button"]')) ? 24 : 14;
+              window.addEventListener('mousemove', onMouseMove, { passive: false });
+              window.addEventListener('mouseup', onMouseUp);
+              window.addEventListener('blur', onMouseUp);
+            });
+
+            el.addEventListener('dragstart', function (e) {
+              if (isDown || el.dataset.dragging === 'true') {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }, true);
+
+            el.addEventListener('click', function (e) {
+              if (suppressClick) {
+                suppressClick = false;
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }, true);
+          });
+        }
+
+        function scheduleInit() {
+          const raf = window.requestAnimationFrame;
+          if (typeof raf === 'function') {
+            raf(function () {
+              raf(function () {
+                initDragScroll();
+              });
+            });
+            return;
+          }
+          setTimeout(initDragScroll, 0);
+        }
+
+        window.addEventListener('load', scheduleInit, { once: true });
+        document.addEventListener('astro:page-load', scheduleInit);
+      })();
+    </script>
+
+    <script is:inline>
+      (function () {
+        if (window.__navPrefetchBound) return;
+        window.__navPrefetchBound = true;
+
+        const prefetched = new Set();
+
+        function canPrefetch() {
+          const conn = navigator.connection;
+          if (!conn) return true;
+          if (conn.saveData) return false;
+          const type = String(conn.effectiveType || '');
+          if (type.includes('2g')) return false;
+          return true;
+        }
+
+        function schedule(fn) {
+          const ric = window.requestIdleCallback;
+          if (typeof ric === 'function') {
+            ric(fn, { timeout: 2000 });
+            return;
+          }
+          setTimeout(fn, 800);
+        }
+
+        function prefetchHref(href) {
+          if (!href) return;
+          try {
+            const url = new URL(href, window.location.origin);
+            if (url.origin !== window.location.origin) return;
+            if (!url.pathname || url.pathname === window.location.pathname) return;
+            if (prefetched.has(url.pathname)) return;
+            prefetched.add(url.pathname);
+
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = url.pathname;
+            link.as = 'document';
+            document.head.appendChild(link);
+          } catch {
+          }
+        }
+
+        function initPrefetch() {
+          if (!canPrefetch()) return;
+          document.querySelectorAll('a[data-nav-prefetch]').forEach(function (a) {
+            prefetchHref(a.getAttribute('href'));
+          });
+        }
+
+        function onPrefetchEvent(e) {
+          const target = e.target;
+          const a = target && target.closest ? target.closest('a[data-nav-prefetch]') : null;
+          if (!a) return;
+          prefetchHref(a.getAttribute('href'));
+        }
+
+        document.addEventListener('pointerover', onPrefetchEvent, { capture: true, passive: true });
+        document.addEventListener('touchstart', onPrefetchEvent, { capture: true, passive: true });
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function () {
+            schedule(initPrefetch);
+          }, { once: true });
+        } else {
+          schedule(initPrefetch);
+        }
+
+        document.addEventListener('astro:after-swap', function () {
+          schedule(initPrefetch);
+        });
+      })();
+    </script>
+
+    <!-- Automatic Event Tracking -->
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.__autoTrackingBound) return;
+        window.__autoTrackingBound = true;
+
+        function schedule(fn) {
+          const ric = window.requestIdleCallback;
+          if (typeof ric === 'function') {
+            ric(fn, { timeout: 2000 });
+            return;
+          }
+          setTimeout(fn, 600);
+        }
+
+        schedule(function () {
+          // Track outbound links (social media, external sites)
+          document.addEventListener('click', function (e) {
+            var target = e.target;
+            var el = target && target.closest ? target.closest('a, button') : null;
+            if (!el) return;
+
+            var a = el.tagName === 'A' ? el : null;
+            var href = a ? a.getAttribute('href') : null;
+            var isDownload = a && a.hasAttribute('download');
+
+            if (a && href && href.indexOf('http') === 0) {
+              var url = a.href;
+              var hostname = new URL(url).hostname;
+              
+              // Skip internal links
+              if (hostname === window.location.hostname) return;
+              
+              // Determine link type
+              var linkType = 'outbound';
+              if (url.includes('linkedin.com')) linkType = 'linkedin';
+              else if (url.includes('threads.net') || url.includes('threads.com')) linkType = 'threads';
+              else if (url.includes('mailto:')) linkType = 'email';
+              
+              if (typeof window.trackEvent === 'function') {
+                window.trackEvent('click', {
+                  event_category: 'outbound_link',
+                  event_label: linkType,
+                  link_url: url,
+                });
+              }
+              return;
+            }
+
+            // Track CTA button clicks
+            var btn = target && target.closest ? target.closest('.btn-primary, .btn-secondary, [class*="btn-"]') : null;
+            if (btn) {
+              var label = (btn.textContent || '').trim() || 'Button';
+              if (typeof window.trackEvent === 'function') {
+                window.trackEvent('click', {
+                  event_category: 'cta',
+                  event_label: label,
+                });
+              }
+              return;
+            }
+            
+            // Track CV downloads
+            if (isDownload && a) {
+              if (typeof window.trackEvent === 'function') {
+                window.trackEvent('file_download', {
+                  event_category: 'download',
+                  event_label: 'CV',
+                  file_name: (a.href || '').split('/').pop(),
+                });
+              }
+            }
+          }, { capture: true, passive: true });
+          
+          // Track newsletter signups (Kit.com form)
+          document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (!form || !form.matches || !form.matches('form[data-sv-form]')) return;
+            if (typeof window.trackEvent === 'function') {
+              window.trackEvent('sign_up', {
+                event_category: 'newsletter',
+                event_label: 'Newsletter Signup',
+                method: 'kit.com',
+              });
+            }
+          }, { capture: true });
+          
+          // Scroll Depth Tracking (25%, 50%, 75%, 100%)
+          var scrollDepthMarkers = { 25: false, 50: false, 75: false, 100: false };
+          window.addEventListener('scroll', function() {
+            var scrollTop = window.scrollY;
+            var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            var scrollPercent = Math.round((scrollTop / docHeight) * 100);
+            
+            [25, 50, 75, 100].forEach(function(marker) {
+              if (scrollPercent >= marker && !scrollDepthMarkers[marker]) {
+                scrollDepthMarkers[marker] = true;
+                if (typeof window.trackEvent === 'function') {
+                  window.trackEvent('scroll', {
+                    event_category: 'engagement',
+                    event_label: marker + '%',
+                    page_path: window.location.pathname,
+                  });
+                }
+              }
+            });
+          }, { passive: true });
+        });
+      });
+      
+      // Search Query Tracking (called from Search component)
+      window.trackSearch = function(query, resultsCount) {
+        if (typeof window.trackEvent === 'function') {
+          window.trackEvent('search', {
+            event_category: 'search',
+            search_term: query,
+            results_count: resultsCount,
+          });
+        }
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+---
+import InsightCard from './InsightCard.astro';
+import type { Insight } from '../lib/wordpress';
+
+interface Props {
+  currentSlug: string;
+  currentTags?: string[];
+  allInsights: Insight[];
+  maxItems?: number;
+}
+
+const { currentSlug, currentTags = [], allInsights, maxItems = 3 } = Astro.props;
+
+// Find related articles based on shared tags
+const relatedInsights = allInsights
+  .filter(insight => insight.slug !== currentSlug)
+  .map(insight => {
+    const sharedTags = insight.tags?.filter(tag => currentTags.includes(tag)) || [];
+    return { insight, score: sharedTags.length };
+  })
+  .sort((a, b) => b.score - a.score)
+  .slice(0, maxItems)
+  .map(item => item.insight);
+
+// If not enough related by tags, fill with recent articles
+const fillerNeeded = maxItems - relatedInsights.length;
+if (fillerNeeded > 0) {
+  const fillerInsights = allInsights
+    .filter(insight => 
+      insight.slug !== currentSlug && 
+      !relatedInsights.find(r => r.slug === insight.slug)
+    )
+    .slice(0, fillerNeeded);
+  relatedInsights.push(...fillerInsights);
+}
+---
+
+{relatedInsights.length > 0 && (
+  <section class="section border-t border-border">
+    <div class="container-custom">
+      <div class="mb-8">
+        <p class="text-accent font-medium mb-2 uppercase tracking-wider text-sm">Keep Reading</p>
+        <h2 class="font-display text-3xl text-foreground">Related Articles</h2>
+      </div>
+      
+      <div class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-3 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll>
+        {relatedInsights.map((insight, index) => (
+          <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-center">
+            <InsightCard insight={insight} index={index} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

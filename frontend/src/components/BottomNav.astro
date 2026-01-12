@@ -1,0 +1,72 @@
+---
+const { pathname } = Astro.url;
+
+const navItems = [
+  { href: '/', label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+  { href: '/portfolio', label: 'Work', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
+  { href: '#search', label: 'Search', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', isSearch: true },
+  { href: '/insights', label: 'Insights', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+  { href: '/contact', label: 'Contact', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+];
+---
+
+<nav class="fixed bottom-0 left-0 right-0 z-50 md:hidden pb-safe">
+  <div class="absolute inset-0 bg-background/90 backdrop-blur-sm border-t border-border/50"></div>
+  
+  <div class="relative flex justify-around items-center h-16 px-2">
+    {navItems.map(item => {
+      const isActive = !item.isSearch && (pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href)));
+      
+      if (item.isSearch) {
+        return (
+          <button 
+            id="mobile-search-trigger"
+            type="button"
+            class="flex flex-col items-center justify-center w-full h-full gap-1 transition-colors duration-200 text-foreground-muted hover:text-foreground"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={item.icon} />
+            </svg>
+            <span class="text-[10px] font-medium tracking-wide">{item.label}</span>
+          </button>
+        );
+      }
+      
+      return (
+        <a 
+          href={item.href} 
+          data-nav-prefetch
+          class:list={[
+            "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors duration-200 touch-manipulation",
+            isActive ? "text-accent" : "text-foreground-muted hover:text-foreground"
+          ]}
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={item.icon} />
+          </svg>
+          <span class="text-[10px] font-medium tracking-wide">{item.label}</span>
+          
+          {isActive && (
+            <span class="absolute top-0 w-8 h-0.5 bg-accent rounded-b-full"></span>
+          )}
+        </a>
+      );
+    })}
+  </div>
+</nav>
+
+<script>
+  // Mobile search trigger
+  const mobileSearchTrigger = document.getElementById('mobile-search-trigger');
+  mobileSearchTrigger?.addEventListener('click', () => {
+    // Trigger the search modal by simulating Ctrl+K
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+  });
+</script>
+
+<style>
+  /* Safe area padding for iPhone Home Indicator */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+</style>

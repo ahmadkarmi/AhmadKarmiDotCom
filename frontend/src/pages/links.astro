@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Links" showHeader={false} showFooter={false}>
+  <section class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-background">
+    
+    <!-- Animated Mesh Gradient Background (CSS Implementation) -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden -z-10">
+      <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+      <div class="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div class="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-orange-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+      <div class="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
+    </div>
+
+    <div class="w-full max-w-lg mx-auto relative z-10">
+      
+      <!-- Profile Header -->
+      <div class="text-center mb-12 animate-fade-in">
+        <div class="mb-6 relative group inline-block">
+          <div class="absolute inset-0 bg-accent/20 blur-2xl group-hover:blur-3xl transition-all duration-500 rounded-full opacity-0 group-hover:opacity-100"></div>
+          <img src="/brand/logo-mark.png" alt="Ahmad Al-Karmi" class="w-20 h-20 mx-auto object-contain relative z-10 drop-shadow-lg group-hover:scale-110 transition-transform duration-500" />
+        </div>
+        <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
+          Ahmad Al-Karmi
+        </h1>
+        <p class="text-foreground-secondary text-lg leading-relaxed max-w-sm mx-auto">
+          Leading digital transformation through product innovation and AI strategy.
+        </p>
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="grid gap-4">
+        
+        <style>
+          /* Card Entrance Animation */
+          .link-card-anim {
+            opacity: 0;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+          .link-card-anim:nth-child(1) { animation-delay: 0.1s; }
+          .link-card-anim:nth-child(2) { animation-delay: 0.2s; }
+          .link-card-anim:nth-child(3) { animation-delay: 0.3s; }
+          .link-card-anim:nth-child(4) { animation-delay: 0.4s; }
+
+          @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
+          /* Background Blob Animation */
+          @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+          }
+          .animate-blob {
+            animation: blob 7s infinite;
+          }
+          .animation-delay-2000 {
+            animation-delay: 2s;
+          }
+          .animation-delay-4000 {
+            animation-delay: 4s;
+          }
+        </style>
+
+        <!-- Official Website -->
+        <a href="/" class="link-card-anim group relative overflow-hidden rounded-2xl bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg hover:shadow-2xl hover:shadow-accent/10 transition-all duration-300 hover:-translate-y-1">
+          <div class="absolute inset-0 bg-gradient-to-r from-accent/0 via-accent/10 to-accent/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          <div class="p-4 flex items-center gap-5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-white/80 to-white/40 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-accent shadow-inner border border-white/20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9h18" /></svg>
+            </div>
+            <div class="flex-1 flex items-center">
+              <h3 class="font-display text-lg font-bold text-foreground group-hover:text-accent transition-colors">Official Website</h3>
+            </div>
+            <svg class="w-5 h-5 text-foreground-secondary/40 group-hover:text-accent group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </div>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="https://www.linkedin.com/in/akarmi" target="_blank" rel="noopener noreferrer" class="link-card-anim group relative overflow-hidden rounded-2xl bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg hover:shadow-2xl hover:shadow-[#0077b5]/10 transition-all duration-300 hover:-translate-y-1">
+          <div class="absolute inset-0 bg-gradient-to-r from-[#0077b5]/0 via-[#0077b5]/10 to-[#0077b5]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          <div class="p-4 flex items-center gap-5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-white/80 to-white/40 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-[#0077b5] shadow-inner border border-white/20">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </div>
+            <div class="flex-1 flex items-center">
+              <h3 class="font-display text-lg font-bold text-foreground group-hover:text-[#0077b5] transition-colors">LinkedIn</h3>
+            </div>
+            <svg class="w-5 h-5 text-foreground-secondary/40 group-hover:text-[#0077b5] group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </div>
+        </a>
+
+        <!-- Newsletter -->
+        <a href="/#newsletter" class="link-card-anim group relative overflow-hidden rounded-2xl bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg hover:shadow-2xl hover:shadow-accent/10 transition-all duration-300 hover:-translate-y-1">
+          <div class="absolute inset-0 bg-gradient-to-r from-accent/0 via-accent/10 to-accent/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          <div class="p-4 flex items-center gap-5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-white/80 to-white/40 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-accent shadow-inner border border-white/20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </div>
+            <div class="flex-1 flex items-center">
+              <h3 class="font-display text-lg font-bold text-foreground group-hover:text-accent transition-colors">Newsletter</h3>
+            </div>
+            <svg class="w-5 h-5 text-foreground-secondary/40 group-hover:text-accent group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </div>
+        </a>
+
+        <!-- Insights -->
+        <a href="/insights" class="link-card-anim group relative overflow-hidden rounded-2xl bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg hover:shadow-2xl hover:shadow-accent/10 transition-all duration-300 hover:-translate-y-1">
+          <div class="absolute inset-0 bg-gradient-to-r from-accent/0 via-accent/10 to-accent/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          <div class="p-4 flex items-center gap-5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-white/80 to-white/40 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-accent shadow-inner border border-white/20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
+            </div>
+            <div class="flex-1 flex items-center">
+              <h3 class="font-display text-lg font-bold text-foreground group-hover:text-accent transition-colors">Insights</h3>
+            </div>
+            <svg class="w-5 h-5 text-foreground-secondary/40 group-hover:text-accent group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-16 text-center animate-fade-in" style="animation-delay: 0.6s;">
+        <p class="text-sm text-foreground-secondary/60">
+          &copy; {new Date().getFullYear()} Ahmad Al-Karmi
+        </p>
+      </footer>
+
+    </div>
+  </section>
+</BaseLayout>
