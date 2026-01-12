@@ -8,9 +8,30 @@ import { fetchWorks, fetchInsights, fetchSiteSettings, fetchHomePage, getMediaUr
 
 import MetricBento from '../components/MetricBento';
 
-// Fetch featured content
-const featuredWorks = await fetchWorks({ featured: true, limit: 3 });
-const latestInsights = await fetchInsights({ limit: 3 });
+// Fetch content: prioritize featured items, fill remaining slots with recent non-featured
+const MAX_ITEMS = 3;
+
+// Works (Lab section)
+const allFeaturedWorks = await fetchWorks({ featured: true, limit: MAX_ITEMS });
+let featuredWorks = allFeaturedWorks;
+if (featuredWorks.length < MAX_ITEMS) {
+  const remaining = MAX_ITEMS - featuredWorks.length;
+  const featuredIds = new Set(featuredWorks.map((w) => w.id));
+  const recentWorks = await fetchWorks({ featured: false, limit: remaining + 5 });
+  const fillers = recentWorks.filter((w) => !featuredIds.has(w.id)).slice(0, remaining);
+  featuredWorks = [...featuredWorks, ...fillers];
+}
+
+// Insights (Thought Leadership section)
+const allFeaturedInsights = await fetchInsights({ featured: true, limit: MAX_ITEMS });
+let latestInsights = allFeaturedInsights;
+if (latestInsights.length < MAX_ITEMS) {
+  const remaining = MAX_ITEMS - latestInsights.length;
+  const featuredIds = new Set(latestInsights.map((i) => i.id));
+  const recentInsights = await fetchInsights({ featured: false, limit: remaining + 5 });
+  const fillers = recentInsights.filter((i) => !featuredIds.has(i.id)).slice(0, remaining);
+  latestInsights = [...latestInsights, ...fillers];
+}
 
 const siteSettings = await fetchSiteSettings();
 const homePage = await fetchHomePage();
