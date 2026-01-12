@@ -6,7 +6,7 @@
 <button 
   id="search-trigger"
   type="button"
-  class="p-2 text-foreground-secondary hover:text-foreground transition-colors rounded-lg hover:bg-background-secondary"
+  class="hidden md:inline-flex p-2 text-foreground-secondary hover:text-foreground transition-colors rounded-lg hover:bg-background-secondary"
   aria-label="Search"
 >
   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +80,7 @@
   </div>
 </div>
 
-<style>
+<style is:global>
   @keyframes scale-in {
     from {
       opacity: 0;
@@ -97,27 +97,77 @@
   }
   
   .search-result-item {
-    @apply block p-3 rounded-lg hover:bg-background-secondary transition-colors cursor-pointer;
+    @apply block rounded-lg border border-border bg-background shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden hover:-translate-y-0.5 cursor-pointer;
   }
   
   .search-result-item.active {
-    @apply bg-accent/10 ring-1 ring-accent/30;
+    @apply ring-2 ring-accent/30 border-accent/30 shadow-md;
   }
-  
+
+  .search-result-card {
+    @apply flex items-stretch gap-4 p-4;
+  }
+
+  .search-result-header {
+    @apply px-4 py-3 flex items-center justify-between border-b border-border/40 bg-background-secondary/5;
+  }
+
+  .search-result-key {
+    @apply flex items-center gap-2;
+  }
+
+  .search-result-code {
+    @apply text-xs font-mono text-foreground-muted font-medium;
+  }
+
+  .search-result-thumb {
+    @apply relative w-24 sm:w-28 aspect-[16/10] rounded-md overflow-hidden bg-background-secondary/20 border border-border/50 shadow-inner flex-shrink-0;
+  }
+
+  .search-result-thumb img {
+    @apply absolute inset-0 w-full h-full object-cover opacity-95 transition-transform duration-700 group-hover:scale-105;
+  }
+
+  .search-result-content {
+    @apply flex-1 min-w-0;
+  }
+
+  .search-result-top {
+    @apply flex items-center justify-between gap-3 mb-2;
+  }
+
+  .search-result-badge {
+    @apply px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase ring-1;
+  }
+
+  .search-result-url {
+    @apply text-[10px] font-mono text-foreground-muted truncate;
+  }
+
   .search-result-title {
-    @apply font-medium text-foreground mb-1;
+    @apply font-display font-bold text-base md:text-lg text-foreground leading-tight line-clamp-2 group-hover:text-accent transition-colors;
   }
-  
+
+  .search-result-description {
+    @apply mt-1 text-xs md:text-sm text-foreground-secondary line-clamp-2;
+  }
+
   .search-result-excerpt {
-    @apply text-sm text-foreground-secondary line-clamp-2;
+    @apply mt-1 text-xs md:text-sm text-foreground-secondary line-clamp-2;
   }
-  
+
+  .search-result-title mark,
+  .search-result-description mark,
   .search-result-excerpt mark {
-    @apply bg-accent/20 text-accent font-medium rounded px-0.5;
+    @apply bg-accent/15 text-foreground font-semibold rounded px-0.5;
   }
-  
-  .search-result-meta {
-    @apply text-xs text-foreground-muted mt-2 flex items-center gap-2;
+
+  .search-result-chevron {
+    @apply self-center text-foreground-muted opacity-60 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5;
+  }
+
+  .search-result-bottom {
+    @apply mt-2 flex items-center justify-between gap-3;
   }
 </style>
 
@@ -125,7 +175,9 @@
   // Search Modal Logic
   const win = window;
   const state = win.__searchModalState || (win.__searchModalState = {
-    pagefind: null,
+    indexLoaded: false,
+    items: [],
+    queryTokens: [],
     activeIndex: -1,
     results: [],
     searchTimeout: null,
@@ -153,7 +205,7 @@
     modal?.classList.remove('hidden');
     input?.focus();
     document.body.style.overflow = 'hidden';
-    loadPagefind();
+    loadSearchIndex();
   }
 
   // Close modal
@@ -169,23 +221,78 @@
     state.results = [];
   }
 
-  // Load Pagefind dynamically (only available after production build)
-  async function loadPagefind() {
-    if (state.pagefind) return;
+  async function loadSearchIndex() {
+    if (state.indexLoaded) return;
+    state.indexLoaded = true;
+
     try {
-      // Check if pagefind exists before trying to import
-      const checkResponse = await fetch('/pagefind/pagefind.js', { method: 'HEAD' });
-      if (!checkResponse.ok) {
-        console.info('Pagefind not available yet - run a production build to enable search');
+      const response = await fetch('/search-index.json', {
+        headers: { 'Accept': 'application/json' },
+      });
+      if (!response.ok) {
+        console.warn('Search index not available:', response.status);
+        state.items = [];
+        state.indexLoaded = false;
         return;
       }
-      // Dynamic import with variable to prevent Vite from bundling
-      const pagefindPath = '/pagefind/pagefind.js';
-      state.pagefind = await import(/* @vite-ignore */ pagefindPath);
-      await state.pagefind.init();
+      const json = await response.json();
+      const items = Array.isArray(json?.items) ? json.items : [];
+      state.items = items.map((item) => {
+        const title = normalizeForSearch(item?.title || '');
+        const description = normalizeForSearch(item?.description || '');
+        const tags = normalizeForSearch(Array.isArray(item?.tags) ? item.tags.join(' ') : '');
+        const meta = normalizeForSearch(`${item?.client || ''} ${item?.status || ''}`);
+        const text = normalizeForSearch(item?.text || '');
+        return {
+          ...item,
+          __title: title,
+          __description: description,
+          __tags: tags,
+          __meta: meta,
+          __text: text,
+        };
+      });
     } catch (e) {
-      console.warn('Pagefind not available:', e);
+      console.warn('Failed to load search index:', e);
+      state.items = [];
+      state.indexLoaded = false;
     }
+  }
+
+  function normalizeForSearch(value) {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function tokenizeQuery(query) {
+    return normalizeForSearch(query)
+      .split(/[^a-z0-9]+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length >= 2);
+  }
+
+  function scoreItem(item, tokens) {
+    if (!tokens.length) return 0;
+    const title = item?.__title || '';
+    const description = item?.__description || '';
+    const tags = item?.__tags || '';
+    const meta = item?.__meta || '';
+    const text = item?.__text || '';
+
+    let score = 0;
+    for (const token of tokens) {
+      if (!token) continue;
+      if (title.includes(token)) score += 50;
+      if (description.includes(token)) score += 20;
+      if (tags.includes(token)) score += 15;
+      if (meta.includes(token)) score += 10;
+      if (text.includes(token)) score += 3;
+    }
+    return score;
   }
 
   // Perform search
@@ -200,21 +307,26 @@
       return;
     }
 
-    if (state.pagefind) {
-      try {
-        const search = await state.pagefind.search(query);
-        state.results = await Promise.all(search.results.slice(0, 10).map((r) => r.data()));
-        renderResults(state.results, query);
-        
-        // Track search query
-        if (typeof window.trackSearch === 'function') {
-          window.trackSearch(query, state.results.length);
-        }
-      } catch (e) {
-        renderFallbackMessage();
-      }
-    } else {
+    state.queryTokens = tokenizeQuery(query);
+    await loadSearchIndex();
+
+    if (!Array.isArray(state.items) || state.items.length === 0) {
       renderFallbackMessage();
+      return;
+    }
+
+    const scored = state.items
+      .map((item) => ({ item, score: scoreItem(item, state.queryTokens) }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map((x) => x.item);
+
+    state.results = scored;
+    renderResults(state.results, query);
+
+    if (typeof window.trackSearch === 'function') {
+      window.trackSearch(query, state.results.length);
     }
   }
 
@@ -233,28 +345,227 @@
       return;
     }
 
-    resultsContainer.innerHTML = results.map((result, index) => `
-      <a 
-        href="${result.url}" 
-        class="search-result-item ${index === state.activeIndex ? 'active' : ''}"
-        data-index="${index}"
-      >
-        <div class="search-result-title">${result.meta?.title || 'Untitled'}</div>
-        <div class="search-result-excerpt">${result.excerpt || ''}</div>
-        <div class="search-result-meta">
-          <span>${getContentType(result.url)}</span>
-        </div>
-      </a>
-    `).join('');
+    resultsContainer.innerHTML = `
+      <div class="space-y-3">
+        ${results
+          .map((result, index) => renderSearchResultCard(result, index, state.activeIndex))
+          .join('')}
+      </div>
+    `;
   }
 
-  // Get content type from URL
-  function getContentType(url) {
-    if (url.includes('/insights/')) return '📝 Insight';
-    if (url.includes('/portfolio/')) return '💼 Portfolio';
-    if (url.includes('/about')) return '👤 About';
-    if (url.includes('/contact')) return '✉️ Contact';
-    return '📄 Page';
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatUrlLabel(url) {
+    const value = String(url || '').replace(/^[a-z]+:\/\//i, '');
+
+    return value.length > 48 ? `${value.slice(0, 45)}…` : value;
+  }
+
+  function getContentTypeData(value) {
+    const u = String(value || '');
+
+    if (u === 'insight' || u.includes('/insights/')) {
+      return {
+        key: 'insight',
+        label: 'Insight',
+        badgeClass: 'bg-blue-500/10 text-blue-400 ring-blue-500/20',
+      };
+    }
+
+    if (u === 'portfolio' || u.includes('/portfolio/')) {
+      return {
+        key: 'portfolio',
+        label: 'Portfolio',
+        badgeClass: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20',
+      };
+    }
+
+    return {
+      key: 'page',
+      label: 'Page',
+      badgeClass: 'bg-slate-500/10 text-slate-400 ring-slate-500/20',
+    };
+  }
+
+  function getContentTypeIcon(typeKey) {
+    if (typeKey === 'insight') {
+      return '<svg class="w-3.5 h-3.5 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+    }
+    if (typeKey === 'portfolio') {
+      return '<svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6z"/></svg>';
+    }
+    return '<svg class="w-3.5 h-3.5 text-foreground-muted" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6z"/></svg>';
+  }
+
+  function getResultCode(typeKey, index) {
+    if (typeKey === 'insight') return `INSIGHT-${index + 1}`;
+    if (typeKey === 'portfolio') return `PROJ-${index + 1}`;
+    return `PAGE-${index + 1}`;
+  }
+
+  function getSearchResultImage(result, typeKey) {
+    const src = result?.image || (typeKey === 'page' ? '/brand/logo-mark.png' : '/brand/logo-mark.png');
+    const alt = result?.imageAlt || result?.title || 'Image';
+    return { src, alt };
+  }
+
+  function escapeRegExp(value) {
+    return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function highlightText(text, tokens) {
+    let html = escapeHtml(text);
+    for (const token of tokens || []) {
+      if (!token || token.length < 2) continue;
+      const re = new RegExp(`(${escapeRegExp(token)})`, 'gi');
+      html = html.replace(re, '<mark>$1</mark>');
+    }
+    return html;
+  }
+
+  function buildExcerpt(text, tokens) {
+    const raw = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!raw) return '';
+
+    const maxLen = 220;
+    const lower = raw.toLowerCase();
+    const firstToken = Array.isArray(tokens) ? tokens.find((t) => t && t.length >= 2) : null;
+    const idx = firstToken ? lower.indexOf(String(firstToken).toLowerCase()) : -1;
+
+    if (idx < 0) {
+      return raw.length > maxLen ? `${raw.slice(0, maxLen - 1)}…` : raw;
+    }
+
+    const start = Math.max(0, idx - 80);
+    const end = Math.min(raw.length, idx + 140);
+    const slice = raw.slice(start, end).trim();
+
+    const prefix = start > 0 ? '…' : '';
+    const suffix = end < raw.length ? '…' : '';
+    return `${prefix}${slice}${suffix}`;
+  }
+
+  function humanizeStatus(status) {
+    return String(status || '').replace(/_/g, ' ').trim();
+  }
+
+  function getStatusBadgeClass(status) {
+    const s = String(status || '');
+    if (s === 'completed') return 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20';
+    if (s === 'proposal') return 'bg-amber-500/10 text-amber-400 ring-amber-500/20';
+    if (s === 'in_progress') return 'bg-blue-500/10 text-blue-400 ring-blue-500/20';
+    if (s === 'concept') return 'bg-violet-500/10 text-violet-400 ring-violet-500/20';
+    return 'bg-slate-500/10 text-slate-400 ring-slate-500/20';
+  }
+
+  function renderRightHeaderPill(result, typeData) {
+    if (typeData.key === 'portfolio') {
+      const status = result?.status;
+      if (status) {
+        return `<span class="search-result-badge ${getStatusBadgeClass(status)}">${escapeHtml(humanizeStatus(status))}</span>`;
+      }
+    }
+
+    if (typeData.key === 'insight') {
+      const tag = Array.isArray(result?.tags) ? result.tags[0] : null;
+      if (tag) {
+        return `<span class="search-result-badge bg-blue-500/10 text-blue-400 ring-blue-500/20">${escapeHtml(tag)}</span>`;
+      }
+    }
+
+    return `<span class="search-result-badge ${typeData.badgeClass}">${typeData.label}</span>`;
+  }
+
+  function renderMetaRow(result, typeData) {
+    if (typeData.key === 'portfolio') {
+      if (result?.clientLogo) {
+        return `
+          <div class="flex items-center justify-between mb-2 h-6">
+            <img src="${escapeHtml(result.clientLogo)}" alt="${escapeHtml(result.client || 'Client')}" class="h-5 w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
+            <span class="text-[10px] font-mono text-foreground-muted">${escapeHtml(result?.status ? humanizeStatus(result.status) : '')}</span>
+          </div>
+        `;
+      }
+
+      if (result?.client) {
+        return `
+          <div class="flex items-center justify-between mb-2 h-6">
+            <span class="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider truncate">${escapeHtml(result.client)}</span>
+            <span class="text-[10px] font-mono text-foreground-muted">${escapeHtml(result?.status ? humanizeStatus(result.status) : '')}</span>
+          </div>
+        `;
+      }
+    }
+
+    if (typeData.key === 'insight') {
+      const publishDate = result?.publishDate ? escapeHtml(result.publishDate) : '';
+      const readTime = result?.readTime ? escapeHtml(`${result.readTime} min read`) : '';
+      if (publishDate || readTime) {
+        return `
+          <div class="flex items-center justify-between mb-2 h-6">
+            <span class="text-[10px] text-foreground-muted">${readTime}</span>
+            <span class="text-[10px] font-mono text-foreground-muted">${publishDate}</span>
+          </div>
+        `;
+      }
+    }
+
+    return '';
+  }
+
+  function renderSearchResultCard(result, index, activeIndex) {
+    const typeData = getContentTypeData(result.type || result.url);
+    const isActive = index === activeIndex;
+    const title = highlightText(result.title || 'Untitled', state.queryTokens);
+    const description = highlightText(result.description || '', state.queryTokens);
+    const image = getSearchResultImage(result, typeData.key);
+    const bodyText = description || highlightText(buildExcerpt(result.text || '', state.queryTokens), state.queryTokens);
+    const code = escapeHtml(getResultCode(typeData.key, index));
+
+    return `
+      <a 
+        href="${result.url}" 
+        class="search-result-item group ${isActive ? 'active' : ''}"
+        data-index="${index}"
+      >
+        <div class="search-result-header">
+          <div class="search-result-key">
+            ${getContentTypeIcon(typeData.key)}
+            <span class="search-result-code">${code}</span>
+          </div>
+          ${renderRightHeaderPill(result, typeData)}
+        </div>
+        <div class="search-result-card">
+          <div class="search-result-thumb">
+            <img 
+              src="${escapeHtml(image.src)}" 
+              alt="${escapeHtml(image.alt)}"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="search-result-content">
+            ${renderMetaRow(result, typeData)}
+            <div class="search-result-title">${title}</div>
+            ${description ? `<div class="search-result-description">${description}</div>` : `<div class="search-result-excerpt">${bodyText}</div>`}
+            <div class="search-result-bottom">
+              <span class="search-result-url" title="${escapeHtml(result.url)}">${escapeHtml(formatUrlLabel(result.url))}</span>
+            </div>
+          </div>
+          <div class="search-result-chevron">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </a>
+    `;
   }
 
   // Render fallback message
@@ -264,7 +575,7 @@
       resultsContainer.innerHTML = `
         <div class="text-center py-8">
           <p class="text-foreground-muted mb-2">Search index not available</p>
-          <p class="text-sm text-foreground-muted">Run a production build to enable search</p>
+          <p class="text-sm text-foreground-muted">Please try again in a moment.</p>
         </div>
       `;
     }

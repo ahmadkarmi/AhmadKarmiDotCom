@@ -50,14 +50,14 @@ const currentPath = Astro.url.pathname;
       </ul>
 
       <!-- Right Side Actions -->
-      <div class="hidden md:flex items-center gap-2">
+      <div class="flex items-center gap-2">
         <!-- Search Button -->
         <Search />
         
         <!-- CTA Button -->
         <a 
           href="/contact" 
-          class="btn-secondary text-sm touch-manipulation"
+          class="hidden md:inline-flex btn-secondary text-sm touch-manipulation"
           data-nav-prefetch
         >
           Get in Touch
