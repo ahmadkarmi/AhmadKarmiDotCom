@@ -185,11 +185,27 @@
 
   function getEls() {
     const trigger = document.getElementById('search-trigger');
-    const modal = document.getElementById('search-modal');
     const backdrop = document.getElementById('search-backdrop');
     const closeBtn = document.getElementById('search-close');
     const input = document.getElementById('search-input');
     const resultsContainer = document.getElementById('search-results');
+
+    // Find the modal - prefer one in component tree, clean up orphaned ones in body
+    const allModals = document.querySelectorAll('#search-modal');
+    let modal = null;
+
+    if (allModals.length > 1) {
+      // Multiple modals exist (orphaned from previous navigation) - keep only the fresh one
+      allModals.forEach((m) => {
+        if (m.parentElement === document.body) {
+          m.remove(); // Remove orphaned modal from body
+        } else {
+          modal = m;
+        }
+      });
+    } else {
+      modal = document.getElementById('search-modal');
+    }
 
     // Move modal to body so it's not constrained by header's stacking context
     if (modal && modal.parentElement !== document.body) {

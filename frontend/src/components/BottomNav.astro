@@ -56,12 +56,23 @@ const navItems = [
 </nav>
 
 <script>
-  // Mobile search trigger
-  const mobileSearchTrigger = document.getElementById('mobile-search-trigger');
-  mobileSearchTrigger?.addEventListener('click', () => {
-    // Trigger the search modal by simulating Ctrl+K
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
-  });
+  // Mobile search trigger - uses astro:page-load to survive client-side navigation
+  function bindMobileSearch() {
+    const trigger = document.getElementById('mobile-search-trigger');
+    if (trigger && trigger.dataset.mobileSearchBound !== '1') {
+      trigger.dataset.mobileSearchBound = '1';
+      trigger.addEventListener('click', () => {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+      });
+    }
+  }
+
+  const win = window;
+  if (!win.__mobileSearchPageLoadBound) {
+    win.__mobileSearchPageLoadBound = true;
+    document.addEventListener('astro:page-load', bindMobileSearch);
+  }
+  bindMobileSearch();
 </script>
 
 <style>
