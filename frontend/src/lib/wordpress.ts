@@ -48,6 +48,71 @@ function isAllowedContentUrl(url: string): boolean {
     }
 }
 
+/**
+ * Transform admin domain URLs to frontend domain URLs.
+ * Use this for canonical URLs, page links, and metadata.
+ * DO NOT use this for media/image URLs - those should stay on admin domain.
+ */
+export function transformAdminUrlToFrontend(url: string | null | undefined): string | null {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+
+    try {
+        const parsed = new URL(trimmed);
+        const normalizedHost = normalizeHost(parsed.hostname);
+        
+        if (normalizedHost === WP_HOST_NORMALIZED) {
+            parsed.hostname = new URL(SITE_URL).hostname;
+            parsed.protocol = 'https:';
+            return parsed.toString();
+        }
+        return trimmed;
+    } catch {
+        if (trimmed.startsWith('/')) {
+            return `${SITE_URL}${trimmed}`;
+        }
+        return trimmed;
+    }
+}
+
+/**
+ * Check if a URL is a media/asset URL that should NOT be transformed.
+ * Media files should stay on the admin domain.
+ */
+function isMediaUrl(url: string): boolean {
+    if (!url) return false;
+    const mediaPatterns = [
+        '/wp-content/uploads/',
+        '/wp-includes/',
+        '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
+        '.pdf', '.doc', '.docx', '.mp4', '.mp3', '.wav'
+    ];
+    const lower = url.toLowerCase();
+    return mediaPatterns.some(pattern => lower.includes(pattern));
+}
+
+/**
+ * Transform URL strings in content, replacing admin domain with frontend domain.
+ * Preserves media URLs on the admin domain.
+ */
+export function transformContentUrls(content: string | null | undefined): string | null {
+    if (!content || typeof content !== 'string') return null;
+    
+    const wpUrlPattern = new RegExp(
+        WP_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+        'gi'
+    );
+    
+    return content.replace(wpUrlPattern, (match, offset, fullString) => {
+        const afterMatch = fullString.slice(offset + match.length, offset + match.length + 100);
+        if (isMediaUrl(afterMatch)) {
+            return match;
+        }
+        return SITE_URL;
+    });
+}
+
 function base64Encode(value: string): string {
     if (typeof btoa === 'function') {
         return btoa(value);
@@ -1160,8 +1225,22 @@ function recoverFlatTgTable(html: string): string {
 
 export function normalizeWpRichText(content?: any): string | undefined {
     if (typeof content !== 'string') return undefined;
-    const value = content.trim();
+    let value = content.trim();
     if (!value) return undefined;
+
+    // Transform admin domain URLs to frontend domain for non-media hrefs
+    // This preserves media URLs (images, uploads) on the admin domain
+    value = value.replace(
+        /href=(["'])(https?:\/\/admin\.ahmadkarmi\.com)(\/[^"']*)?(\1)/gi,
+        (match, quote, _domain, path, endQuote) => {
+            const urlPath = path || '';
+            // Keep media URLs on admin domain
+            if (/\/wp-content\/uploads\//i.test(urlPath)) {
+                return match;
+            }
+            return `href=${quote}${SITE_URL}${urlPath}${endQuote}`;
+        }
+    );
 
     const containsHtml = /<\s*[a-z][\s\S]*>/i.test(value);
     const hasComplexHtml = /<\s*(img|iframe|figure|video|audio|table|pre|code|ul|ol|blockquote|h[1-6])\b/i.test(value);
