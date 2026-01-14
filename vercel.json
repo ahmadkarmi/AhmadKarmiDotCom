@@ -9,10 +9,11 @@
       }
     }
   ],
-  "rewrites": [
+  "redirects": [
     {
       "source": "/sitemap.xml",
-      "destination": "/sitemap-index.xml"
+      "destination": "/sitemap-index.xml",
+      "permanent": true
     }
   ],
   "headers": [
