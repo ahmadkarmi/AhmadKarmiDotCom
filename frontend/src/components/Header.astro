@@ -11,6 +11,11 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ];
 
+const socialLinks = [
+  { href: 'https://www.linkedin.com/in/akarmi', label: 'LinkedIn' },
+  { href: 'https://www.threads.com/@karmi.csd', label: 'Threads' },
+];
+
 const currentPath = Astro.url.pathname;
 ---
 
@@ -67,7 +72,282 @@ const currentPath = Astro.url.pathname;
         >
           Get in Touch
         </a>
+
+        <button
+          id="mobile-menu-trigger"
+          type="button"
+          class="inline-flex md:hidden items-center justify-center rounded-lg p-2 text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+          aria-label="Open menu"
+          aria-controls="mobile-menu-panel"
+          aria-expanded="false"
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
       </div>
     </nav>
   </div>
+
+  <div id="mobile-menu" class="fixed inset-0 z-[90] hidden pointer-events-none md:hidden" aria-hidden="true">
+    <button
+      id="mobile-menu-backdrop"
+      type="button"
+      class="absolute inset-0 bg-foreground/60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+      aria-label="Close menu"
+      tabindex="-1"
+    ></button>
+
+    <div
+      id="mobile-menu-panel"
+      class="absolute inset-y-0 right-0 flex w-full max-w-sm translate-x-full flex-col border-l border-border bg-background shadow-2xl transition-transform duration-300 ease-out"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Mobile navigation"
+    >
+      <div class="flex h-16 items-center justify-between border-b border-border px-5">
+        <a
+          href="/"
+          class="flex items-center gap-2 hover:opacity-80 transition-opacity touch-manipulation"
+          data-nav-prefetch
+          data-mobile-menu-close
+        >
+          <Image
+            src={logoDarkHorizontal}
+            alt="Ahmad Karmi"
+            width={220}
+            height={80}
+            loading="eager"
+            class="h-8 w-auto"
+          />
+        </a>
+
+        <button
+          id="mobile-menu-close"
+          type="button"
+          class="inline-flex items-center justify-center rounded-lg p-2 text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+          aria-label="Close menu"
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex flex-1 flex-col overflow-y-auto px-5 py-6">
+        <button
+          id="mobile-menu-search"
+          type="button"
+          class="flex items-center justify-between rounded-2xl border border-border bg-background-secondary/40 px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-background-secondary"
+        >
+          <span>
+            <span class="block text-sm font-semibold text-foreground">Search the site</span>
+            <span class="mt-1 block text-xs text-foreground-secondary">Find insights, work, and pages quickly.</span>
+          </span>
+          <svg class="h-5 w-5 text-foreground-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+
+        <div class="mt-6 space-y-1">
+          {navLinks.map(link => (
+            <a
+              href={link.href}
+              data-nav-prefetch
+              data-mobile-menu-close
+              class:list={[
+                'flex items-center justify-between rounded-xl px-4 py-3 text-base font-medium transition-colors touch-manipulation',
+                currentPath === link.href
+                  ? 'bg-accent/10 text-accent'
+                  : 'text-foreground hover:bg-background-secondary hover:text-foreground'
+              ]}
+            >
+              <span>{link.label}</span>
+              <svg class="h-4 w-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          ))}
+        </div>
+
+        <div class="mt-6 rounded-2xl border border-border bg-background-secondary/30 p-5">
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-accent">Start a Project</p>
+          <p class="mt-3 text-sm leading-relaxed text-foreground-secondary">Share your next product, strategy, or digital experience challenge.</p>
+          <a
+            href="/contact"
+            class="mt-4 inline-flex w-full items-center justify-center btn-secondary text-sm touch-manipulation"
+            data-nav-prefetch
+            data-mobile-menu-close
+          >
+            Get in Touch
+          </a>
+        </div>
+
+        <div class="mt-auto border-t border-border/70 pt-5">
+          <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-foreground-muted">Elsewhere</p>
+          <div class="mt-3 flex flex-wrap gap-3">
+            {socialLinks.map(link => (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex items-center rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground-secondary transition-colors hover:border-accent/30 hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
+
+<script is:inline>
+  (() => {
+    const win = window;
+    const state = win.__mobileMenuState || (win.__mobileMenuState = {
+      open: false,
+      restoreOverflow: '',
+      closeTimer: null,
+    });
+
+    function getEls() {
+      const trigger = document.getElementById('mobile-menu-trigger');
+      const menu = document.getElementById('mobile-menu');
+      const backdrop = document.getElementById('mobile-menu-backdrop');
+      const panel = document.getElementById('mobile-menu-panel');
+      const closeBtn = document.getElementById('mobile-menu-close');
+      const searchBtn = document.getElementById('mobile-menu-search');
+      const closers = document.querySelectorAll('[data-mobile-menu-close]');
+
+      return { trigger, menu, backdrop, panel, closeBtn, searchBtn, closers };
+    }
+
+    function syncTrigger(expanded) {
+      const { trigger } = getEls();
+      if (trigger) {
+        trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      }
+    }
+
+    function openMenu() {
+      const { menu, backdrop, panel, closeBtn } = getEls();
+      if (!menu || !backdrop || !panel || state.open) return;
+
+      if (state.closeTimer) {
+        clearTimeout(state.closeTimer);
+        state.closeTimer = null;
+      }
+
+      state.restoreOverflow = document.body.style.overflow;
+      state.open = true;
+      menu.classList.remove('hidden', 'pointer-events-none');
+      menu.setAttribute('aria-hidden', 'false');
+      syncTrigger(true);
+      document.body.style.overflow = 'hidden';
+
+      requestAnimationFrame(() => {
+        backdrop.classList.remove('opacity-0');
+        backdrop.classList.add('opacity-100');
+        panel.classList.remove('translate-x-full');
+        panel.classList.add('translate-x-0');
+      });
+
+      window.setTimeout(() => {
+        closeBtn?.focus();
+      }, 150);
+    }
+
+    function closeMenu(restoreFocus = false) {
+      const { trigger, menu, backdrop, panel } = getEls();
+      if (!menu || !backdrop || !panel || !state.open) return;
+
+      state.open = false;
+      syncTrigger(false);
+      backdrop.classList.remove('opacity-100');
+      backdrop.classList.add('opacity-0');
+      panel.classList.remove('translate-x-0');
+      panel.classList.add('translate-x-full');
+      document.body.style.overflow = state.restoreOverflow;
+
+      if (state.closeTimer) {
+        clearTimeout(state.closeTimer);
+      }
+
+      state.closeTimer = window.setTimeout(() => {
+        menu.classList.add('hidden', 'pointer-events-none');
+        menu.setAttribute('aria-hidden', 'true');
+        state.closeTimer = null;
+      }, 300);
+
+      if (restoreFocus) {
+        trigger?.focus();
+      }
+    }
+
+    function openSearchFromMenu() {
+      closeMenu();
+      window.setTimeout(() => {
+        const searchTrigger = document.getElementById('search-trigger');
+        if (searchTrigger) {
+          searchTrigger.click();
+          return;
+        }
+
+        document.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'k',
+          ctrlKey: true,
+          bubbles: true,
+        }));
+      }, 150);
+    }
+
+    function bindListeners() {
+      const { trigger, backdrop, closeBtn, searchBtn, closers } = getEls();
+
+      if (trigger && trigger.dataset.mobileMenuBound !== '1') {
+        trigger.dataset.mobileMenuBound = '1';
+        trigger.addEventListener('click', () => {
+          if (state.open) {
+            closeMenu(true);
+          } else {
+            openMenu();
+          }
+        });
+      }
+
+      if (backdrop && backdrop.dataset.mobileMenuBound !== '1') {
+        backdrop.dataset.mobileMenuBound = '1';
+        backdrop.addEventListener('click', () => closeMenu(true));
+      }
+
+      if (closeBtn && closeBtn.dataset.mobileMenuBound !== '1') {
+        closeBtn.dataset.mobileMenuBound = '1';
+        closeBtn.addEventListener('click', () => closeMenu(true));
+      }
+
+      if (searchBtn && searchBtn.dataset.mobileMenuBound !== '1') {
+        searchBtn.dataset.mobileMenuBound = '1';
+        searchBtn.addEventListener('click', openSearchFromMenu);
+      }
+
+      closers.forEach((el) => {
+        if (el.dataset.mobileMenuBound === '1') return;
+        el.dataset.mobileMenuBound = '1';
+        el.addEventListener('click', () => closeMenu());
+      });
+    }
+
+    if (!win.__mobileMenuKeydownBound) {
+      win.__mobileMenuKeydownBound = true;
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && state.open) {
+          closeMenu(true);
+        }
+      });
+    }
+
+    bindListeners();
+  })();
+</script>
