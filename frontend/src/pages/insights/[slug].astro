@@ -1,6 +1,7 @@
 
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
 import { fetchInsights, fetchInsightBySlug, getMediaUrl } from '../../lib/wordpress';
 import { marked } from 'marked';
 import ShareButtons from '../../components/ShareButtons.astro';
@@ -30,6 +31,10 @@ const shareUrl = new URL(Astro.url.pathname, siteUrl).toString();
 
 const heroMedia = insightData.mainImage || insightData.thumbnailImage;
 const heroImageUrl = getMediaUrl(heroMedia);
+const heroSourceWidth = heroMedia?.width || 1200;
+const heroSourceHeight = heroMedia?.height || 600;
+const heroImageWidth = Math.min(heroSourceWidth, 1280);
+const heroImageHeight = Math.round((heroImageWidth / heroSourceWidth) * heroSourceHeight);
 
 // Format date
 function formatDate(dateString?: string): string {
@@ -277,11 +282,14 @@ const schema = {
       <div class="max-w-4xl mx-auto">
         <div
           class="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-background-secondary"
-          transition:name={`insight-${insightData.slug}`}
         >
-          <img 
+          <Image 
             src={heroImageUrl}
             alt={insightData.name}
+            width={heroImageWidth}
+            height={heroImageHeight}
+            loading="eager"
+            fetchpriority="high"
             class="absolute inset-0 w-full h-full object-cover"
           />
         </div>

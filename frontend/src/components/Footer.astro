@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import logoDarkHorizontal from '../assets/brand/logo-dark-horizontal.png';
 const currentYear = new Date().getFullYear();
 
 const socialLinks = [
@@ -13,9 +15,12 @@ const socialLinks = [
       <!-- Brand -->
       <div>
       <a href="/" class="inline-block">
-          <img 
-            src="/brand/logo-dark-horizontal.png" 
+          <Image 
+            src={logoDarkHorizontal}
             alt="Ahmad Karmi" 
+            width={220}
+            height={80}
+            loading="lazy"
             class="h-8 w-auto"
           />
         </a>

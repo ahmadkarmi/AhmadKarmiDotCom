@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import avatarImage from '../assets/brand/avatar.jpg';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import { fetchAboutPage, getMediaUrl } from '../lib/wordpress';
 
@@ -123,9 +125,11 @@ const aboutPage = await fetchAboutPage();
         <div class="xl:col-span-4 xl:sticky xl:top-32">
           <div class="glass-card p-8">
             <div class="w-24 h-24 rounded-full overflow-hidden mb-6 ring-4 ring-accent/20">
-              <img 
-                src={aboutPage?.bioImage ? getMediaUrl(aboutPage.bioImage) || "/brand/avatar.jpg" : "/brand/avatar.jpg"} 
+              <Image 
+                src={getMediaUrl(aboutPage?.bioImage) || avatarImage} 
                 alt={aboutPage?.bioName || "Ahmad Al-Karmi"} 
+                width={192}
+                height={192}
                 class="w-full h-full object-cover"
               />
             </div>

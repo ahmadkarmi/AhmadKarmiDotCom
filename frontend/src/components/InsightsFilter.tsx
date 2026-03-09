@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import avatarImage from '../assets/brand/avatar.jpg';
 import type { Insight } from '../lib/wordpress';
 import { getMediaUrl } from '../lib/wordpress';
 
@@ -208,7 +209,7 @@ function InsightCardReact({ insight, index }: { insight: Insight; index: number 
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-3 border-t border-border/40 mt-auto">
                     <div className="flex items-center gap-2">
-                        <img src="/brand/avatar.jpg" alt="Ahmad Al-Karmi" className="w-6 h-6 rounded-full object-cover" />
+                        <img src={avatarImage.src} alt="Ahmad Al-Karmi" width="24" height="24" loading="lazy" decoding="async" className="w-6 h-6 rounded-full object-cover" />
                         <span className="text-xs text-foreground-secondary font-medium">Ahmad Al-Karmi</span>
                     </div>
                     <div className="text-[10px] font-mono text-foreground-muted">

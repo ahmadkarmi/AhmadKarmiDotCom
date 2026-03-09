@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import avatarImage from '../assets/brand/avatar.jpg';
 import type { Insight } from '../lib/wordpress';
 import { getMediaUrl } from '../lib/wordpress';
 
@@ -13,6 +14,8 @@ const media = insight.mainImage || insight.thumbnailImage;
 const imageUrl = getMediaUrl(media);
 const imageWidth = media?.width || 800; // Fallback
 const imageHeight = media?.height || 400; // Fallback
+const cardImageWidth = Math.min(imageWidth, 900);
+const cardImageHeight = Math.round((cardImageWidth / imageWidth) * imageHeight);
 
 // Format date
 function formatDate(dateString?: string): string {
@@ -86,14 +89,13 @@ const readTime = calculateReadTime(insight.body);
     <!-- Thumbnail -->
     <div
       class="relative w-full aspect-[2/1] rounded-md overflow-hidden border border-border/50 mb-4 bg-background-secondary/20 shadow-inner"
-      transition:name={`insight-${insight.slug}`}
     >
       {imageUrl ? (
         <Image 
           src={imageUrl}
           alt={insight.name}
-          width={imageWidth}
-          height={imageHeight}
+          width={cardImageWidth}
+          height={cardImageHeight}
           class="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />
@@ -120,7 +122,7 @@ const readTime = calculateReadTime(insight.body);
     <!-- Footer: Author & ID -->
     <div class="flex items-center justify-between pt-3 border-t border-border/40 mt-auto">
        <div class="flex items-center gap-2">
-          <img src="/brand/avatar.jpg" alt="Ahmad Al-Karmi" class="w-6 h-6 rounded-full object-cover" />
+          <Image src={avatarImage} alt="Ahmad Al-Karmi" width={48} height={48} class="w-6 h-6 rounded-full object-cover" loading="lazy" />
           <span class="text-xs text-foreground-secondary font-medium">Ahmad Al-Karmi</span>
        </div>
        <div class="text-[10px] font-mono text-foreground-muted">INSIGHT-{insight.id}</div>

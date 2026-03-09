@@ -2,6 +2,7 @@
 import type { Work } from '../lib/wordpress';
 import { getMediaUrl } from '../lib/wordpress';
 import { Image } from 'astro:assets';
+import avatarImage from '../assets/brand/avatar.jpg';
 
 export interface Props {
   work: Work;
@@ -13,6 +14,8 @@ const media = work.coverImage || work.mainImage;
 const imageUrl = getMediaUrl(media);
 const imageWidth = media?.width || 800; // Fallback
 const imageHeight = media?.height || 450; // Fallback
+const cardImageWidth = Math.min(imageWidth, 900);
+const cardImageHeight = Math.round((cardImageWidth / imageWidth) * imageHeight);
 
 const clientLogoUrl = getMediaUrl(work.clientLogo);
 const clientLogoWidth = work.clientLogo?.width || 120;
@@ -86,14 +89,13 @@ const descriptionText = toPlainText(work.brief) || toPlainText(work.details);
     <!-- Cover Image (Thumbnail Style) -->
     <div
       class="relative w-full aspect-[16/9] rounded-md overflow-hidden bg-background-secondary/20 mb-4 border border-border/50 shadow-inner"
-      transition:name={`work-${work.slug}`}
     >
       {imageUrl ? (
         <Image 
           src={imageUrl}
           alt={work.name}
-          width={imageWidth}
-          height={imageHeight}
+          width={cardImageWidth}
+          height={cardImageHeight}
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />
@@ -116,7 +118,7 @@ const descriptionText = toPlainText(work.brief) || toPlainText(work.details);
     <!-- Footer: Assignee -->
     <div class="flex items-center justify-between pt-3 border-t border-border/40 mt-auto">
        <div class="flex items-center gap-2">
-          <Image src="/brand/avatar.jpg" alt="Ahmad Al-Karmi" width={24} height={24} class="w-6 h-6 rounded-full object-cover ring-2 ring-white" loading="lazy" />
+          <Image src={avatarImage} alt="Ahmad Al-Karmi" width={48} height={48} class="w-6 h-6 rounded-full object-cover ring-2 ring-white" loading="lazy" />
           <span class="text-xs text-foreground-secondary font-medium">Ahmad Al-Karmi</span>
        </div>
        <div class="text-[10px] font-mono text-foreground-muted">PROJ-{work.id}</div>
