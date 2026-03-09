@@ -113,8 +113,8 @@ const metaDescription = String(description || '')
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />
     )}
 
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1SKBRGQJRM"></script>
+    <!-- Google Analytics 4 (Deferred) -->
+    <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-1SKBRGQJRM"></script>
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
