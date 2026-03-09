@@ -80,13 +80,26 @@ const {
     </form>
     
     <script>
+      function loadKitScript() {
+        if (window.kitScriptLoaded) return;
+        const script = document.createElement('script');
+        script.src = "https://f.convertkit.com/ckjs/ck.5.js";
+        script.defer = true;
+        document.body.appendChild(script);
+        window.kitScriptLoaded = true;
+      }
+
       function initNewsletterForm() {
         const form = document.getElementById('newsletter-form');
         if (!form) return;
         if (form.dataset.newsletterFormBound === '1') return;
         form.dataset.newsletterFormBound = '1';
 
+        form.addEventListener('focusin', loadKitScript, { once: true });
+        form.addEventListener('pointerdown', loadKitScript, { once: true });
+
         form.addEventListener('submit', (e) => {
+          loadKitScript();
           const honeyInput = form.querySelector('input[name="website_url"]');
           if (honeyInput && honeyInput.value) {
             e.preventDefault();
@@ -111,14 +124,3 @@ const {
     </p>
   </div>
 </div>
-
-<!-- Kit.com Script (only load once per page) -->
-<script is:inline>
-  if (!window.kitScriptLoaded) {
-    const script = document.createElement('script');
-    script.src = "https://f.convertkit.com/ckjs/ck.5.js";
-    script.defer = true;
-    document.body.appendChild(script);
-    window.kitScriptLoaded = true;
-  }
-</script>
