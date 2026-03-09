@@ -11,10 +11,13 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ];
 
-const socialLinks = [
-  { href: 'https://www.linkedin.com/in/akarmi', label: 'LinkedIn' },
-  { href: 'https://www.threads.com/@karmi.csd', label: 'Threads' },
+const secondaryLinks = [
+  { href: 'https://www.linkedin.com/in/akarmi', label: 'LinkedIn', external: true },
+  { href: 'mailto:info@ahmadkarmi.com', label: 'Email', external: false },
 ];
+
+const availabilityLine = 'Open for select projects';
+const ctaSupport = 'Product, strategy, and growth work.';
 
 const currentPath = Astro.url.pathname;
 ---
@@ -76,7 +79,7 @@ const currentPath = Astro.url.pathname;
         <button
           id="mobile-menu-trigger"
           type="button"
-          class="inline-flex md:hidden items-center justify-center rounded-lg p-2 text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+          class="inline-flex md:hidden items-center justify-center rounded-full border border-border/70 bg-background/80 p-2.5 text-foreground-secondary shadow-sm transition-all hover:border-border hover:bg-background hover:text-foreground"
           aria-label="Open menu"
           aria-controls="mobile-menu-panel"
           aria-expanded="false"
@@ -94,105 +97,107 @@ const currentPath = Astro.url.pathname;
   <button
     id="mobile-menu-backdrop"
     type="button"
-    class="absolute inset-0 bg-foreground/60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+    class="absolute inset-0 bg-foreground/70 opacity-0 backdrop-blur-md transition-opacity duration-300"
     aria-label="Close menu"
     tabindex="-1"
   ></button>
 
   <div
     id="mobile-menu-panel"
-    class="absolute inset-y-0 right-0 flex w-full max-w-sm translate-x-full flex-col border-l border-border bg-background shadow-2xl transition-transform duration-300 ease-out"
+    class="absolute inset-y-0 right-0 flex w-full max-w-sm translate-x-full flex-col border-l border-border bg-background/95 shadow-2xl transition-transform duration-300 ease-out backdrop-blur-xl"
     role="dialog"
     aria-modal="true"
     aria-label="Mobile navigation"
   >
-    <div class="flex h-16 items-center justify-between border-b border-border px-5">
-      <a
-        href="/"
-        class="flex items-center gap-2 hover:opacity-80 transition-opacity touch-manipulation"
-        data-nav-prefetch
-        data-mobile-menu-close
-      >
-        <Image
-          src={logoDarkHorizontal}
-          alt="Ahmad Karmi"
-          width={220}
-          height={80}
-          loading="eager"
-          class="h-8 w-auto"
-        />
-      </a>
-
-      <button
-        id="mobile-menu-close"
-        type="button"
-        class="inline-flex items-center justify-center rounded-lg p-2 text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
-        aria-label="Close menu"
-      >
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-
-    <div class="flex flex-1 flex-col overflow-y-auto px-5 py-6">
-      <button
-        id="mobile-menu-search"
-        type="button"
-        class="flex items-center justify-between rounded-2xl border border-border bg-background-secondary/40 px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-background-secondary"
-      >
-        <span>
-          <span class="block text-sm font-semibold text-foreground">Search the site</span>
-          <span class="mt-1 block text-xs text-foreground-secondary">Find insights, work, and pages quickly.</span>
-        </span>
-        <svg class="h-5 w-5 text-foreground-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </button>
-
-      <div class="mt-6 space-y-1">
-        {navLinks.map(link => (
+    <div class="flex flex-1 flex-col overflow-y-auto px-5 pb-6 pt-5">
+      <div class="rounded-[1.75rem] border border-border/70 bg-background-secondary/20 px-4 py-4">
+        <div class="flex items-center justify-between gap-4">
           <a
-            href={link.href}
+            href="/"
+            class="flex items-center gap-2 hover:opacity-80 transition-opacity touch-manipulation"
             data-nav-prefetch
             data-mobile-menu-close
-            class:list={[
-              'flex items-center justify-between rounded-xl px-4 py-3 text-base font-medium transition-colors touch-manipulation',
-              currentPath === link.href
-                ? 'bg-accent/10 text-accent'
-                : 'text-foreground hover:bg-background-secondary hover:text-foreground'
-            ]}
           >
-            <span>{link.label}</span>
-            <svg class="h-4 w-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
+            <Image
+              src={logoDarkHorizontal}
+              alt="Ahmad Karmi"
+              width={220}
+              height={80}
+              loading="eager"
+              class="h-8 w-auto"
+            />
           </a>
-        ))}
+
+          <button
+            id="mobile-menu-close"
+            type="button"
+            class="inline-flex items-center justify-center rounded-full border border-border/70 bg-background/80 p-2 text-foreground-secondary transition-all hover:border-border hover:bg-background hover:text-foreground"
+            aria-label="Close menu"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="mt-5 flex items-center justify-between gap-3 border-t border-border/70 pt-4">
+          <p class="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-accent">{availabilityLine}</p>
+          <button
+            id="mobile-menu-search"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-border/70 px-3 py-1.5 text-sm font-medium text-foreground-secondary transition-colors hover:border-accent/30 hover:text-foreground"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span>Search</span>
+          </button>
+        </div>
       </div>
 
-      <div class="mt-6 rounded-2xl border border-border bg-background-secondary/30 p-5">
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-accent">Start a Project</p>
-        <p class="mt-3 text-sm leading-relaxed text-foreground-secondary">Share your next product, strategy, or digital experience challenge.</p>
+      <div class="mt-8 flex-1">
+        <div class="space-y-2">
+          {navLinks.map(link => (
+            <a
+              href={link.href}
+              data-nav-prefetch
+              data-mobile-menu-close
+              class:list={[
+                'group flex items-center justify-between rounded-2xl px-3 py-3 transition-colors touch-manipulation',
+                currentPath === link.href
+                  ? 'bg-accent/[0.08] text-accent'
+                  : 'text-foreground hover:bg-background-secondary/60'
+              ]}
+            >
+              <span class="font-display text-[1.9rem] leading-none tracking-[-0.03em]">{link.label}</span>
+              <span class:list={[
+                'h-2.5 w-2.5 rounded-full transition-colors',
+                currentPath === link.href ? 'bg-accent' : 'bg-border group-hover:bg-foreground-muted'
+              ]}></span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="mt-8 rounded-[1.75rem] bg-foreground px-5 py-5 text-background shadow-xl shadow-foreground/10">
+        <p class="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-background/70">{availabilityLine}</p>
+        <p class="mt-3 max-w-[18rem] text-base leading-relaxed text-background/90">{ctaSupport}</p>
         <a
           href="/contact"
-          class="mt-4 inline-flex w-full items-center justify-center btn-secondary text-sm touch-manipulation"
+          class="mt-5 inline-flex w-full items-center justify-center rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.01] hover:bg-accent/90 touch-manipulation"
           data-nav-prefetch
           data-mobile-menu-close
         >
-          Get in Touch
+          Get in touch
         </a>
-      </div>
 
-      <div class="mt-auto border-t border-border/70 pt-5">
-        <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-foreground-muted">Elsewhere</p>
-        <div class="mt-3 flex flex-wrap gap-3">
-          {socialLinks.map(link => (
+        <div class="mt-5 flex flex-wrap gap-2 border-t border-background/10 pt-4">
+          {secondaryLinks.map(link => (
             <a
               href={link.href}
-              target="_blank"
-              rel="noreferrer"
-              class="inline-flex items-center rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground-secondary transition-colors hover:border-accent/30 hover:text-foreground"
+              target={link.external ? '_blank' : undefined}
+              rel={link.external ? 'noreferrer' : undefined}
+              class="inline-flex items-center rounded-full border border-background/15 px-3 py-1.5 text-xs font-medium text-background/80 transition-colors hover:border-background/30 hover:text-background"
             >
               {link.label}
             </a>
