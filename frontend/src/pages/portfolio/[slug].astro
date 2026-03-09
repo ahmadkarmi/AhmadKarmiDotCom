@@ -83,8 +83,8 @@ const workProseClass = `prose prose-lg max-w-none
 
 const schema: Record<string, any> = {
   "@context": "https://schema.org",
-  "@type": "CreativeWork",
-  "name": workData.name,
+  "@type": "Article",
+  "headline": workData.name,
   "description": metaDescription,
   "image": [
     ogImageUrl,
@@ -95,12 +95,20 @@ const schema: Record<string, any> = {
     "name": "Ahmad Al-Karmi",
     "url": siteUrl
   },
-  "creator": {
-    "@type": "Person",
+  "publisher": {
+    "@type": "Organization",
     "name": "Ahmad Al-Karmi",
-    "url": siteUrl
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteUrl}/brand/logo-mark.png`
+    }
   },
-  "url": shareUrl
+  "datePublished": workData.publishDate || new Date().toISOString(),
+  "dateModified": workData.publishDate || new Date().toISOString(),
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": shareUrl
+  }
 };
 
 if (workData.client) {
