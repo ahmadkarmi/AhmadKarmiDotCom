@@ -162,6 +162,34 @@ const bodyHtmlRaw = !containsHtml || hasTable || hasSignals
   : rawBody;
 const bodyHtml = wrapTablesInOverflow(bodyHtmlRaw);
 
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": insightData.name,
+  "description": insightData.description || insightData.body?.slice(0, 160)?.replace(/<[^>]*>?/gm, ''),
+  "image": heroImageUrl ? [heroImageUrl] : [],
+  "author": {
+    "@type": "Person",
+    "name": "Ahmad Al-Karmi",
+    "url": siteUrl
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ahmad Al-Karmi",
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteUrl}/brand/logo-mark.png`
+    }
+  },
+  "datePublished": insightData.publishDate,
+  "dateModified": insightData.publishDate,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": shareUrl
+  },
+  "keywords": insightData.tags?.join(', ') || undefined
+};
+
 ---
 <BaseLayout 
   title={insightData.name} 
@@ -173,6 +201,7 @@ const bodyHtml = wrapTablesInOverflow(bodyHtmlRaw);
   ogImageAlt={heroMedia?.alternativeText || insightData.name}
   publishDate={insightData.publishDate}
   tags={insightData.tags}
+  schema={schema}
 >
   <!-- Hero -->
   <section class="section pt-32 pb-8">

@@ -80,6 +80,36 @@ const workProseClass = `prose prose-lg max-w-none
   prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:bg-background-secondary/50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:text-foreground-secondary
   prose-pre:bg-foreground prose-pre:text-background prose-pre:rounded-xl prose-pre:p-6 prose-pre:overflow-x-auto
   [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:rounded-xl [&_video]:w-full [&_video]:rounded-xl`;
+
+const schema: Record<string, any> = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": workData.name,
+  "description": metaDescription,
+  "image": [
+    ogImageUrl,
+    ...galleryImages.map(img => img.url)
+  ].filter(Boolean),
+  "author": {
+    "@type": "Person",
+    "name": "Ahmad Al-Karmi",
+    "url": siteUrl
+  },
+  "creator": {
+    "@type": "Person",
+    "name": "Ahmad Al-Karmi",
+    "url": siteUrl
+  },
+  "url": shareUrl
+};
+
+if (workData.client) {
+  schema.about = {
+    "@type": "Organization",
+    "name": workData.client
+  };
+}
+
 ---
 
 <BaseLayout 
@@ -89,6 +119,7 @@ const workProseClass = `prose prose-lg max-w-none
   ogImageWidth={ogMedia?.width}
   ogImageHeight={ogMedia?.height}
   ogImageAlt={(ogMedia as any)?.alternativeText || workData.name}
+  schema={schema}
 >
   <!-- Hero -->
   <section class="relative w-full min-h-[100dvh] lg:min-h-0 lg:h-auto flex flex-col">
