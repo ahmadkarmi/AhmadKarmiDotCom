@@ -67,8 +67,13 @@ const metaDescription = (briefContent || detailsContent || '')
   .trim()
   .slice(0, 180);
 
+const workSectionHeadingClass = 'font-display text-2xl md:text-[2rem] font-bold leading-tight tracking-tight text-foreground mb-5';
+
 const workProseClass = `prose prose-lg max-w-none
-  prose-headings:font-display prose-headings:text-foreground prose-headings:font-semibold
+  prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-tight prose-headings:leading-tight prose-headings:font-semibold
+  prose-h1:text-3xl md:prose-h1:text-4xl prose-h1:mb-6 prose-h1:font-bold
+  prose-h2:text-[1.75rem] md:prose-h2:text-[2rem] prose-h2:mt-12 prose-h2:mb-5 prose-h2:font-bold
+  prose-h3:text-[1.35rem] md:prose-h3:text-[1.5rem] prose-h3:mt-8 prose-h3:mb-3 prose-h3:font-semibold prose-h3:leading-snug
   prose-p:text-foreground-secondary prose-p:leading-relaxed
   prose-a:text-accent prose-a:underline prose-a:underline-offset-2
   prose-strong:text-foreground prose-strong:font-semibold
@@ -290,7 +295,7 @@ if (workData.client) {
         <div class="flex-1 order-2 lg:order-1 space-y-12">
           {workData.brief && (
             <div>
-              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+              <h2 class={workSectionHeadingClass}>
                 Project Brief
               </h2>
               <div class={workProseClass} set:html={briefHtml} />
@@ -299,7 +304,7 @@ if (workData.client) {
           
           {workData.scope && (
             <div>
-              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+              <h2 class={workSectionHeadingClass}>
                 Scope of Work
               </h2>
               <div class={workProseClass} set:html={scopeHtml} />
@@ -308,7 +313,7 @@ if (workData.client) {
           
           {workData.details && (
             <div>
-              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+              <h2 class={workSectionHeadingClass}>
                 Project Details
               </h2>
               <div class={workProseClass} set:html={detailsHtml} />
@@ -317,7 +322,7 @@ if (workData.client) {
           
           {workData.videoUrl && (
             <div>
-              <h2 class="font-display text-xl font-semibold text-foreground mb-4">
+              <h2 class={workSectionHeadingClass}>
                 Video
               </h2>
               <div class="aspect-video rounded-xl overflow-hidden bg-background-secondary">
@@ -336,7 +341,7 @@ if (workData.client) {
       <!-- Gallery -->
       {galleryImages.length > 0 && (
         <div class="mt-16">
-          <h2 class="font-display text-xl font-semibold text-foreground mb-8">
+          <h2 class={workSectionHeadingClass}>
             Project Gallery
           </h2>
           <GalleryCarousel 
