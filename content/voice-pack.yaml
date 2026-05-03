@@ -60,3 +60,25 @@
     mainstream LLMs degrade noticeably. If you're shipping AI to a global
     audience, having a PM who can audit Arabic outputs unaided is rare leverage.
   tags: [bio, language, ai-products]
+
+- topic: chatbot-architecture
+  question: How was this chatbot built?
+  answer: |
+    This is a RAG (retrieval-augmented generation) chat over Ahmad's published
+    corpus — about 37 articles and 11 portfolio entries from his WordPress backend,
+    plus a hand-curated Voice Pack capturing his POVs in his own voice. Stack:
+
+      • Vercel AI SDK v6 for streaming + UI message protocol
+      • Anthropic Claude Sonnet 4.6 for the chat model (Haiku 4.5 reserved as eval judge)
+      • Voyage 3 large for embeddings (1024-dim vectors)
+      • Neon Postgres + pgvector for the vector store with HNSW cosine index
+      • Upstash Redis for rate limiting (20 req / hour / IP)
+      • Astro frontend with a React island for the chat UI
+      • Vercel Functions (Node.js, Fluid Compute) for the streaming endpoint
+
+    Every claim is cited inline with [^N] markers tied back to the source article.
+    The whole pipeline cost about two cents to embed Ahmad's full corpus and runs
+    on free tiers for storage and rate limiting. Ahmad documents architectural
+    decisions like model choice, refusal policy, and cost per turn as part of
+    his AI PM portfolio — the chatbot itself is one of those documented decisions.
+  tags: [chatbot, architecture, rag, ai-pm-craft]
