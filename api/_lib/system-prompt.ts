@@ -136,10 +136,12 @@ Always available. Mention them naturally when the visitor seems stuck, when hand
 - Email: alkarmi.ahmad@gmail.com
 
 CITATIONS
-Cite sources inline as [^N] where N is the 1-indexed source number from the CONTEXT block.
-Every claim about Ahmad's writing, opinions, or work must cite from CONTEXT.
-Do NOT invent sources or claim things CONTEXT does not support.
-Do NOT cite when you are asking a clarifying question, acknowledging the visitor, doing small talk, or framing the conversation. Citations only attach to substantive claims drawn from the corpus.
+ONLY cite from the CITABLE INSIGHTS block below. Use [^N] inline where N is the 1-indexed insight number.
+- Insights are Ahmad's published blog articles. They are the only citable source.
+- DO NOT use [^N] for anything in BACKGROUND CONTEXT (the voice pack and portfolio entries that fill in his bio and project history). Reference that material freely without citation markers.
+- DO NOT use [^N] for canonical facts from the ABOUT AHMAD AL-KARMI section above. Those are background, not citations.
+- DO NOT invent sources or claim things the CITABLE INSIGHTS block does not support.
+- DO NOT cite when asking a clarifying question, acknowledging the visitor, doing small talk, or framing the conversation. Citations only attach to substantive claims drawn from a published article.
 
 ABOUT YOURSELF (use only when asked)
 If a visitor asks how you (the chatbot) work or how you were built, you can answer from this without needing CONTEXT support, but cite the chatbot-architecture chunk when present:
@@ -151,23 +153,50 @@ If a visitor asks how you (the chatbot) work or how you were built, you can answ
 
 Frame this as Ahmad's deliberate AI PM craft. The chatbot is itself a documented architectural decision in his AI PM portfolio, including model choice, retrieval design, refusal policy, rate limiting, and cost discipline. Do not over-pitch. Answer the question, then return to the visitor's actual reason for being here.`;
 
+// Returns the chunks that should be exposed to the client as citation
+// metadata. Only insights are citable, so the UI's data-citations payload
+// must be filtered to match what the model is allowed to cite. The order
+// must match the [^N] numbering used in the prompt.
+export function citableChunks(chunks: RetrievedChunk[]): RetrievedChunk[] {
+  return chunks.filter((c) => c.source_type === 'insight');
+}
+
 export function buildSystemPrompt(_mode: Mode, chunks: RetrievedChunk[]): string {
-  const contextBlocks = chunks
+  const insights = chunks.filter((c) => c.source_type === 'insight');
+  const background = chunks.filter((c) => c.source_type !== 'insight');
+
+  const insightsBlock = insights
     .map((c, i) => {
-      const meta = c.metadata as { tags?: string[]; date?: string; field?: string; client?: string };
+      const meta = c.metadata as { tags?: string[]; date?: string };
       const tags = meta.tags?.length ? ` tags=[${meta.tags.join(', ')}]` : '';
       const date = meta.date ? ` date=${String(meta.date).slice(0, 10)}` : '';
-      const client = meta.client ? ` client="${meta.client}"` : '';
-      const field = meta.field ? ` field=${meta.field}` : '';
-      return `[^${i + 1}] ${c.title}${client}${date}${tags}${field}
+      return `[^${i + 1}] ${c.title}${date}${tags}
 URL: ${c.source_url}
 ${c.content.trim()}`;
     })
     .join('\n\n---\n\n');
 
-  const context = chunks.length
-    ? `\n\nCONTEXT (top ${chunks.length} retrieved chunks from Ahmad's writing, ordered by similarity to the user's question):\n\n${contextBlocks}`
-    : "\n\nCONTEXT: (no relevant chunks retrieved. The question is likely off-corpus. Refuse honestly and offer the contact options above.)";
+  const backgroundBlock = background
+    .map((c) => {
+      const meta = c.metadata as { client?: string; field?: string };
+      const client = meta.client ? ` client="${meta.client}"` : '';
+      const field = meta.field ? ` field=${meta.field}` : '';
+      return `${c.title} (${c.source_type}${client}${field})
+${c.content.trim()}`;
+    })
+    .join('\n\n---\n\n');
+
+  let context = '';
+  if (insights.length) {
+    context += `\n\nCITABLE INSIGHTS (top ${insights.length} blog articles. Cite these with [^N] inline. These are the ONLY citable sources):\n\n${insightsBlock}`;
+  }
+  if (background.length) {
+    context += `\n\nBACKGROUND CONTEXT (Ahmad's voice pack and portfolio entries. Use freely as supporting material. DO NOT use [^N] markers for any of this):\n\n${backgroundBlock}`;
+  }
+  if (!insights.length && !background.length) {
+    context =
+      "\n\nCONTEXT: (no relevant chunks retrieved. The question is likely off-corpus. Refuse honestly and offer the contact options above.)";
+  }
 
   return `${IDENTITY}${context}`;
 }

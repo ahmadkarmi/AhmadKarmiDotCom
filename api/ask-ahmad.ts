@@ -10,7 +10,7 @@ import {
 
 import { isAskAhmadEnabled } from './_lib/feature-flag';
 import { retrieve } from './_lib/retrieve';
-import { buildSystemPrompt, isValidMode, type Mode } from './_lib/system-prompt';
+import { buildSystemPrompt, citableChunks, isValidMode, type Mode } from './_lib/system-prompt';
 import { checkRateLimit } from './_lib/rate-limit';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -117,7 +117,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
       let chunks;
       try {
-        chunks = await retrieve(lastUserText, 5);
+        // Top-7 mixed retrieval: oversampling so we end up with enough
+        // citable insight chunks even when voice/work entries outrank by
+        // similarity. Background context can also benefit from extra
+        // chunks (more material for the model to work with).
+        chunks = await retrieve(lastUserText, 7);
       } catch (err) {
         writer.write({
           type: 'data-status',
@@ -127,12 +131,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         throw err;
       }
 
+      // Only insights are citable, so the data-citations payload must mirror
+      // what the system prompt exposes as [^N]. Order must match the prompt's
+      // numbering (citableChunks preserves the retrieval order).
+      const citable = citableChunks(chunks);
+
       writer.write({
         type: 'data-status',
         id: 'status',
         data: {
           stage: 'retrieved',
-          label: `Found ${chunks.length} relevant chunk${chunks.length === 1 ? '' : 's'} from Ahmad's writing.`,
+          label: `Found ${chunks.length} relevant chunk${chunks.length === 1 ? '' : 's'} (${citable.length} citable).`,
         },
       });
 
@@ -140,7 +149,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         type: 'data-citations',
         id: 'citations',
         data: {
-          chunks: chunks.map((c) => ({
+          chunks: citable.map((c) => ({
             title: c.title,
             url: c.source_url,
             similarity: Number(c.similarity.toFixed(3)),
