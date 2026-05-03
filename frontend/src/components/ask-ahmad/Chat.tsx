@@ -145,10 +145,13 @@ function StatusPill({ status }: { status: StatusData }) {
   );
 }
 
-function AssistantAvatar() {
+function AssistantAvatar({ size = 'sm' }: { size?: 'sm' | 'lg' } = {}) {
+  const dim = size === 'lg' ? 'w-10 h-10 text-base' : 'w-7 h-7 text-xs';
   return (
-    <div className="w-7 h-7 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-      <span className="text-[10px] font-display font-semibold text-accent leading-none">AK</span>
+    <div
+      className={`${dim} rounded-full bg-accent text-accent-foreground flex items-center justify-center flex-shrink-0 shadow-sm`}
+    >
+      <span className="font-display font-semibold leading-none tracking-tight">K</span>
     </div>
   );
 }
@@ -156,21 +159,22 @@ function AssistantAvatar() {
 function Citations({ items, onClick }: { items: CitationItem[]; onClick: (item: CitationItem) => void }) {
   if (!items.length) return null;
   return (
-    <div className="mt-4 rounded-xl bg-background-secondary/60 border border-border/60 p-3">
-      <div className="text-[10px] uppercase tracking-wider text-foreground-muted mb-2 font-medium">
-        Sources cited
+    <div className="mt-3 pt-3 border-t border-border/40">
+      <div className="text-[10px] uppercase tracking-wider text-foreground-muted mb-2 font-semibold">
+        From Ahmad&rsquo;s writing
       </div>
-      <ul className="space-y-1.5">
+      <ul className="space-y-1">
         {items.map((c, i) => (
-          <li key={c.url} className="text-xs leading-snug">
+          <li key={c.url} className="text-[13px] leading-snug flex items-baseline gap-2">
+            <span className="text-foreground-muted text-[11px] font-mono mt-0.5">{i + 1}</span>
             <a
               href={c.url}
               target="_blank"
               rel="noreferrer"
               onClick={() => onClick(c)}
-              className="text-foreground-secondary hover:text-accent hover:underline"
+              className="text-foreground-secondary hover:text-accent hover:underline truncate"
             >
-              <span className="text-foreground-muted">[{i + 1}]</span> {c.title}
+              {c.title}
             </a>
           </li>
         ))}
@@ -389,9 +393,16 @@ export default function Chat() {
       <button
         type="button"
         onClick={openChat}
-        className="rounded-full bg-foreground text-background px-5 py-3 text-sm font-medium shadow-lg hover:bg-accent hover:text-accent-foreground transition pointer-events-auto"
+        className="group rounded-full bg-foreground text-background pl-2 pr-5 py-2 text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-accent transition-all pointer-events-auto flex items-center gap-2.5"
       >
-        Ask Ahmad Karmi&rsquo;s AI &rarr;
+        <span className="w-7 h-7 rounded-full bg-background/10 flex items-center justify-center font-display text-xs font-semibold tracking-tight">
+          K
+        </span>
+        <span>Ask K.AI</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="13 6 19 12 13 18" />
+        </svg>
       </button>
     );
   }
@@ -402,30 +413,25 @@ export default function Chat() {
     <div className="fixed inset-0 md:relative md:inset-auto z-[60] pointer-events-auto">
       <div className="bg-background border-0 md:border md:border-border rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden flex flex-col w-full h-full md:w-[460px] md:h-[700px] md:max-h-[calc(100vh-6rem)]">
         {/* Header */}
-        <header className="px-5 py-4 border-b border-border/60 flex items-start justify-between flex-shrink-0 gap-3 bg-background">
-          <div className="flex items-start gap-3 min-w-0">
-            <AssistantAvatar />
+        <header className="px-5 py-4 border-b border-border/60 flex items-center justify-between flex-shrink-0 gap-3 bg-background">
+          <div className="flex items-center gap-3 min-w-0">
+            <AssistantAvatar size="lg" />
             <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-display text-base font-semibold text-foreground leading-tight">
-                  Ahmad Karmi&rsquo;s AI
-                </span>
-                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold border border-accent/20">
-                  AI assistant
-                </span>
+              <div className="font-display text-xl font-semibold text-foreground leading-none tracking-tight">
+                K.AI
               </div>
-              <div className="text-xs text-foreground-muted mt-0.5 leading-snug">
-                junior, trained on his writing
+              <div className="text-[11px] text-foreground-muted mt-1 leading-snug">
+                Ahmad Al-Karmi&rsquo;s AI Assistant
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-0.5 flex-shrink-0">
             {messages.length > 0 && (
               <button
                 type="button"
                 onClick={startOver}
                 title="Start over"
-                className="text-xs px-2.5 py-1.5 text-foreground-muted hover:text-foreground hover:bg-background-secondary rounded-md transition"
+                className="text-[11px] px-2.5 py-1.5 text-foreground-muted hover:text-foreground hover:bg-background-secondary rounded-md transition font-medium"
               >
                 Start over
               </button>
@@ -434,7 +440,7 @@ export default function Chat() {
               type="button"
               onClick={closeChat}
               aria-label="Close"
-              className="text-foreground-muted hover:text-foreground p-2 -m-1 rounded-md hover:bg-background-secondary transition"
+              className="text-foreground-muted hover:text-foreground p-2 rounded-md hover:bg-background-secondary transition"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -449,11 +455,13 @@ export default function Chat() {
           {messages.length === 0 && (
             <div className="flex items-start gap-3">
               <AssistantAvatar />
-              <div className="space-y-2 pt-0.5">
-                <p className="text-sm text-foreground leading-relaxed">
-                  Hi. I&rsquo;m Ahmad Karmi&rsquo;s AI assistant.
+              <div className="space-y-1.5 pt-0.5">
+                <p className="text-[15px] text-foreground leading-relaxed">
+                  Hi, I&rsquo;m K.AI.
                 </p>
-                <p className="text-sm text-foreground-secondary leading-relaxed">What brought you here today?</p>
+                <p className="text-[15px] text-foreground-secondary leading-relaxed">
+                  What brought you here today?
+                </p>
               </div>
             </div>
           )}
@@ -470,7 +478,7 @@ export default function Chat() {
             if (m.role === 'user') {
               return (
                 <div key={m.id} className="flex justify-end">
-                  <div className="max-w-[85%] bg-background-secondary text-foreground rounded-2xl rounded-tr-md px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap">
+                  <div className="max-w-[82%] bg-foreground text-background rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap">
                     {visibleText}
                   </div>
                 </div>
@@ -483,7 +491,7 @@ export default function Chat() {
                 <div className="flex-1 min-w-0 space-y-2 pt-0.5">
                   {status && status.stage !== 'done' && <StatusPill status={status} />}
                   {visibleText && (
-                    <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                    <div className="text-[15px] text-foreground leading-relaxed whitespace-pre-wrap">
                       {visibleText}
                     </div>
                   )}
@@ -510,13 +518,13 @@ export default function Chat() {
           })}
 
           {showQuickReplies && (
-            <div className="flex flex-wrap gap-2 pt-2 pl-10">
+            <div className="flex flex-wrap gap-2 pt-3 pl-[40px]">
               {QUICK_REPLIES.map((q) => (
                 <button
                   key={q}
                   type="button"
                   onClick={() => submit(q, 'quick_reply')}
-                  className="text-xs text-foreground-secondary bg-background hover:bg-background-secondary border border-border hover:border-foreground-muted rounded-full px-3.5 py-2 transition"
+                  className="text-[13px] text-foreground bg-background hover:bg-accent hover:text-accent-foreground border border-border hover:border-accent rounded-full px-4 py-2 transition-all font-medium"
                 >
                   {q}
                 </button>
@@ -543,21 +551,23 @@ export default function Chat() {
             e.preventDefault();
             submit(input, 'input');
           }}
-          className="border-t border-border/60 px-4 py-3 flex gap-2 flex-shrink-0 bg-background"
+          className="border-t border-border/60 px-4 py-3 flex items-center gap-2 flex-shrink-0 bg-background"
         >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="What are you working on?"
-            disabled={isStreaming}
-            className="flex-1 text-base md:text-sm px-4 py-2.5 md:py-2 bg-background-secondary border border-transparent rounded-full focus:outline-none focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent/30 disabled:opacity-50 transition placeholder:text-foreground-muted"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Tell K.AI what you&rsquo;re working on…"
+              disabled={isStreaming}
+              className="w-full text-[15px] md:text-sm px-4 py-3 md:py-2.5 bg-background-secondary border border-transparent rounded-full focus:outline-none focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/20 disabled:opacity-50 transition placeholder:text-foreground-muted"
+            />
+          </div>
           <button
             type="submit"
             disabled={isStreaming || !input.trim()}
             aria-label="Send"
-            className="px-4 md:px-3.5 rounded-full bg-foreground text-background hover:bg-accent disabled:bg-background-tertiary disabled:text-foreground-muted transition flex items-center justify-center"
+            className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-foreground text-background hover:bg-accent disabled:bg-background-tertiary disabled:text-foreground-muted transition flex items-center justify-center flex-shrink-0"
           >
             {isStreaming ? (
               <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -574,26 +584,26 @@ export default function Chat() {
         </form>
 
         {/* Footer: disclaimer + escape hatches */}
-        <div className="px-4 py-2.5 border-t border-border/60 text-[10px] text-foreground-muted flex-shrink-0 pb-[max(0.625rem,env(safe-area-inset-bottom))] bg-background-secondary/40">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="leading-snug">
-              Powered by Anthropic. May produce inaccurate or misleading information.
+        <div className="px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] border-t border-border/60 text-[10.5px] text-foreground-muted flex-shrink-0 bg-background-secondary/30">
+          <div className="flex items-center justify-between gap-3 flex-wrap leading-snug">
+            <span>
+              Powered by Anthropic. May produce inaccurate information.
             </span>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => escapeToEmail('header')}
-                className="hover:text-foreground hover:underline"
+                className="hover:text-accent hover:underline font-medium"
               >
-                email
+                Email Ahmad
               </button>
-              <span>&middot;</span>
+              <span className="text-border">|</span>
               <button
                 type="button"
                 onClick={() => escapeToForm('header')}
-                className="hover:text-foreground hover:underline"
+                className="hover:text-accent hover:underline font-medium"
               >
-                contact form
+                Contact form
               </button>
             </div>
           </div>
