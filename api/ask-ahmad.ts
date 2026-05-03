@@ -28,12 +28,35 @@ function jsonError(status: number, payload: Record<string, unknown>, headers: Re
   });
 }
 
+function envCheck(): { missing: string[]; present: string[] } {
+  const required = ['ANTHROPIC_API_KEY', 'VOYAGE_API_KEY', 'DATABASE_URL', 'KV_REST_API_URL', 'KV_REST_API_TOKEN'];
+  const missing: string[] = [];
+  const present: string[] = [];
+  for (const k of required) {
+    if (process.env[k]) present.push(k);
+    else missing.push(k);
+  }
+  return { missing, present };
+}
+
 export default async function handler(request: Request): Promise<Response> {
-  if (!isAskAhmadEnabled()) return disabledResponse();
+  const t0 = Date.now();
+  const log = (msg: string) => console.log(`[ask-ahmad +${Date.now() - t0}ms] ${msg}`);
+  log('handler entry');
+
+  if (!isAskAhmadEnabled()) {
+    log('feature disabled');
+    return disabledResponse();
+  }
 
   if (request.method !== 'POST') {
     return jsonError(405, { error: 'method_not_allowed' });
   }
+
+  // One-time env diagnostic on every invocation. Printed early so even if
+  // a downstream call hangs, we know which keys are reaching the runtime.
+  const env = envCheck();
+  log(`env present=[${env.present.join(',')}] missing=[${env.missing.join(',')}]`);
 
   let body: ChatBody;
   try {
@@ -47,8 +70,17 @@ export default async function handler(request: Request): Promise<Response> {
   if (messages.length === 0) {
     return jsonError(400, { error: 'no_messages' });
   }
+  log(`body parsed: ${messages.length} message(s), mode=${mode}`);
 
-  const rl = await checkRateLimit(clientIdentifier(request));
+  log('about to checkRateLimit…');
+  const rlPromise = checkRateLimit(clientIdentifier(request));
+  const rl = await Promise.race([
+    rlPromise,
+    new Promise<{ ok: true; limit: number; remaining: number; reset: number; degraded: true }>((resolve) =>
+      setTimeout(() => resolve({ ok: true, limit: 20, remaining: 20, reset: Date.now() + 3600_000, degraded: true }), 3000)
+    ),
+  ]);
+  log(`rate limit done (degraded=${'degraded' in rl})`);
   if (!rl.ok) {
     return jsonError(
       429,
@@ -75,6 +107,7 @@ export default async function handler(request: Request): Promise<Response> {
 
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
+      log('stream execute start');
       writer.write({
         type: 'data-status',
         id: 'status',
@@ -83,13 +116,15 @@ export default async function handler(request: Request): Promise<Response> {
 
       let chunks;
       try {
+        log('calling retrieve…');
         chunks = await retrieve(lastUserText, 5);
+        log(`retrieve done (${chunks.length} chunks)`);
       } catch (err) {
-        console.error('[ask-ahmad] retrieve failed:', err);
+        log(`retrieve FAILED: ${err instanceof Error ? err.message : String(err)}`);
         writer.write({
           type: 'data-status',
           id: 'status',
-          data: { stage: 'error', label: 'Retrieval failed. Try again in a moment.' },
+          data: { stage: 'error', label: `Retrieval failed: ${err instanceof Error ? err.message : 'unknown'}` },
         });
         throw err;
       }
@@ -122,8 +157,10 @@ export default async function handler(request: Request): Promise<Response> {
         data: { stage: 'thinking', label: 'Thinking with Claude Sonnet 4.6…' },
       });
 
+      log('building system prompt + converting messages…');
       const system = buildSystemPrompt(mode, chunks);
       const modelMessages = await convertToModelMessages(messages);
+      log('calling streamText…');
 
       const result = streamText({
         model: anthropic(MODEL),
@@ -132,6 +169,7 @@ export default async function handler(request: Request): Promise<Response> {
         maxOutputTokens: 600,
         temperature: 0.4,
         onFinish: () => {
+          log('streamText finished');
           writer.write({
             type: 'data-status',
             id: 'status',
@@ -140,13 +178,17 @@ export default async function handler(request: Request): Promise<Response> {
         },
       });
 
+      log('merging stream…');
       writer.merge(result.toUIMessageStream());
+      log('writer.merge returned');
     },
     onError: (err) => {
-      console.error('[ask-ahmad] stream error:', err);
+      log(`stream onError: ${err instanceof Error ? err.message : String(err)}`);
       return err instanceof Error ? err.message : String(err);
     },
   });
+
+  log('returning Response');
 
   return createUIMessageStreamResponse({
     stream,
