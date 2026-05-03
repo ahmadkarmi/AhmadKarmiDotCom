@@ -8,6 +8,8 @@
 
 import { neon, type NeonQueryFunction } from '@neondatabase/serverless';
 
+type FullSql = NeonQueryFunction<false, true>;
+
 export interface ChunkRow {
   id: string; // e.g. "wp:insight:457:body:0"
   source: string; // "wp" | "voice-pack" | "portfolio-mdx"
@@ -47,13 +49,13 @@ CREATE INDEX IF NOT EXISTS chunks_metadata_gin_idx
 `;
 
 export class ChunkStore {
-  private sql: NeonQueryFunction<false, false> | null;
+  private sql: FullSql | null;
   readonly dryRun: boolean;
 
   constructor() {
     const url = process.env.DATABASE_URL;
     if (url) {
-      this.sql = neon(url);
+      this.sql = neon(url, { fullResults: true });
       this.dryRun = false;
     } else {
       this.sql = null;
@@ -66,10 +68,9 @@ export class ChunkStore {
       console.log('[db] DRY RUN: would create extension + chunks table + indexes');
       return;
     }
-    // neon() runs each statement individually; split on semicolons.
     const stmts = SCHEMA_SQL.split(';').map((s) => s.trim()).filter(Boolean);
     for (const stmt of stmts) {
-      await this.sql.query(stmt);
+      await this.sql(stmt);
     }
   }
 
@@ -79,8 +80,8 @@ export class ChunkStore {
       return 0;
     }
     const result = sourceType
-      ? await this.sql.query(`DELETE FROM chunks WHERE source = $1 AND source_type = $2`, [source, sourceType])
-      : await this.sql.query(`DELETE FROM chunks WHERE source = $1`, [source]);
+      ? await this.sql(`DELETE FROM chunks WHERE source = $1 AND source_type = $2`, [source, sourceType])
+      : await this.sql(`DELETE FROM chunks WHERE source = $1`, [source]);
     return (result as { rowCount?: number }).rowCount ?? 0;
   }
 
@@ -90,13 +91,10 @@ export class ChunkStore {
       return rows.length;
     }
     if (rows.length === 0) return 0;
-    // Insert one at a time to keep this simple and safe; switch to a single
-    // bulk INSERT once volumes are large enough to matter (we're at ~hundreds,
-    // not thousands).
     let written = 0;
     for (const r of rows) {
       const vec = `[${r.embedding.join(',')}]`;
-      await this.sql.query(
+      await this.sql(
         `INSERT INTO chunks (id, source, source_type, source_id, source_url, title, content, embedding, metadata)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8::vector, $9::jsonb)
          ON CONFLICT (id) DO UPDATE SET

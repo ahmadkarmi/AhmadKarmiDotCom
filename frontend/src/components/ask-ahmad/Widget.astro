@@ -1,14 +1,9 @@
 ---
+import Chat from './Chat';
 const enabled = import.meta.env.PUBLIC_ASK_AHMAD_ENABLED === 'true';
 ---
 {enabled && (
-  <div data-ask-ahmad-mount class="fixed bottom-6 right-6 z-50">
-    <button
-      type="button"
-      class="rounded-full bg-neutral-900 text-white px-4 py-2 text-sm font-medium shadow-lg hover:bg-neutral-800 transition"
-      aria-label="Ask Ahmad"
-    >
-      Ask Ahmad &rarr;
-    </button>
+  <div class="fixed bottom-6 right-6 z-[60]">
+    <Chat client:load />
   </div>
 )}

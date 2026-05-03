@@ -10,10 +10,10 @@
     "backfill:work-gallery": "node backfill-work-gallery.mjs --yes",
     "reapply:insight-tags:dry": "node reapply-insight-tags.mjs",
     "reapply:insight-tags": "node reapply-insight-tags.mjs --yes",
-    "ingest": "tsx --env-file=.env scripts/ingest.ts",
-    "ingest:full": "tsx --env-file=.env scripts/ingest.ts -- --full",
-    "evals": "tsx --env-file=.env evals/run.ts",
-    "smoke": "tsx --env-file=.env scripts/smoke.ts"
+    "ingest": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/ingest.ts",
+    "ingest:full": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/ingest.ts -- --full",
+    "evals": "tsx --env-file=.env --env-file-if-exists=.env.local evals/run.ts",
+    "smoke": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/smoke.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0",

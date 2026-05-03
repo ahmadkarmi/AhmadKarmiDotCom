@@ -6,13 +6,13 @@
 
 const VOYAGE_URL = 'https://api.voyageai.com/v1/embeddings';
 const MODEL = 'voyage-3-large';
-// Default tuned for Voyage free tier (3 RPM / 10K TPM). With a payment method
-// added, throughput is much higher and these defaults waste a minute or two
-// on a one-time ingest — fine.
-const BATCH_SIZE = 16; // ~6.4K tokens at avg ~400 tok/chunk, under 10K TPM cap
-const REQUEST_SPACING_MS = 21_000; // > 20s between requests to stay under 3 RPM
+// Tuned for Voyage paid tier (300 RPM / 1M TPM). On free tier (3 RPM / 10K TPM)
+// the retry-on-429 logic below kicks in automatically and slows things down to
+// safe pacing — no config swap needed.
+const BATCH_SIZE = 64;
+const REQUEST_SPACING_MS = 250;
 const MAX_RETRIES = 5;
-const RATE_LIMIT_BACKOFF_MS = 25_000; // free-tier 429 cooldown
+const RATE_LIMIT_BACKOFF_MS = 25_000; // backoff for 429 (free-tier minute window)
 
 interface VoyageResponse {
   data: { embedding: number[]; index: number }[];

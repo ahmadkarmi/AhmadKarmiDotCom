@@ -36,3 +36,5 @@ Thumbs.db
 
 CMS-Migration/
 wp-response.json
+.vercel
+.env*.local

@@ -11,7 +11,7 @@
         "astro": "astro"
     },
     "dependencies": {
-        "@ai-sdk/react": "^2.0.0",
+        "@ai-sdk/react": "^3.0.176",
         "@astrojs/check": "^0.9.6",
         "@astrojs/react": "^4.0.0",
         "@astrojs/rss": "^4.0.14",
