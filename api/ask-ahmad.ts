@@ -1,14 +1,18 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { convertToModelMessages, streamText, type UIMessage } from 'ai';
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  streamText,
+  type UIMessage,
+} from 'ai';
 
 import { isAskAhmadEnabled, disabledResponse } from './_lib/feature-flag';
 import { retrieve } from './_lib/retrieve';
 import { buildSystemPrompt, isValidMode, type Mode } from './_lib/system-prompt';
 import { checkRateLimit, clientIdentifier } from './_lib/rate-limit';
 
-export const config = {
-  maxDuration: 60,
-};
+// Default function timeout is 300s on Vercel Fluid Compute — plenty for chat.
 
 const MODEL = 'claude-sonnet-4-6';
 
@@ -44,7 +48,6 @@ export default async function handler(request: Request): Promise<Response> {
     return jsonError(400, { error: 'no_messages' });
   }
 
-  // Rate limit BEFORE any expensive call.
   const rl = await checkRateLimit(clientIdentifier(request));
   if (!rl.ok) {
     return jsonError(
@@ -54,7 +57,7 @@ export default async function handler(request: Request): Promise<Response> {
         limit: rl.limit,
         remaining: rl.remaining,
         reset: rl.reset,
-        message: `You've hit the hourly limit of ${rl.limit} questions. It resets at ${new Date(rl.reset).toISOString()}. Email Ahmad directly: https://www.ahmadkarmi.com/contact`,
+        message: `You've hit the hourly limit of ${rl.limit} questions. Email Ahmad directly: https://www.ahmadkarmi.com/contact`,
       },
       {
         'x-ratelimit-limit': String(rl.limit),
@@ -64,33 +67,89 @@ export default async function handler(request: Request): Promise<Response> {
     );
   }
 
-  // Pull the most recent user turn for retrieval.
   const lastUser = [...messages].reverse().find((m) => m.role === 'user');
   if (!lastUser) {
     return jsonError(400, { error: 'no_user_message' });
   }
   const lastUserText = uiMessageToText(lastUser);
 
-  let chunks;
-  try {
-    chunks = await retrieve(lastUserText, 5);
-  } catch (err) {
-    console.error('[ask-ahmad] retrieve failed:', err);
-    return jsonError(500, { error: 'retrieve_failed' });
-  }
+  const stream = createUIMessageStream({
+    execute: async ({ writer }) => {
+      writer.write({
+        type: 'data-status',
+        id: 'status',
+        data: { stage: 'embedding', label: 'Embedding your question…' },
+      });
 
-  const system = buildSystemPrompt(mode, chunks);
+      let chunks;
+      try {
+        chunks = await retrieve(lastUserText, 5);
+      } catch (err) {
+        console.error('[ask-ahmad] retrieve failed:', err);
+        writer.write({
+          type: 'data-status',
+          id: 'status',
+          data: { stage: 'error', label: 'Retrieval failed. Try again in a moment.' },
+        });
+        throw err;
+      }
 
-  const modelMessages = await convertToModelMessages(messages);
-  const result = streamText({
-    model: anthropic(MODEL),
-    system,
-    messages: modelMessages,
-    maxOutputTokens: 600,
-    temperature: 0.4,
+      writer.write({
+        type: 'data-status',
+        id: 'status',
+        data: {
+          stage: 'retrieved',
+          label: `Found ${chunks.length} relevant chunk${chunks.length === 1 ? '' : 's'} from the corpus.`,
+        },
+      });
+
+      writer.write({
+        type: 'data-citations',
+        id: 'citations',
+        data: {
+          chunks: chunks.map((c) => ({
+            title: c.title,
+            url: c.source_url,
+            similarity: Number(c.similarity.toFixed(3)),
+            sourceType: c.source_type,
+          })),
+        },
+      });
+
+      writer.write({
+        type: 'data-status',
+        id: 'status',
+        data: { stage: 'thinking', label: 'Thinking with Claude Sonnet 4.6…' },
+      });
+
+      const system = buildSystemPrompt(mode, chunks);
+      const modelMessages = await convertToModelMessages(messages);
+
+      const result = streamText({
+        model: anthropic(MODEL),
+        system,
+        messages: modelMessages,
+        maxOutputTokens: 600,
+        temperature: 0.4,
+        onFinish: () => {
+          writer.write({
+            type: 'data-status',
+            id: 'status',
+            data: { stage: 'done', label: 'Done.' },
+          });
+        },
+      });
+
+      writer.merge(result.toUIMessageStream());
+    },
+    onError: (err) => {
+      console.error('[ask-ahmad] stream error:', err);
+      return err instanceof Error ? err.message : String(err);
+    },
   });
 
-  return result.toUIMessageStreamResponse({
+  return createUIMessageStreamResponse({
+    stream,
     headers: {
       'x-ratelimit-limit': String(rl.limit),
       'x-ratelimit-remaining': String(rl.remaining),
@@ -100,9 +159,7 @@ export default async function handler(request: Request): Promise<Response> {
 }
 
 function uiMessageToText(m: UIMessage): string {
-  // UIMessage v6 stores parts as an array of typed parts. Concatenate text parts.
   if (!Array.isArray((m as { parts?: unknown }).parts)) {
-    // Fallback for legacy shapes.
     return String((m as { content?: unknown }).content ?? '');
   }
   return (m.parts as Array<{ type: string; text?: string }>)

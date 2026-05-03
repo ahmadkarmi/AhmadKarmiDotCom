@@ -19,12 +19,84 @@ const PROMPTS: { mode: Mode | 'all'; text: string }[] = [
   { mode: 'peer-pm', text: 'Walk me through your retrieval + refusal design.' },
 ];
 
-function messageText(m: UIMessage): string {
-  if (!Array.isArray(m.parts)) return '';
-  return m.parts
-    .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
-    .map((p) => p.text)
+interface StatusData {
+  stage: 'embedding' | 'retrieved' | 'thinking' | 'done' | 'error';
+  label: string;
+}
+
+interface CitationData {
+  chunks: Array<{
+    title: string;
+    url: string;
+    similarity: number;
+    sourceType: string;
+  }>;
+}
+
+interface AnyPart {
+  type: string;
+  text?: string;
+  data?: unknown;
+}
+
+function getText(parts: AnyPart[]): string {
+  return parts
+    .filter((p) => p.type === 'text')
+    .map((p) => p.text ?? '')
     .join('');
+}
+
+function getStatus(parts: AnyPart[]): StatusData | null {
+  // Take the LAST status data part — it represents current state.
+  const statuses = parts.filter((p) => p.type === 'data-status');
+  const last = statuses[statuses.length - 1];
+  return (last?.data as StatusData) ?? null;
+}
+
+function getCitations(parts: AnyPart[]): CitationData | null {
+  const c = parts.find((p) => p.type === 'data-citations');
+  return (c?.data as CitationData) ?? null;
+}
+
+function StatusPill({ status }: { status: StatusData }) {
+  const dotColor =
+    status.stage === 'error'
+      ? 'bg-red-500'
+      : status.stage === 'done'
+      ? 'bg-emerald-500'
+      : 'bg-amber-500 animate-pulse';
+  return (
+    <div className="flex items-center gap-2 text-[11px] text-neutral-500 mb-2">
+      <span className={`inline-block w-1.5 h-1.5 rounded-full ${dotColor}`} />
+      <span className="italic">{status.label}</span>
+    </div>
+  );
+}
+
+function Citations({ citations }: { citations: CitationData }) {
+  if (!citations.chunks.length) return null;
+  return (
+    <div className="mt-3 pt-2 border-t border-neutral-100">
+      <div className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">sources</div>
+      <ul className="space-y-1">
+        {citations.chunks.map((c, i) => (
+          <li key={`${c.url}-${i}`} className="text-[11px] leading-snug">
+            <a
+              href={c.url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-neutral-600 hover:text-neutral-900 hover:underline"
+            >
+              <span className="text-neutral-400">[{i + 1}]</span> {c.title}
+            </a>
+            <span className="text-neutral-400 ml-1">
+              · {c.sourceType} · sim {c.similarity.toFixed(2)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 export default function Chat() {
@@ -74,7 +146,7 @@ export default function Chat() {
   const visiblePrompts = PROMPTS.filter((p) => p.mode === 'all' || p.mode === mode);
 
   return (
-    <div className="w-[400px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-6rem)] bg-white border border-neutral-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="w-[420px] max-w-[calc(100vw-3rem)] h-[640px] max-h-[calc(100vh-6rem)] bg-white border border-neutral-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
       <header className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between flex-shrink-0">
         <div>
           <div className="text-sm font-semibold text-neutral-900">Ask Ahmad</div>
@@ -129,30 +201,30 @@ export default function Chat() {
           </div>
         )}
 
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`${m.role === 'user' ? 'text-neutral-900' : 'text-neutral-700'}`}
-          >
-            <div className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">
-              {m.role === 'user' ? 'you' : 'ahmad'}
-            </div>
-            <div className="whitespace-pre-wrap leading-relaxed">{messageText(m)}</div>
-          </div>
-        ))}
+        {messages.map((m) => {
+          const parts = (m.parts ?? []) as AnyPart[];
+          const text = getText(parts);
+          const status = m.role === 'assistant' ? getStatus(parts) : null;
+          const citations = m.role === 'assistant' ? getCitations(parts) : null;
 
-        {isStreaming && messages[messages.length - 1]?.role === 'user' && (
-          <div className="text-neutral-400 text-xs italic">thinking…</div>
-        )}
+          return (
+            <div key={m.id} className={m.role === 'user' ? 'text-neutral-900' : 'text-neutral-700'}>
+              <div className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">
+                {m.role === 'user' ? 'you' : 'ahmad'}
+              </div>
+              {status && status.stage !== 'done' && <StatusPill status={status} />}
+              {text && <div className="whitespace-pre-wrap leading-relaxed">{text}</div>}
+              {citations && citations.chunks.length > 0 && status?.stage === 'done' && (
+                <Citations citations={citations} />
+              )}
+            </div>
+          );
+        })}
 
         {error && (
           <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded p-2">
             {error.message || 'Something went wrong.'}
-            <button
-              type="button"
-              onClick={clearError}
-              className="ml-2 underline"
-            >
+            <button type="button" onClick={clearError} className="ml-2 underline">
               dismiss
             </button>
           </div>
