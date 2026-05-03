@@ -57,11 +57,27 @@ export default async function handler(request: Request): Promise<Response> {
   // a downstream call hangs, we know which keys are reaching the runtime.
   const env = envCheck();
   log(`env present=[${env.present.join(',')}] missing=[${env.missing.join(',')}]`);
+  log(`headers ct=${request.headers.get('content-type') ?? 'none'} cl=${request.headers.get('content-length') ?? 'none'}`);
+
+  // Read body as text with a 5s race — if the stream hangs we want a clean
+  // failure, not a 300s function timeout.
+  let bodyText: string;
+  try {
+    bodyText = await Promise.race([
+      request.text(),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('body_read_timeout_5s')), 5000)),
+    ]);
+  } catch (err) {
+    log(`body read FAILED: ${err instanceof Error ? err.message : String(err)}`);
+    return jsonError(500, { error: 'body_read_failed', message: err instanceof Error ? err.message : 'unknown' });
+  }
+  log(`body text received: ${bodyText.length} bytes`);
 
   let body: ChatBody;
   try {
-    body = (await request.json()) as ChatBody;
-  } catch {
+    body = JSON.parse(bodyText) as ChatBody;
+  } catch (err) {
+    log(`body json parse FAILED: ${err instanceof Error ? err.message : String(err)}`);
     return jsonError(400, { error: 'invalid_json' });
   }
 
