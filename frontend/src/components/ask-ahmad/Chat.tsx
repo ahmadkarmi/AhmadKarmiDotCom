@@ -4,7 +4,7 @@ import { DefaultChatTransport, type UIMessage } from 'ai';
 
 const STORAGE_KEY = 'ask-ahmad:messages-v1';
 const CONTACT_URL = 'https://www.ahmadkarmi.com/contact';
-const CONTACT_EMAIL = 'info@ahmadkarmi.com';
+const CONTACT_EMAIL = 'alkarmi.ahmad@gmail.com';
 
 const QUICK_REPLIES = [
   'I have a project idea',
