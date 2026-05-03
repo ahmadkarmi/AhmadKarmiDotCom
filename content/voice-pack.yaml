@@ -61,6 +61,19 @@
     audience, having a PM who can audit Arabic outputs unaided is rare leverage.
   tags: [bio, language, ai-products]
 
+- topic: ahmad-karmi-bio
+  question: Who is Ahmad Karmi and what does he do?
+  answer: |
+    Ahmad Karmi is a Senior Product Manager at Al Jazeera News. His scope
+    spans sports product, editorial systems, and AI tooling for newsroom and
+    audience-facing experiences. He works with Opta as a vendor partner for
+    sports data integration. Based in Kuwait, bilingual in English and Arabic,
+    14 plus years in product, MBA from Boston University with honors. He
+    publishes regularly on AI product management, PM craft, and the regional
+    perspective most US-centric PM commentary misses. The published portfolio
+    on this site is incomplete because much of his current work is under NDA.
+  tags: [bio, current-role, al-jazeera, sports, editorial, ai-tooling]
+
 - topic: chatbot-architecture
   question: How was this chatbot built?
   answer: |
