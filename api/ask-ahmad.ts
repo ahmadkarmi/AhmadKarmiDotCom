@@ -81,10 +81,11 @@ export default async function handler(request: Request): Promise<Response> {
 
   const system = buildSystemPrompt(mode, chunks);
 
+  const modelMessages = await convertToModelMessages(messages);
   const result = streamText({
     model: anthropic(MODEL),
     system,
-    messages: convertToModelMessages(messages),
+    messages: modelMessages,
     maxOutputTokens: 600,
     temperature: 0.4,
   });
