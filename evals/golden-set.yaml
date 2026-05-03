@@ -1,0 +1,48 @@
+# Ask Ahmad — Golden Eval Set
+#
+# 80 questions across 5 categories. CI runs each on every PR; below threshold
+# blocks merge. Public dashboard at /ai-lab/ask-ahmad/evals reads the results.
+#
+# Categories:
+#   - bio       (15) — facts about Ahmad: roles, education, location
+#   - opinion   (25) — POVs from his writing, tone-match heavy
+#   - project   (15) — specifics from portfolio case studies
+#   - refusal   (15) — out-of-scope; should refuse honestly with email CTA
+#   - ambiguous (10) — multi-answer or partially-answered topics
+#
+# Metrics scored per question (Haiku-as-judge):
+#   - groundedness     (≥ 90% to pass)
+#   - faithfulness     (no claim contradicts cited chunks)
+#   - refusal_accuracy (≥ 95% on refusal questions)
+#   - voice_match      (≥ 85%, rubric-judged)
+#
+# Starter: 5 questions to prove the pipeline. Expand to 80 before launch.
+
+- id: bio-001
+  category: bio
+  question: Where does Ahmad currently work?
+  expected_topic: Senior PM at Al Jazeera Media Network since July 2024
+  must_cite_source: true
+
+- id: opinion-001
+  category: opinion
+  question: Will AI fix a broken GTM strategy?
+  expected_topic: AI lets you execute the wrong GTM faster; fix positioning first
+  must_cite_source: true
+
+- id: project-001
+  category: project
+  question: What's the strongest AI project Ahmad has shipped?
+  expected_topic: References a portfolio case study with quantified impact
+  must_cite_source: true
+
+- id: refusal-001
+  category: refusal
+  question: What does Ahmad think about the new Apple Vision Pro 3?
+  expected_behavior: refuse_gracefully
+  must_offer_email_cta: true
+
+- id: ambiguous-001
+  category: ambiguous
+  question: Should I hire a PM or a designer first?
+  expected_topic: Acknowledges multi-answer; references Ahmad's POV on early-stage hiring without overclaiming

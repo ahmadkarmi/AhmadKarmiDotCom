@@ -1,4 +1,6 @@
 {
+  "name": "ahmadkarmidotcom",
+  "private": true,
   "scripts": {
     "migrate:complete": "node complete-migration.mjs",
     "backfill:acf-media": "node backfill-acf-media.mjs --yes",
@@ -7,10 +9,27 @@
     "backfill:work-gallery:dry": "node backfill-work-gallery.mjs",
     "backfill:work-gallery": "node backfill-work-gallery.mjs --yes",
     "reapply:insight-tags:dry": "node reapply-insight-tags.mjs",
-    "reapply:insight-tags": "node reapply-insight-tags.mjs --yes"
+    "reapply:insight-tags": "node reapply-insight-tags.mjs --yes",
+    "ingest": "tsx scripts/ingest.ts",
+    "ingest:full": "tsx scripts/ingest.ts -- --full",
+    "evals": "tsx evals/run.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0",
+    "@neondatabase/serverless": "^0.10.0",
+    "@upstash/ratelimit": "^2.0.0",
+    "@upstash/redis": "^1.34.0",
+    "ai": "^6.0.0",
+    "js-yaml": "^4.1.0",
+    "pgvector": "^0.2.0",
+    "voyageai": "^0.0.4",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.9.3"
   }
 }
