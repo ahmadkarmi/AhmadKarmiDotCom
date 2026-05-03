@@ -1,16 +1,17 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { anthropic } from '@ai-sdk/anthropic';
 import {
   convertToModelMessages,
   createUIMessageStream,
-  createUIMessageStreamResponse,
+  pipeUIMessageStreamToResponse,
   streamText,
   type UIMessage,
 } from 'ai';
 
-import { isAskAhmadEnabled, disabledResponse } from './_lib/feature-flag';
+import { isAskAhmadEnabled } from './_lib/feature-flag';
 import { retrieve } from './_lib/retrieve';
 import { buildSystemPrompt, isValidMode, type Mode } from './_lib/system-prompt';
-import { checkRateLimit, clientIdentifier } from './_lib/rate-limit';
+import { checkRateLimit } from './_lib/rate-limit';
 
 // Default function timeout is 300s on Vercel Fluid Compute — plenty for chat.
 
@@ -19,13 +20,6 @@ const MODEL = 'claude-sonnet-4-6';
 interface ChatBody {
   messages?: UIMessage[];
   mode?: Mode;
-}
-
-function jsonError(status: number, payload: Record<string, unknown>, headers: Record<string, string> = {}): Response {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: { 'content-type': 'application/json', ...headers },
-  });
 }
 
 function envCheck(): { missing: string[]; present: string[] } {
@@ -39,85 +33,102 @@ function envCheck(): { missing: string[]; present: string[] } {
   return { missing, present };
 }
 
-export default async function handler(request: Request): Promise<Response> {
+function hashStr(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = (h * 33) ^ s.charCodeAt(i);
+  return (h >>> 0).toString(36);
+}
+
+function uiMessageToText(m: UIMessage): string {
+  if (!Array.isArray((m as { parts?: unknown }).parts)) {
+    return String((m as { content?: unknown }).content ?? '');
+  }
+  return (m.parts as Array<{ type: string; text?: string }>)
+    .filter((p) => p.type === 'text')
+    .map((p) => p.text ?? '')
+    .join('\n')
+    .trim();
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const t0 = Date.now();
   const log = (msg: string) => console.log(`[ask-ahmad +${Date.now() - t0}ms] ${msg}`);
-  log('handler entry');
+  log(`handler entry method=${req.method}`);
 
   if (!isAskAhmadEnabled()) {
-    log('feature disabled');
-    return disabledResponse();
+    res.status(503).json({ error: 'feature_disabled' });
+    return;
   }
 
-  if (request.method !== 'POST') {
-    return jsonError(405, { error: 'method_not_allowed' });
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'method_not_allowed' });
+    return;
   }
 
-  // One-time env diagnostic on every invocation. Printed early so even if
-  // a downstream call hangs, we know which keys are reaching the runtime.
   const env = envCheck();
   log(`env present=[${env.present.join(',')}] missing=[${env.missing.join(',')}]`);
-  log(`headers ct=${request.headers.get('content-type') ?? 'none'} cl=${request.headers.get('content-length') ?? 'none'}`);
 
-  // Read body as text with a 5s race — if the stream hangs we want a clean
-  // failure, not a 300s function timeout.
-  let bodyText: string;
-  try {
-    bodyText = await Promise.race([
-      request.text(),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('body_read_timeout_5s')), 5000)),
-    ]);
-  } catch (err) {
-    log(`body read FAILED: ${err instanceof Error ? err.message : String(err)}`);
-    return jsonError(500, { error: 'body_read_failed', message: err instanceof Error ? err.message : 'unknown' });
-  }
-  log(`body text received: ${bodyText.length} bytes`);
-
+  // @vercel/node auto-parses JSON bodies when Content-Type is application/json,
+  // populating req.body as the parsed object. Fall back to manual parse if it's
+  // a string for any reason.
   let body: ChatBody;
   try {
-    body = JSON.parse(bodyText) as ChatBody;
+    if (typeof req.body === 'string') {
+      body = JSON.parse(req.body);
+    } else if (req.body && typeof req.body === 'object') {
+      body = req.body as ChatBody;
+    } else {
+      throw new Error(`unexpected body type: ${typeof req.body}`);
+    }
   } catch (err) {
-    log(`body json parse FAILED: ${err instanceof Error ? err.message : String(err)}`);
-    return jsonError(400, { error: 'invalid_json' });
+    log(`body parse FAILED: ${err instanceof Error ? err.message : String(err)}`);
+    res.status(400).json({ error: 'invalid_json' });
+    return;
   }
 
   const messages = body.messages ?? [];
   const mode: Mode = isValidMode(body.mode) ? body.mode : 'anyone';
   if (messages.length === 0) {
-    return jsonError(400, { error: 'no_messages' });
+    res.status(400).json({ error: 'no_messages' });
+    return;
   }
   log(`body parsed: ${messages.length} message(s), mode=${mode}`);
 
+  const fwd = (req.headers['x-forwarded-for'] as string | undefined) ?? '';
+  const ip = fwd.split(',')[0]?.trim() || (req.headers['x-real-ip'] as string | undefined) || 'anon';
+  const ua = (req.headers['user-agent'] as string | undefined) ?? '';
+  const identifier = `${ip}:${hashStr(ua)}`;
+
   log('about to checkRateLimit…');
-  const rlPromise = checkRateLimit(clientIdentifier(request));
-  const rl = await Promise.race([
-    rlPromise,
-    new Promise<{ ok: true; limit: number; remaining: number; reset: number; degraded: true }>((resolve) =>
-      setTimeout(() => resolve({ ok: true, limit: 20, remaining: 20, reset: Date.now() + 3600_000, degraded: true }), 3000)
-    ),
-  ]);
-  log(`rate limit done (degraded=${'degraded' in rl})`);
+  let rl: { ok: boolean; limit: number; remaining: number; reset: number };
+  try {
+    rl = await Promise.race([
+      checkRateLimit(identifier),
+      new Promise<typeof rl>((resolve) =>
+        setTimeout(() => resolve({ ok: true, limit: 20, remaining: 20, reset: Date.now() + 3600_000 }), 3000)
+      ),
+    ]);
+  } catch (err) {
+    log(`rate limit error (failing open): ${err instanceof Error ? err.message : String(err)}`);
+    rl = { ok: true, limit: 20, remaining: 20, reset: Date.now() + 3600_000 };
+  }
+  log(`rate limit done ok=${rl.ok} remaining=${rl.remaining}`);
+
   if (!rl.ok) {
-    return jsonError(
-      429,
-      {
-        error: 'rate_limited',
-        limit: rl.limit,
-        remaining: rl.remaining,
-        reset: rl.reset,
-        message: `You've hit the hourly limit of ${rl.limit} questions. Email Ahmad directly: https://www.ahmadkarmi.com/contact`,
-      },
-      {
-        'x-ratelimit-limit': String(rl.limit),
-        'x-ratelimit-remaining': '0',
-        'x-ratelimit-reset': String(rl.reset),
-      }
-    );
+    res.status(429).json({
+      error: 'rate_limited',
+      limit: rl.limit,
+      remaining: rl.remaining,
+      reset: rl.reset,
+      message: `You've hit the hourly limit of ${rl.limit} questions. Email Ahmad directly: https://www.ahmadkarmi.com/contact`,
+    });
+    return;
   }
 
   const lastUser = [...messages].reverse().find((m) => m.role === 'user');
   if (!lastUser) {
-    return jsonError(400, { error: 'no_user_message' });
+    res.status(400).json({ error: 'no_user_message' });
+    return;
   }
   const lastUserText = uiMessageToText(lastUser);
 
@@ -204,25 +215,9 @@ export default async function handler(request: Request): Promise<Response> {
     },
   });
 
-  log('returning Response');
-
-  return createUIMessageStreamResponse({
-    stream,
-    headers: {
-      'x-ratelimit-limit': String(rl.limit),
-      'x-ratelimit-remaining': String(rl.remaining),
-      'x-ratelimit-reset': String(rl.reset),
-    },
-  });
-}
-
-function uiMessageToText(m: UIMessage): string {
-  if (!Array.isArray((m as { parts?: unknown }).parts)) {
-    return String((m as { content?: unknown }).content ?? '');
-  }
-  return (m.parts as Array<{ type: string; text?: string }>)
-    .filter((p) => p.type === 'text')
-    .map((p) => p.text ?? '')
-    .join('\n')
-    .trim();
+  res.setHeader('x-ratelimit-limit', String(rl.limit));
+  res.setHeader('x-ratelimit-remaining', String(rl.remaining));
+  res.setHeader('x-ratelimit-reset', String(rl.reset));
+  log('piping stream to response…');
+  pipeUIMessageStreamToResponse({ response: res, stream });
 }
