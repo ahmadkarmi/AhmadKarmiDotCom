@@ -6,10 +6,11 @@ const STORAGE_KEY = 'ask-ahmad:messages-v1';
 const CONTACT_URL = 'https://www.ahmadkarmi.com/contact';
 const CONTACT_EMAIL = 'alkarmi.ahmad@gmail.com';
 
-const QUICK_REPLIES = [
-  'I have a project idea',
-  "I'm hiring",
-  'Just exploring',
+const QUICK_REPLIES: { label: string; message: string }[] = [
+  { label: 'I have a project idea', message: 'I have a project idea' },
+  { label: "I'm hiring", message: "I'm hiring" },
+  { label: 'Just exploring', message: 'Just exploring' },
+  { label: 'How I Built This Assistant', message: 'How was this assistant built?' },
 ];
 
 declare global {
@@ -521,12 +522,12 @@ export default function Chat() {
             <div className="flex flex-wrap gap-2 pt-3 pl-[40px]">
               {QUICK_REPLIES.map((q) => (
                 <button
-                  key={q}
+                  key={q.label}
                   type="button"
-                  onClick={() => submit(q, 'quick_reply')}
+                  onClick={() => submit(q.message, 'quick_reply')}
                   className="text-[13px] text-foreground bg-background hover:bg-accent hover:text-accent-foreground border border-border hover:border-accent rounded-full px-4 py-2 transition-all font-medium"
                 >
-                  {q}
+                  {q.label}
                 </button>
               ))}
             </div>
