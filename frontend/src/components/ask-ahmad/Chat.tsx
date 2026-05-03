@@ -2,21 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 
-type Mode = 'anyone' | 'recruiter' | 'founder' | 'peer-pm';
-
-const MODES: { id: Mode; label: string }[] = [
-  { id: 'anyone', label: 'Anyone' },
-  { id: 'recruiter', label: 'Recruiter' },
-  { id: 'founder', label: 'Founder' },
-  { id: 'peer-pm', label: 'Peer PM' },
-];
-
-const PROMPTS: { mode: Mode | 'all'; text: string }[] = [
-  { mode: 'all', text: "What's Ahmad's strongest AI case study?" },
-  { mode: 'all', text: 'How does Ahmad think about AI evals?' },
-  { mode: 'recruiter', text: 'Recruiter brief in 60 seconds' },
-  { mode: 'founder', text: 'How would you prioritize AI features at an early-stage SaaS?' },
-  { mode: 'peer-pm', text: 'Walk me through your retrieval + refusal design.' },
+const SUGGESTED_PROMPTS = [
+  "I'm thinking about adding AI to a product — where should I start?",
+  'How does Ahmad think about evals for AI features?',
+  "I'm prepping a strategy call — what frameworks would help?",
+  "Help me figure out if Ahmad's the right person to talk to for what I need.",
 ];
 
 interface StatusData {
@@ -47,7 +37,6 @@ function getText(parts: AnyPart[]): string {
 }
 
 function getStatus(parts: AnyPart[]): StatusData | null {
-  // Take the LAST status data part — it represents current state.
   const statuses = parts.filter((p) => p.type === 'data-status');
   const last = statuses[statuses.length - 1];
   return (last?.data as StatusData) ?? null;
@@ -77,7 +66,7 @@ function Citations({ citations }: { citations: CitationData }) {
   if (!citations.chunks.length) return null;
   return (
     <div className="mt-3 pt-2 border-t border-neutral-100">
-      <div className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">sources</div>
+      <div className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">from ahmad&rsquo;s writing</div>
       <ul className="space-y-1">
         {citations.chunks.map((c, i) => (
           <li key={`${c.url}-${i}`} className="text-[11px] leading-snug">
@@ -101,7 +90,6 @@ function Citations({ citations }: { citations: CitationData }) {
 
 export default function Chat() {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<Mode>('anyone');
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -109,9 +97,9 @@ export default function Chat() {
     () =>
       new DefaultChatTransport({
         api: '/api/ask-ahmad',
-        body: () => ({ mode }),
+        body: () => ({ mode: 'anyone' }),
       }),
-    [mode]
+    []
   );
 
   const { messages, sendMessage, status, error, clearError } = useChat({ transport });
@@ -138,19 +126,17 @@ export default function Chat() {
         onClick={() => setOpen(true)}
         className="rounded-full bg-neutral-900 text-white px-4 py-2 text-sm font-medium shadow-lg hover:bg-neutral-800 transition"
       >
-        Ask Ahmad &rarr;
+        Ask Ahmad&rsquo;s AI &rarr;
       </button>
     );
   }
-
-  const visiblePrompts = PROMPTS.filter((p) => p.mode === 'all' || p.mode === mode);
 
   return (
     <div className="w-[420px] max-w-[calc(100vw-3rem)] h-[640px] max-h-[calc(100vh-6rem)] bg-white border border-neutral-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
       <header className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between flex-shrink-0">
         <div>
-          <div className="text-sm font-semibold text-neutral-900">Ask Ahmad</div>
-          <div className="text-[10px] text-neutral-500">my second brain &mdash; cites every claim</div>
+          <div className="text-sm font-semibold text-neutral-900">Ahmad&rsquo;s AI Consultant</div>
+          <div className="text-[10px] text-neutral-500">trained on his writing &middot; routes serious questions to him</div>
         </div>
         <button
           type="button"
@@ -162,39 +148,26 @@ export default function Chat() {
         </button>
       </header>
 
-      <div className="px-4 py-2 border-b border-neutral-100 flex gap-1 flex-wrap flex-shrink-0">
-        {MODES.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => setMode(m.id)}
-            className={`text-xs px-2 py-1 rounded-full border transition ${
-              mode === m.id
-                ? 'bg-neutral-900 text-white border-neutral-900'
-                : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
-            }`}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 text-sm">
         {messages.length === 0 && (
           <div className="space-y-3">
-            <p className="text-neutral-500">
-              Hi &mdash; ask me anything I&rsquo;ve written about AI product, my portfolio, or how I think about
-              shipping under model uncertainty.
+            <p className="text-neutral-700">
+              Hi &mdash; I&rsquo;m a consultant trained on Ahmad&rsquo;s writing.
             </p>
+            <p className="text-neutral-500">
+              Tell me what you&rsquo;re working on or what brought you here, and I&rsquo;ll point you to the relevant
+              parts of how Ahmad thinks &mdash; and let you know when it&rsquo;s worth talking to him directly.
+            </p>
+            <div className="text-[10px] uppercase tracking-wider text-neutral-400 pt-2">or try one of these</div>
             <div className="flex flex-col gap-1.5">
-              {visiblePrompts.map((p) => (
+              {SUGGESTED_PROMPTS.map((p) => (
                 <button
-                  key={p.text}
+                  key={p}
                   type="button"
-                  onClick={() => submit(p.text)}
+                  onClick={() => submit(p)}
                   className="text-left text-xs text-neutral-700 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg px-3 py-2 transition"
                 >
-                  {p.text}
+                  {p}
                 </button>
               ))}
             </div>
@@ -210,7 +183,7 @@ export default function Chat() {
           return (
             <div key={m.id} className={m.role === 'user' ? 'text-neutral-900' : 'text-neutral-700'}>
               <div className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">
-                {m.role === 'user' ? 'you' : 'ahmad'}
+                {m.role === 'user' ? 'you' : 'consultant'}
               </div>
               {status && status.stage !== 'done' && <StatusPill status={status} />}
               {text && <div className="whitespace-pre-wrap leading-relaxed">{text}</div>}
@@ -242,7 +215,7 @@ export default function Chat() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask anything…"
+          placeholder="What are you working on?"
           disabled={isStreaming}
           className="flex-1 text-sm px-2 py-1.5 border border-neutral-200 rounded-md focus:outline-none focus:border-neutral-500 disabled:bg-neutral-50"
         />
@@ -256,7 +229,7 @@ export default function Chat() {
       </form>
 
       <div className="px-3 py-1.5 border-t border-neutral-100 text-[10px] text-neutral-400 flex items-center justify-between flex-shrink-0">
-        <span>Sonnet 4.6 + RAG over WP corpus</span>
+        <span>Sonnet 4.6 + RAG over Ahmad&rsquo;s corpus</span>
         <span>preview</span>
       </div>
     </div>

@@ -13,24 +13,11 @@ import { retrieve } from './_lib/retrieve';
 import { buildSystemPrompt, isValidMode, type Mode } from './_lib/system-prompt';
 import { checkRateLimit } from './_lib/rate-limit';
 
-// Default function timeout is 300s on Vercel Fluid Compute — plenty for chat.
-
 const MODEL = 'claude-sonnet-4-6';
 
 interface ChatBody {
   messages?: UIMessage[];
   mode?: Mode;
-}
-
-function envCheck(): { missing: string[]; present: string[] } {
-  const required = ['ANTHROPIC_API_KEY', 'VOYAGE_API_KEY', 'DATABASE_URL', 'KV_REST_API_URL', 'KV_REST_API_TOKEN'];
-  const missing: string[] = [];
-  const present: string[] = [];
-  for (const k of required) {
-    if (process.env[k]) present.push(k);
-    else missing.push(k);
-  }
-  return { missing, present };
 }
 
 function hashStr(s: string): string {
@@ -51,10 +38,6 @@ function uiMessageToText(m: UIMessage): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  const t0 = Date.now();
-  const log = (msg: string) => console.log(`[ask-ahmad +${Date.now() - t0}ms] ${msg}`);
-  log(`handler entry method=${req.method}`);
-
   if (!isAskAhmadEnabled()) {
     res.status(503).json({ error: 'feature_disabled' });
     return;
@@ -65,12 +48,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const env = envCheck();
-  log(`env present=[${env.present.join(',')}] missing=[${env.missing.join(',')}]`);
-
-  // @vercel/node auto-parses JSON bodies when Content-Type is application/json,
-  // populating req.body as the parsed object. Fall back to manual parse if it's
-  // a string for any reason.
   let body: ChatBody;
   try {
     if (typeof req.body === 'string') {
@@ -80,8 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     } else {
       throw new Error(`unexpected body type: ${typeof req.body}`);
     }
-  } catch (err) {
-    log(`body parse FAILED: ${err instanceof Error ? err.message : String(err)}`);
+  } catch {
     res.status(400).json({ error: 'invalid_json' });
     return;
   }
@@ -92,14 +68,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.status(400).json({ error: 'no_messages' });
     return;
   }
-  log(`body parsed: ${messages.length} message(s), mode=${mode}`);
 
   const fwd = (req.headers['x-forwarded-for'] as string | undefined) ?? '';
   const ip = fwd.split(',')[0]?.trim() || (req.headers['x-real-ip'] as string | undefined) || 'anon';
   const ua = (req.headers['user-agent'] as string | undefined) ?? '';
   const identifier = `${ip}:${hashStr(ua)}`;
 
-  log('about to checkRateLimit…');
+  // Race rate limit against a 3s timeout — if Upstash is slow/unreachable we
+  // fail open rather than hang the entire request. The platform-level cap on
+  // Anthropic spend remains the hard ceiling.
   let rl: { ok: boolean; limit: number; remaining: number; reset: number };
   try {
     rl = await Promise.race([
@@ -108,11 +85,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         setTimeout(() => resolve({ ok: true, limit: 20, remaining: 20, reset: Date.now() + 3600_000 }), 3000)
       ),
     ]);
-  } catch (err) {
-    log(`rate limit error (failing open): ${err instanceof Error ? err.message : String(err)}`);
+  } catch {
     rl = { ok: true, limit: 20, remaining: 20, reset: Date.now() + 3600_000 };
   }
-  log(`rate limit done ok=${rl.ok} remaining=${rl.remaining}`);
 
   if (!rl.ok) {
     res.status(429).json({
@@ -134,7 +109,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
-      log('stream execute start');
       writer.write({
         type: 'data-status',
         id: 'status',
@@ -143,11 +117,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
       let chunks;
       try {
-        log('calling retrieve…');
         chunks = await retrieve(lastUserText, 5);
-        log(`retrieve done (${chunks.length} chunks)`);
       } catch (err) {
-        log(`retrieve FAILED: ${err instanceof Error ? err.message : String(err)}`);
         writer.write({
           type: 'data-status',
           id: 'status',
@@ -161,7 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         id: 'status',
         data: {
           stage: 'retrieved',
-          label: `Found ${chunks.length} relevant chunk${chunks.length === 1 ? '' : 's'} from the corpus.`,
+          label: `Found ${chunks.length} relevant chunk${chunks.length === 1 ? '' : 's'} from Ahmad's writing.`,
         },
       });
 
@@ -184,19 +155,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         data: { stage: 'thinking', label: 'Thinking with Claude Sonnet 4.6…' },
       });
 
-      log('building system prompt + converting messages…');
       const system = buildSystemPrompt(mode, chunks);
       const modelMessages = await convertToModelMessages(messages);
-      log('calling streamText…');
 
       const result = streamText({
         model: anthropic(MODEL),
         system,
         messages: modelMessages,
-        maxOutputTokens: 600,
-        temperature: 0.4,
+        maxOutputTokens: 700,
+        temperature: 0.5,
         onFinish: () => {
-          log('streamText finished');
           writer.write({
             type: 'data-status',
             id: 'status',
@@ -205,19 +173,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         },
       });
 
-      log('merging stream…');
       writer.merge(result.toUIMessageStream());
-      log('writer.merge returned');
     },
-    onError: (err) => {
-      log(`stream onError: ${err instanceof Error ? err.message : String(err)}`);
-      return err instanceof Error ? err.message : String(err);
-    },
+    onError: (err) => (err instanceof Error ? err.message : String(err)),
   });
 
   res.setHeader('x-ratelimit-limit', String(rl.limit));
   res.setHeader('x-ratelimit-remaining', String(rl.remaining));
   res.setHeader('x-ratelimit-reset', String(rl.reset));
-  log('piping stream to response…');
   pipeUIMessageStreamToResponse({ response: res, stream });
 }
