@@ -241,6 +241,8 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const [hydrated, setHydrated] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const prevStatusRef = useRef<string>('ready');
 
   const initialMessages = useMemo<UIMessage[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -287,6 +289,21 @@ export default function Chat() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, status]);
+
+  // Auto-focus the input when streaming finishes so the user can keep typing
+  // without having to click back into the textarea. Only fires on the
+  // streaming -> ready transition (not on initial mount, which would pop the
+  // keyboard on mobile before the user has even opened the chat themselves).
+  useEffect(() => {
+    const wasStreaming = prevStatusRef.current === 'streaming' || prevStatusRef.current === 'submitted';
+    const isReady = status !== 'streaming' && status !== 'submitted';
+    if (wasStreaming && isReady && open) {
+      // Defer to the next tick so the input's `disabled` flag is fully
+      // cleared before we try to focus it.
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+    prevStatusRef.current = status;
+  }, [status, open]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -556,6 +573,7 @@ export default function Chat() {
         >
           <div className="flex-1 relative">
             <input
+              ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
