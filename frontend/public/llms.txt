@@ -1,0 +1,95 @@
+# Ahmad Al-Karmi
+
+> Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused product manager with 14 plus years shipping digital products from enterprise through consumer. Native English and Arabic. Based in Kuwait, commutes to Doha for the Al Jazeera role. Open to relocation.
+
+This site documents Ahmad's product thinking through long-form articles, a working portfolio, and an AI assistant (K.AI) that surfaces his POVs on demand.
+
+## Site map
+
+- [About](https://www.ahmadkarmi.com/about): full bio, career history, education, credentials
+- [Insights](https://www.ahmadkarmi.com/insights): published writing on AI product management, PM craft, digital strategy
+- [Portfolio](https://www.ahmadkarmi.com/portfolio): project case studies (note: portfolio is partial because much current work is under NDA)
+- [Contact](https://www.ahmadkarmi.com/contact): direct outreach
+
+## Recent AI writing
+
+- [AI Will Not Fix a Broken GTM Strategy. Here Is What It Will Do.](https://www.ahmadkarmi.com/insights/ai-will-not-fix-a-broken-gtm-strategy-here-is-what-it-will-do): 2026-03-10
+- [AI in Dealership Service: Where Fixed Operations Leak Profit and How to Stop It](https://www.ahmadkarmi.com/insights/ai-in-dealership-service-where-fixed-operations-leak-profit-and-how-to-stop-it): 2026-02-04
+- [Beyond Persuasion: Is AI Engineering a Systematic Threat to Politics?](https://www.ahmadkarmi.com/insights/beyond-persuasion-is-ai-engineering-a-systematic-threat-to-politics): 2026-01-14
+- [When Machines Paint: The Unfolding Debate Over AI-Generated Art](https://www.ahmadkarmi.com/insights/when-machines-paint-the-unfolding-debate-over-ai-generated-art): 2025-02-20
+- [The Energy Cost of Artificial Intelligence](https://www.ahmadkarmi.com/insights/the-energy-cost-of-artificial-intelligence): 2025-02-18
+- [Quantum Computing and AI: The Next Frontier](https://www.ahmadkarmi.com/insights/quantum-computing-and-ai-the-next-frontier): 2025-02-18
+
+## Recent product management writing
+
+- [Product Management is Dead. Modern Business Killed It.](https://www.ahmadkarmi.com/insights/product-management-is-dead-modern-business-killed-it): 2025-08-26
+- [The New Divide: Who Gets to Shape the Digital World, and Who Gets Shaped by It?](https://www.ahmadkarmi.com/insights/the-new-divide-who-gets-to-shape-the-digital-world-and-who-gets-shaped-by-it): 2025-06-08
+- [Why Product Management in the Middle East Needs Its Own Playbook](https://www.ahmadkarmi.com/insights/why-product-management-in-the-middle-east-needs-its-own-playbook): 2025-05-20
+- [The Art of Crafting Exceptional Product Experiences](https://www.ahmadkarmi.com/insights/the-art-of-crafting-exceptional-product-experiences): 2024-11-26
+- [How to Manage Product Scope and Feature Creep](https://www.ahmadkarmi.com/insights/how-to-manage-product-scope-and-feature-creep): 2024-09-27
+- [The RICE Framework: A Valuable Tool, But Not the Whole Picture](https://www.ahmadkarmi.com/insights/the-rice-framework-a-valuable-tool-but-not-the-whole-picture): 2024-09-09
+
+## Full insight catalog (37 articles)
+
+- [AI Will Not Fix a Broken GTM Strategy. Here Is What It Will Do.](https://www.ahmadkarmi.com/insights/ai-will-not-fix-a-broken-gtm-strategy-here-is-what-it-will-do): 2026-03-10
+- [AI in Dealership Service: Where Fixed Operations Leak Profit and How to Stop It](https://www.ahmadkarmi.com/insights/ai-in-dealership-service-where-fixed-operations-leak-profit-and-how-to-stop-it): 2026-02-04
+- [Beyond Persuasion: Is AI Engineering a Systematic Threat to Politics?](https://www.ahmadkarmi.com/insights/beyond-persuasion-is-ai-engineering-a-systematic-threat-to-politics): 2026-01-14
+- [Product Management is Dead. Modern Business Killed It.](https://www.ahmadkarmi.com/insights/product-management-is-dead-modern-business-killed-it): 2025-08-26
+- [The New Divide: Who Gets to Shape the Digital World, and Who Gets Shaped by It?](https://www.ahmadkarmi.com/insights/the-new-divide-who-gets-to-shape-the-digital-world-and-who-gets-shaped-by-it): 2025-06-08
+- [Why Product Management in the Middle East Needs Its Own Playbook](https://www.ahmadkarmi.com/insights/why-product-management-in-the-middle-east-needs-its-own-playbook): 2025-05-20
+- [When Machines Paint: The Unfolding Debate Over AI-Generated Art](https://www.ahmadkarmi.com/insights/when-machines-paint-the-unfolding-debate-over-ai-generated-art): 2025-02-20
+- [The Dark Side of Big Tech: Are Your Smart Devices Always Listening?](https://www.ahmadkarmi.com/insights/the-dark-side-of-big-tech-are-your-smart-devices-always-listening): 2025-02-19
+- [The Energy Cost of Artificial Intelligence](https://www.ahmadkarmi.com/insights/the-energy-cost-of-artificial-intelligence): 2025-02-18
+- [Quantum Computing and AI: The Next Frontier](https://www.ahmadkarmi.com/insights/quantum-computing-and-ai-the-next-frontier): 2025-02-18
+- [The Art of Crafting Exceptional Product Experiences](https://www.ahmadkarmi.com/insights/the-art-of-crafting-exceptional-product-experiences): 2024-11-26
+- [How to Manage Product Scope and Feature Creep](https://www.ahmadkarmi.com/insights/how-to-manage-product-scope-and-feature-creep): 2024-09-27
+- [The RICE Framework: A Valuable Tool, But Not the Whole Picture](https://www.ahmadkarmi.com/insights/the-rice-framework-a-valuable-tool-but-not-the-whole-picture): 2024-09-09
+- [Digital Banking and Product Management: Lessons from the Kuwaiti Market](https://www.ahmadkarmi.com/insights/digital-banking-and-product-management-lessons-from-the-kuwaiti-market): 2024-09-05
+- [Mastering Strategic Performance Indicators in Product Management](https://www.ahmadkarmi.com/insights/mastering-strategic-performance-indicators-in-product-management): 2024-07-05
+- [How to Integrate AI into Your GTM Strategy for Maximum Impact](https://www.ahmadkarmi.com/insights/how-to-integrate-ai-into-your-gtm-strategy-for-maximum-impact): 2024-06-26
+- [Real-Time Monitoring and Predictive Maintenance: The Backbone of Smart City Operations](https://www.ahmadkarmi.com/insights/real-time-monitoring-and-predictive-maintenance-the-backbone-of-smart-city-operations): 2024-06-14
+- [Leveraging the Fibonacci Sequence for Effective Project Estimation in Agile and Scrum](https://www.ahmadkarmi.com/insights/leveraging-the-fibonacci-sequence-for-effective-project-estimation-in-agile-and-scrum): 2024-05-07
+- [Building Fair Tech: How PMs Can Mitigate AI Bias in Their Products](https://www.ahmadkarmi.com/insights/building-fair-tech-how-pms-can-mitigate-ai-bias-in-their-products): 2024-04-29
+- [What They Don’t Tell You About Product Launches](https://www.ahmadkarmi.com/insights/what-they-dont-tell-you-about-product-launches): 2024-04-25
+- [The Imperative of Data-Driven Decision Making in Product Management: An Analytical Perspective](https://www.ahmadkarmi.com/insights/the-imperative-of-data-driven-decision-making-in-product-management-an-analytical-perspective): 2024-04-01
+- [The Unbalanced Scale: How Information Asymmetry Shapes Product Management](https://www.ahmadkarmi.com/insights/the-unbalanced-scale-how-information-asymmetry-shapes-product-management): 2023-12-16
+- [Network Effects: The Economic Engine of Product Growth](https://www.ahmadkarmi.com/insights/network-effects-the-economic-engine-of-product-growth): 2023-12-10
+- [Best Practices for Effective Product Backlog Management](https://www.ahmadkarmi.com/insights/best-practices-for-effective-product-backlog-management): 2023-11-09
+- [5 Ways To Transition Into Product Management](https://www.ahmadkarmi.com/insights/5-ways-to-transition-into-product-management): 2023-04-18
+- [How to Build an Esports Team on a Shoestring Budget](https://www.ahmadkarmi.com/insights/how-to-build-an-esports-team-on-a-shoestring-budget): 2023-04-16
+- [Why Gaming Influencers Are Key Players in the Future of Esports](https://www.ahmadkarmi.com/insights/why-gaming-influencers-are-key-players-in-the-future-of-esports): 2023-04-10
+- [Navigating the Esports Industry: Tips for Professionals](https://www.ahmadkarmi.com/insights/navigating-the-esports-industry-tips-for-professionals): 2023-04-06
+- [The Roadmap to Success: Essential Traits and Qualities for COOs in the Years Ahead](https://www.ahmadkarmi.com/insights/the-roadmap-to-success-essential-traits-and-qualities-for-coos-in-the-years-ahead): 2023-03-29
+- [Mastering Product Management: Your Ultimate Beginner’s Guide](https://www.ahmadkarmi.com/insights/mastering-product-management-your-ultimate-beginners-guide): 2023-03-29
+- [Airlines, IATA, & The OpenAPI Hub](https://www.ahmadkarmi.com/insights/airlines-iata-the-openapi-hub): 2023-03-28
+- [Common product management mistakes to avoid](https://www.ahmadkarmi.com/insights/common-product-management-mistakes-to-avoid): 2023-03-13
+- [The Significance of Product Documentation and Knowledge Sharing in Product Management](https://www.ahmadkarmi.com/insights/the-significance-of-product-documentation): 2023-03-12
+- [Kanban Framework Overview](https://www.ahmadkarmi.com/insights/kanban-framework-overview): 2022-12-05
+- [Customer Acquisition Cost (CAC) Explained](https://www.ahmadkarmi.com/insights/customer-acquisition-cost-cac-explained): 2022-11-03
+- [Pareto’s Principle And Becoming A More Effective Product Manager](https://www.ahmadkarmi.com/insights/paretos-principle-and-becoming-a-more-effective-product-manager): 2020-12-01
+- [Empowering your Digital Transformation Teams](https://www.ahmadkarmi.com/insights/empowering-your-digital-transformation-teams): 2020-09-01
+
+## Portfolio (11 projects)
+
+- [ZAIN eSports](https://www.ahmadkarmi.com/portfolio/zain-esport) — Zain Group / Zain eSport
+- [Wilson & Bass](https://www.ahmadkarmi.com/portfolio/wilson-bass) — Wilson & Bass
+- [The Story Point Calculator](https://www.ahmadkarmi.com/portfolio/story-point-calculator) — Personal Project
+- [Talabat UI/UX Concept](https://www.ahmadkarmi.com/portfolio/talabat-ui-ux-concept) — Talabat (Delivery Hero)
+- [Sultan Telecom Corporate Profile](https://www.ahmadkarmi.com/portfolio/sultan-telecom-corporate-profile) — Sultan Telecom
+- [NBK Automated Audit](https://www.ahmadkarmi.com/portfolio/nbk-automated-audit) — National Bank of Kuwait
+- [Kuwait SC Rebrand](https://www.ahmadkarmi.com/portfolio/kuwait-sc-rebrand) — Kuwait SC
+- [KFAS Labs (Proposed Concept)](https://www.ahmadkarmi.com/portfolio/kfas-labs-studio-concept)
+- [Items Details Page Design (Bleems)](https://www.ahmadkarmi.com/portfolio/bleems-items-details-page-design) — Bleems S.P.C.
+- [Checkout & Purchase Flow Optimization](https://www.ahmadkarmi.com/portfolio/checkout-purchase-flow-optimization) — Bleems S.P.C.
+- [AOU Digital Bookstore](https://www.ahmadkarmi.com/portfolio/aou-digital-bookstore) — Arab Open University
+
+## AI assistant
+
+[K.AI](https://www.ahmadkarmi.com) is an in-page chatbot that answers questions about Ahmad's work using retrieval over his published corpus. Trained on the full insights and portfolio above plus a hand-curated voice pack capturing his POVs in his own voice.
+
+## Optional
+
+- [Trakr](https://trakr-mobile.vercel.app/): compliance audit SAAS Ahmad shipped solo
+- [Story Point Calculator](https://www.storypointcalculator.com/): agile sprint planning tool Ahmad shipped solo
+- [LinkedIn](https://www.linkedin.com/in/akarmi)
+- [Email](mailto:alkarmi.ahmad@gmail.com)

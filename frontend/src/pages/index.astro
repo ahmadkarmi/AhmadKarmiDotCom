@@ -61,22 +61,69 @@ const expertise = {
   tech: ['Generative AI Integration', 'Technical Product Management', 'End-to-End Architecture', 'Data Science & Analytics'],
 };
 
-// JSON-LD Schema
+// JSON-LD Schema — @graph with WebSite + Person, enriched for AI agent
+// discovery (jobTitle, worksFor, alumniOf, knowsAbout, sameAs).
+const personId = `${siteUrl}#person`;
 const schema = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Ahmad Al-Karmi",
-  "url": siteUrl,
-  "author": {
-    "@type": "Person",
-    "name": "Ahmad Al-Karmi",
-    "jobTitle": "Product Manager",
-    "url": siteUrl,
-    "sameAs": [
-      siteSettings?.linkedinUrl,
-      "https://www.threads.com/@karmi.csd"
-    ].filter(Boolean)
-  }
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}#website`,
+      "name": "Ahmad Al-Karmi",
+      "url": siteUrl,
+      "inLanguage": "en",
+      "publisher": { "@id": personId }
+    },
+    {
+      "@type": "Person",
+      "@id": personId,
+      "name": "Ahmad Al-Karmi",
+      "givenName": "Ahmad",
+      "familyName": "Al-Karmi",
+      "alternateName": "Karmi",
+      "url": siteUrl,
+      "jobTitle": "Senior Product Manager for Loyalty and Growth Products",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Al Jazeera Media Network",
+        "url": "https://www.aljazeera.com"
+      },
+      "alumniOf": [
+        {
+          "@type": "EducationalOrganization",
+          "name": "Boston University",
+          "url": "https://www.bu.edu"
+        },
+        {
+          "@type": "EducationalOrganization",
+          "name": "American University of Kuwait",
+          "url": "https://www.auk.edu.kw"
+        }
+      ],
+      "knowsAbout": [
+        "AI Product Management",
+        "Product Management",
+        "Loyalty and Growth",
+        "AI-augmented product development",
+        "Digital Transformation",
+        "Bilingual product strategy"
+      ],
+      "knowsLanguage": ["en", "ar"],
+      "nationality": { "@type": "Country", "name": "Canada" },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Kuwait City",
+        "addressCountry": "KW"
+      },
+      "description": "Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused. Over 14 years shipping digital products from enterprise through consumer.",
+      "email": "alkarmi.ahmad@gmail.com",
+      "sameAs": [
+        siteSettings?.linkedinUrl || "https://www.linkedin.com/in/akarmi",
+        "https://www.threads.com/@karmi.csd"
+      ].filter(Boolean)
+    }
+  ]
 };
 ---
 
