@@ -139,7 +139,7 @@ function StatusPill({ status }: { status: StatusData }) {
       ? 'bg-emerald-500'
       : 'bg-accent animate-pulse';
   return (
-    <div className="flex items-center gap-2 text-xs text-foreground-muted">
+    <div className="flex items-center gap-2 text-xs text-foreground-muted motion-safe:animate-fade-in-fast">
       <span className={`inline-block w-1.5 h-1.5 rounded-full ${dotColor}`} />
       <span>{status.label}</span>
     </div>
@@ -206,7 +206,7 @@ function HandoffCard({
   }
 
   return (
-    <div className="mt-4 rounded-xl bg-accent/5 border border-accent/20 p-4">
+    <div className="mt-4 rounded-xl bg-accent/5 border border-accent/20 p-4 motion-safe:animate-fade-up">
       <div className="text-[10px] uppercase tracking-wider text-accent mb-2 font-semibold">
         Handoff summary &middot; edit if needed
       </div>
@@ -285,9 +285,12 @@ export default function Chat() {
   }, [messages, hydrated]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    const el = scrollRef.current;
+    if (!el) return;
+    // Smooth on user-initiated turns. While streaming, jump (smooth scroll
+    // gets visibly stuck behind rapid token deltas).
+    const streaming = status === 'streaming' || status === 'submitted';
+    el.scrollTo({ top: el.scrollHeight, behavior: streaming ? 'auto' : 'smooth' });
   }, [messages, status]);
 
   // Auto-focus the input when streaming finishes so the user can keep typing
@@ -411,7 +414,7 @@ export default function Chat() {
       <button
         type="button"
         onClick={openChat}
-        className="group rounded-full bg-foreground text-background pl-2 pr-5 py-2 text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-accent transition-all pointer-events-auto flex items-center gap-2.5"
+        className="group rounded-full bg-foreground text-background pl-2 pr-5 py-2 text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-accent transition-all duration-200 pointer-events-auto flex items-center gap-2.5 motion-safe:animate-fade-up"
       >
         <span className="w-7 h-7 rounded-full bg-background/10 flex items-center justify-center font-display text-xs font-semibold tracking-tight">
           K
@@ -428,8 +431,8 @@ export default function Chat() {
   const showQuickReplies = messages.length === 0;
 
   return (
-    <div className="fixed inset-0 md:relative md:inset-auto z-[60] pointer-events-auto">
-      <div className="bg-background border-0 md:border md:border-border rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden flex flex-col w-full h-full md:w-[460px] md:h-[700px] md:max-h-[calc(100vh-6rem)]">
+    <div className="fixed inset-0 md:relative md:inset-auto z-[60] pointer-events-auto motion-safe:animate-fade-in-fast">
+      <div className="bg-background border-0 md:border md:border-border rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden flex flex-col w-full h-full md:w-[460px] md:h-[700px] md:max-h-[calc(100vh-6rem)] motion-safe:animate-panel-in origin-bottom-right">
         {/* Header */}
         <header className="px-5 py-4 border-b border-border/60 flex items-center justify-between flex-shrink-0 gap-3 bg-background">
           <div className="flex items-center gap-3 min-w-0">
@@ -449,7 +452,7 @@ export default function Chat() {
                 type="button"
                 onClick={startOver}
                 title="Start over"
-                className="text-[11px] px-2.5 py-1.5 text-foreground-muted hover:text-foreground hover:bg-background-secondary rounded-md transition font-medium"
+                className="text-[11px] px-2.5 py-1.5 text-foreground-muted hover:text-foreground hover:bg-background-secondary rounded-md transition-all duration-150 font-medium"
               >
                 Start over
               </button>
@@ -471,13 +474,19 @@ export default function Chat() {
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
           {messages.length === 0 && (
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 motion-safe:animate-fade-up">
               <AssistantAvatar />
               <div className="space-y-1.5 pt-0.5">
-                <p className="text-[15px] text-foreground leading-relaxed">
+                <p
+                  className="text-[15px] text-foreground leading-relaxed motion-safe:animate-fade-up motion-safe:opacity-0"
+                  style={{ animationDelay: '120ms' }}
+                >
                   Hi, I&rsquo;m K.AI.
                 </p>
-                <p className="text-[15px] text-foreground-secondary leading-relaxed">
+                <p
+                  className="text-[15px] text-foreground-secondary leading-relaxed motion-safe:animate-fade-up motion-safe:opacity-0"
+                  style={{ animationDelay: '260ms' }}
+                >
                   What brought you here today?
                 </p>
               </div>
@@ -495,7 +504,7 @@ export default function Chat() {
 
             if (m.role === 'user') {
               return (
-                <div key={m.id} className="flex justify-end">
+                <div key={m.id} className="flex justify-end motion-safe:animate-fade-up">
                   <div className="max-w-[82%] bg-foreground text-background rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap">
                     {visibleText}
                   </div>
@@ -504,31 +513,37 @@ export default function Chat() {
             }
 
             return (
-              <div key={m.id} className="flex items-start gap-3">
+              <div key={m.id} className="flex items-start gap-3 motion-safe:animate-fade-up">
                 <AssistantAvatar />
                 <div className="flex-1 min-w-0 space-y-2 pt-0.5">
-                  {status && status.stage !== 'done' && <StatusPill status={status} />}
+                  {status && status.stage !== 'done' && <StatusPill key={status.stage} status={status} />}
                   {visibleText && (
                     <div className="text-[15px] text-foreground leading-relaxed whitespace-pre-wrap">
                       {visibleText}
                     </div>
                   )}
                   {parsed?.handoff && (
-                    <HandoffCard
-                      initialContent={parsed.handoff}
-                      onSent={(channel) =>
-                        track('ask_ahmad_handoff_completed', { channel, message_id: m.id })
-                      }
-                    />
+                    <div className="motion-safe:animate-fade-up">
+                      <HandoffCard
+                        initialContent={parsed.handoff}
+                        onSent={(channel) =>
+                          track('ask_ahmad_handoff_completed', { channel, message_id: m.id })
+                        }
+                      />
+                    </div>
                   )}
                   {parsed?.handoffOpen && !parsed.handoff && (
-                    <div className="text-xs text-foreground-muted italic">preparing handoff summary…</div>
+                    <div className="text-xs text-foreground-muted italic motion-safe:animate-fade-in-fast">
+                      preparing handoff summary…
+                    </div>
                   )}
                   {usedCitations.length > 0 && status?.stage === 'done' && (
-                    <Citations
-                      items={usedCitations}
-                      onClick={(c) => track('ask_ahmad_citation_clicked', { url: c.url, source_type: c.sourceType })}
-                    />
+                    <div className="motion-safe:animate-fade-in-fast">
+                      <Citations
+                        items={usedCitations}
+                        onClick={(c) => track('ask_ahmad_citation_clicked', { url: c.url, source_type: c.sourceType })}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -537,12 +552,13 @@ export default function Chat() {
 
           {showQuickReplies && (
             <div className="flex flex-wrap gap-2 pt-3 pl-[40px]">
-              {QUICK_REPLIES.map((q) => (
+              {QUICK_REPLIES.map((q, i) => (
                 <button
                   key={q.label}
                   type="button"
                   onClick={() => submit(q.message, 'quick_reply')}
-                  className="text-[13px] text-foreground bg-background hover:bg-accent hover:text-accent-foreground border border-border hover:border-accent rounded-full px-4 py-2 transition-all font-medium"
+                  style={{ animationDelay: `${400 + i * 70}ms` }}
+                  className="text-[13px] text-foreground bg-background hover:bg-accent hover:text-accent-foreground border border-border hover:border-accent rounded-full px-4 py-2 transition-all font-medium motion-safe:animate-fade-up motion-safe:opacity-0 hover:-translate-y-0.5"
                 >
                   {q.label}
                 </button>
@@ -551,7 +567,7 @@ export default function Chat() {
           )}
 
           {error && (
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 motion-safe:animate-fade-up">
               <AssistantAvatar />
               <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 flex-1">
                 {error.message || 'Something went wrong.'}
@@ -586,7 +602,7 @@ export default function Chat() {
             type="submit"
             disabled={isStreaming || !input.trim()}
             aria-label="Send"
-            className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-foreground text-background hover:bg-accent disabled:bg-background-tertiary disabled:text-foreground-muted transition flex items-center justify-center flex-shrink-0"
+            className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-foreground text-background hover:bg-accent hover:scale-105 active:scale-95 disabled:bg-background-tertiary disabled:text-foreground-muted disabled:hover:scale-100 transition-all duration-150 flex items-center justify-center flex-shrink-0"
           >
             {isStreaming ? (
               <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
