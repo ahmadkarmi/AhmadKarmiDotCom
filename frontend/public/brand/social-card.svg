@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#13151a" fill-opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <!-- Warm paper background with subtle dot grid -->
+  <rect width="1200" height="630" fill="#fbf9f3"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Top-left brand mark: K.AI badge + label -->
+  <g transform="translate(80, 80)">
+    <circle cx="22" cy="22" r="22" fill="#2664ec"/>
+    <text x="22" y="30" font-family="Playfair Display, Georgia, serif" font-size="24" font-weight="700" fill="white" text-anchor="middle">K</text>
+    <text x="60" y="22" font-family="Playfair Display, Georgia, serif" font-size="22" font-weight="600" fill="#13151a">K.AI</text>
+    <text x="60" y="44" font-family="Inter, system-ui, sans-serif" font-size="13" fill="#5b6471">Ahmad Al-Karmi's AI Assistant</text>
+  </g>
+
+  <!-- Hero: name -->
+  <text x="80" y="335" font-family="Playfair Display, Georgia, serif" font-size="92" font-weight="700" fill="#13151a" letter-spacing="-2">Ahmad Al-Karmi</text>
+
+  <!-- Tagline -->
+  <text x="82" y="395" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="500" fill="#13151a" fill-opacity="0.78">Senior Product Manager. AI-focused.</text>
+  <text x="82" y="432" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="500" fill="#13151a" fill-opacity="0.78">Loyalty and Growth at Al Jazeera.</text>
+
+  <!-- Bottom: accent rule + URL -->
+  <line x1="80" y1="538" x2="220" y2="538" stroke="#2664ec" stroke-width="3" stroke-linecap="round"/>
+  <text x="80" y="578" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="600" fill="#13151a" letter-spacing="0.5">ahmadkarmi.com</text>
+
+  <!-- Top-right: subtle decorative mark echoing the site's editorial feel -->
+  <g transform="translate(1070, 80)">
+    <line x1="0" y1="0" x2="50" y2="0" stroke="#dcd8cf" stroke-width="2"/>
+    <line x1="0" y1="14" x2="50" y2="14" stroke="#dcd8cf" stroke-width="2"/>
+    <line x1="0" y1="28" x2="32" y2="28" stroke="#2664ec" stroke-width="2"/>
+  </g>
+</svg>

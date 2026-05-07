@@ -14,7 +14,8 @@
     "ingest:full": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/ingest.ts -- --full",
     "evals": "tsx --env-file=.env --env-file-if-exists=.env.local evals/run.ts",
     "smoke": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/smoke.ts",
-    "build:llms": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/build-llms.ts"
+    "build:llms": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/build-llms.ts",
+    "build:social-card": "node scripts/build-social-card.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0",
