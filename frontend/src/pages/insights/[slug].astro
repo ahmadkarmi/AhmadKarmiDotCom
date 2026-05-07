@@ -7,6 +7,7 @@ import { marked } from 'marked';
 import ShareButtons from '../../components/ShareButtons.astro';
 import NewsletterForm from '../../components/NewsletterForm.astro';
 import RelatedInsights from '../../components/RelatedInsights.astro';
+import ListenButton from '../../components/insights/ListenButton';
 
 export async function getStaticPaths() {
   const insights = await fetchInsights();
@@ -255,10 +256,11 @@ const schema = {
           </div>
         )}
         
-        <!-- Share Section (Top) -->
+        <!-- Listen + Share Section (Top) -->
         <div class="flex flex-wrap items-center gap-4 mb-8">
+          <ListenButton client:load slug={slug} />
           <span class="text-foreground-muted text-sm shrink-0">Share:</span>
-          <ShareButtons 
+          <ShareButtons
             title={insightData.name}
             url={shareUrl}
             description={insightData.description}
@@ -302,8 +304,9 @@ const schema = {
     <div class="container-custom">
       <article class="max-w-3xl mx-auto">
         {insightData.body && (
-          <div 
-            class="prose prose-lg max-w-none 
+          <div
+            id="article-body"
+            class="prose prose-lg max-w-none
                    prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-tight prose-headings:leading-tight prose-headings:font-semibold
                    prose-h1:text-3xl md:prose-h1:text-4xl prose-h1:mb-6 prose-h1:font-bold
                    prose-h2:text-[1.85rem] md:prose-h2:text-[2.15rem] prose-h2:mt-14 prose-h2:mb-5 prose-h2:font-bold
