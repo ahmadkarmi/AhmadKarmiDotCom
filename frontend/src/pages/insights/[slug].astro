@@ -258,7 +258,7 @@ const schema = {
         
         <!-- Listen + Share Section (Top) -->
         <div class="flex flex-wrap items-center gap-4 mb-8">
-          <ListenButton client:load slug={slug} />
+          <ListenButton client:load slug={slug} title={insightData.name} />
           <span class="text-foreground-muted text-sm shrink-0">Share:</span>
           <ShareButtons
             title={insightData.name}
@@ -302,7 +302,7 @@ const schema = {
   <!-- Article Body -->
   <section class="section pt-0">
     <div class="container-custom">
-      <article class="max-w-3xl mx-auto">
+      <article class="max-w-3xl mx-auto pb-24">
         {insightData.body && (
           <div
             id="article-body"
