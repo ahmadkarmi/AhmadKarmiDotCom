@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 
@@ -13,11 +13,54 @@ const QUICK_REPLIES: { label: string; message: string }[] = [
   { label: 'How I Built This Assistant', message: 'How was this assistant built?' },
 ];
 
+// Minimal Web Speech API type shims (not in lib.dom by default).
+interface SRAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+interface SRResult {
+  readonly isFinal: boolean;
+  readonly length: number;
+  [index: number]: SRAlternative;
+}
+interface SRResultList {
+  readonly length: number;
+  [index: number]: SRResult;
+}
+interface SREvent extends Event {
+  readonly resultIndex: number;
+  readonly results: SRResultList;
+}
+interface SRErrorEvent extends Event {
+  readonly error: string;
+  readonly message: string;
+}
+interface SRInstance extends EventTarget {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  maxAlternatives: number;
+  onstart: ((this: SRInstance, ev: Event) => unknown) | null;
+  onend: ((this: SRInstance, ev: Event) => unknown) | null;
+  onerror: ((this: SRInstance, ev: SRErrorEvent) => unknown) | null;
+  onresult: ((this: SRInstance, ev: SREvent) => unknown) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+type SRConstructor = new () => SRInstance;
+
 declare global {
   interface Window {
     trackEvent?: (eventName: string, params?: Record<string, unknown>) => void;
+    SpeechRecognition?: SRConstructor;
+    webkitSpeechRecognition?: SRConstructor;
   }
 }
+
+type VoiceState = 'unsupported' | 'idle' | 'listening' | 'processing';
+
+type SRErrorKind = 'no-speech' | 'audio-capture' | 'not-allowed' | 'network' | 'aborted' | 'other';
 
 function track(event: string, params: Record<string, unknown> = {}): void {
   if (typeof window !== 'undefined' && typeof window.trackEvent === 'function') {
@@ -244,6 +287,15 @@ export default function Chat() {
   const inputRef = useRef<HTMLInputElement>(null);
   const prevStatusRef = useRef<string>('ready');
 
+  // --- Voice input state ---
+  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [voiceErrorMessage, setVoiceErrorMessage] = useState<string | null>(null);
+  const recognitionRef = useRef<SRInstance | null>(null);
+  const voiceStartTimeRef = useRef<number>(0);
+  const voiceFinalTranscriptRef = useRef<string>('');
+  const voiceInterimRef = useRef<string>('');
+
   const initialMessages = useMemo<UIMessage[]>(() => {
     if (typeof window === 'undefined') return [];
     try {
@@ -319,6 +371,125 @@ export default function Chat() {
       };
     }
   }, [open]);
+
+  // --- Voice input: feature detect + cleanup ---
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      setVoiceState('unsupported');
+      return;
+    }
+    return () => {
+      try {
+        recognitionRef.current?.abort();
+      } catch {
+        /* noop */
+      }
+    };
+  }, []);
+
+  const stopRecognition = useCallback(() => {
+    try {
+      recognitionRef.current?.stop();
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  const startRecognition = useCallback(() => {
+    if (voiceState === 'unsupported' || voiceState === 'listening' || voiceState === 'processing') return;
+    if (status === 'streaming' || status === 'submitted') return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      setVoiceState('unsupported');
+      return;
+    }
+    setVoiceErrorMessage(null);
+    voiceFinalTranscriptRef.current = '';
+    voiceInterimRef.current = '';
+    setInterimTranscript('');
+    voiceStartTimeRef.current = Date.now();
+
+    const rec = new SR();
+    rec.lang = 'en-US';
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+
+    rec.onstart = () => {
+      setVoiceState('listening');
+      track('ask_ahmad_voice_input_started');
+    };
+    rec.onresult = (event: SREvent) => {
+      let interim = '';
+      let finalText = voiceFinalTranscriptRef.current;
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const r = event.results[i];
+        if (r.isFinal) finalText += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      voiceFinalTranscriptRef.current = finalText;
+      voiceInterimRef.current = interim;
+      setInterimTranscript(interim);
+    };
+    rec.onerror = (event: SRErrorEvent) => {
+      const knownKinds: SRErrorKind[] = ['no-speech', 'audio-capture', 'not-allowed', 'network', 'aborted'];
+      const kind: SRErrorKind = knownKinds.includes(event.error as SRErrorKind)
+        ? (event.error as SRErrorKind)
+        : 'other';
+      track('ask_ahmad_voice_input_error', { error_kind: kind });
+      // 'aborted' is the normal stop path triggered by us; don't surface it as an error.
+      if (kind !== 'aborted') {
+        const msg =
+          kind === 'not-allowed'
+            ? 'Microphone access was blocked. Enable it in your browser to use voice input.'
+            : kind === 'no-speech'
+            ? "Couldn't hear that — try again or type your question."
+            : kind === 'audio-capture'
+            ? "Couldn't access the microphone. Check your device settings."
+            : kind === 'network'
+            ? 'Network issue with voice recognition. Try again.'
+            : "Couldn't transcribe — try again or type your question.";
+        setVoiceErrorMessage(msg);
+      }
+    };
+    rec.onend = () => {
+      const final = voiceFinalTranscriptRef.current.trim();
+      const interim = voiceInterimRef.current.trim();
+      // Some browsers (Safari) fire onend without ever marking results as final.
+      // Fall back to whatever interim was captured at the time of stop.
+      const captured = final || interim;
+      if (captured) {
+        setInput((prev) => (prev.trim() ? `${prev.trim()} ${captured}` : captured));
+        const durationMs = Date.now() - voiceStartTimeRef.current;
+        track('ask_ahmad_voice_input_completed', {
+          transcript_length: captured.length,
+          duration_ms: durationMs,
+        });
+        // Defer focus so the input is editable before we drop the cursor.
+        requestAnimationFrame(() => {
+          const el = inputRef.current;
+          if (el) {
+            el.focus();
+            el.setSelectionRange(el.value.length, el.value.length);
+          }
+        });
+      }
+      setInterimTranscript('');
+      setVoiceState('idle');
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = rec;
+    try {
+      rec.start();
+    } catch (err) {
+      console.warn('[ask-ahmad] recognition start failed', err);
+      setVoiceState('idle');
+      track('ask_ahmad_voice_input_error', { error_kind: 'other' });
+    }
+  }, [voiceState, status]);
 
   const trackedIntents = useRef<Set<string>>(new Set());
   const trackedHandoffs = useRef<Set<string>>(new Set());
@@ -579,10 +750,40 @@ export default function Chat() {
           )}
         </div>
 
+        {/* Voice error toast */}
+        {voiceErrorMessage && (
+          <div
+            role="status"
+            className="px-4 pt-2 motion-safe:animate-fade-in-fast bg-background"
+          >
+            <div className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-start justify-between gap-2">
+              <span>{voiceErrorMessage}</span>
+              <button
+                type="button"
+                onClick={() => setVoiceErrorMessage(null)}
+                className="text-amber-700 hover:text-amber-900 font-medium flex-shrink-0"
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* aria-live announcement for screen readers */}
+        <div className="sr-only" aria-live="polite" role="status">
+          {voiceState === 'listening'
+            ? interimTranscript
+              ? `Heard: ${interimTranscript}`
+              : 'Listening'
+            : ''}
+        </div>
+
         {/* Input */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (voiceState === 'listening') return;
             submit(input, 'input');
           }}
           className="border-t border-border/60 px-4 py-3 flex items-center gap-2 flex-shrink-0 bg-background"
@@ -591,16 +792,80 @@ export default function Chat() {
             <input
               ref={inputRef}
               type="text"
-              value={input}
+              value={voiceState === 'listening' ? interimTranscript : input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Tell K.AI what you&rsquo;re working on…"
+              placeholder={
+                voiceState === 'listening'
+                  ? 'Listening…'
+                  : 'Tell K.AI what you’re working on…'
+              }
               disabled={isStreaming}
-              className="w-full text-[15px] md:text-sm px-4 py-3 md:py-2.5 bg-background-secondary border border-transparent rounded-full focus:outline-none focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/20 disabled:opacity-50 transition placeholder:text-foreground-muted"
+              readOnly={voiceState === 'listening'}
+              className={`w-full text-[15px] md:text-sm px-4 py-3 md:py-2.5 bg-background-secondary border rounded-full focus:outline-none focus:bg-background disabled:opacity-50 transition placeholder:text-foreground-muted ${
+                voiceState === 'listening'
+                  ? 'border-red-400 ring-2 ring-red-400/30 italic text-foreground-muted'
+                  : 'border-transparent focus:border-accent focus:ring-2 focus:ring-accent/20'
+              }`}
             />
           </div>
+          {voiceState !== 'unsupported' && (
+            <button
+              type="button"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                startRecognition();
+              }}
+              onPointerUp={(e) => {
+                e.preventDefault();
+                if (voiceState === 'listening') stopRecognition();
+              }}
+              onPointerLeave={() => {
+                if (voiceState === 'listening') stopRecognition();
+              }}
+              onPointerCancel={() => {
+                if (voiceState === 'listening') stopRecognition();
+              }}
+              onKeyDown={(e) => {
+                if ((e.key === ' ' || e.key === 'Enter') && voiceState === 'idle' && !e.repeat) {
+                  e.preventDefault();
+                  startRecognition();
+                }
+              }}
+              onKeyUp={(e) => {
+                if ((e.key === ' ' || e.key === 'Enter') && voiceState === 'listening') {
+                  e.preventDefault();
+                  stopRecognition();
+                }
+              }}
+              onContextMenu={(e) => e.preventDefault()}
+              disabled={isStreaming}
+              aria-pressed={voiceState === 'listening'}
+              aria-label={
+                voiceState === 'listening'
+                  ? 'Recording, release to send'
+                  : 'Hold to record a question'
+              }
+              title={voiceState === 'listening' ? 'Release to stop' : 'Hold to record'}
+              className={`relative w-10 h-10 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 select-none touch-none ${
+                voiceState === 'listening'
+                  ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30'
+                  : 'bg-background-secondary text-foreground-secondary hover:bg-accent/10 hover:text-accent active:scale-95'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="3" width="6" height="11" rx="3" />
+                <path d="M5 11a7 7 0 0 0 14 0" />
+                <line x1="12" y1="18" x2="12" y2="22" />
+                <line x1="8" y1="22" x2="16" y2="22" />
+              </svg>
+              {voiceState === 'listening' && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-300 motion-safe:animate-ping" />
+              )}
+            </button>
+          )}
           <button
             type="submit"
-            disabled={isStreaming || !input.trim()}
+            disabled={isStreaming || !input.trim() || voiceState === 'listening'}
             aria-label="Send"
             className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-foreground text-background hover:bg-accent hover:scale-105 active:scale-95 disabled:bg-background-tertiary disabled:text-foreground-muted disabled:hover:scale-100 transition-all duration-150 flex items-center justify-center flex-shrink-0"
           >
