@@ -15,7 +15,4 @@ export default defineConfig({
     image: {
         domains: ['localhost', '127.0.0.1', 'admin.ahmadkarmi.com'],
     },
-    experimental: {
-        // Enable View Transitions
-    },
 });
