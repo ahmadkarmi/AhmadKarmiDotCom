@@ -20,6 +20,10 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 const { insight, allInsights = [] } = Astro.props;
 
+// Build-time feature flag for the Listen feature. Default off everywhere
+// until we flip it on per environment via PUBLIC_LISTEN_ENABLED=true.
+const listenEnabled = import.meta.env.PUBLIC_LISTEN_ENABLED === 'true';
+
 // Fallback fetch if props are empty (for dev mode)
 const insightData = insight || await fetchInsightBySlug(slug as string);
 
@@ -258,7 +262,9 @@ const schema = {
         
         <!-- Listen + Share Section (Top) -->
         <div class="flex flex-wrap items-center gap-4 mb-8">
-          <ListenButton client:load slug={slug} title={insightData.name} />
+          {listenEnabled && (
+            <ListenButton client:load slug={slug} title={insightData.name} />
+          )}
           <span class="text-foreground-muted text-sm shrink-0">Share:</span>
           <ShareButtons
             title={insightData.name}
@@ -302,7 +308,7 @@ const schema = {
   <!-- Article Body -->
   <section class="section pt-0">
     <div class="container-custom">
-      <article class="max-w-3xl mx-auto pb-24">
+      <article class:list={["max-w-3xl mx-auto", listenEnabled && "pb-24"]}>
         {insightData.body && (
           <div
             id="article-body"
