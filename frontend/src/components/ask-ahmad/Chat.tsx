@@ -414,7 +414,10 @@ export default function Chat() {
     const rec = new SR();
     rec.lang = 'en-US';
     rec.interimResults = true;
-    rec.continuous = false;
+    // Hands-free: keep listening until the user taps stop (or recognition
+    // is auto-aborted on unmount). With continuous=false, Safari ends the
+    // session as soon as it detects a brief pause — that defeats hands-free.
+    rec.continuous = true;
     rec.maxAlternatives = 1;
 
     rec.onstart = () => {
@@ -811,16 +814,19 @@ export default function Chat() {
           {voiceState !== 'unsupported' && (
             <button
               type="button"
-              onMouseDown={(e) => e.preventDefault()}
+              onPointerDown={() => {
+                // Blur the text input on the *down* event so iOS dismisses
+                // the keyboard and resolves any focus-related dead-tap
+                // before the click event runs.
+                if (document.activeElement === inputRef.current) {
+                  inputRef.current?.blur();
+                }
+              }}
               onClick={() => {
                 if (voiceState === 'listening') {
                   stopRecognition();
                   return;
                 }
-                // Drop focus from the text input so the mobile keyboard
-                // collapses and recognition can claim the mic without
-                // competing with input focus.
-                inputRef.current?.blur();
                 startRecognition();
               }}
               disabled={isStreaming}
