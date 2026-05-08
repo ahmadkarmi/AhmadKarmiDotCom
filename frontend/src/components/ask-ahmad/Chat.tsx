@@ -801,7 +801,7 @@ export default function Chat() {
               }
               disabled={isStreaming}
               readOnly={voiceState === 'listening'}
-              className={`w-full text-[15px] md:text-sm px-4 py-3 md:py-2.5 bg-background-secondary border rounded-full focus:outline-none focus:bg-background disabled:opacity-50 transition placeholder:text-foreground-muted ${
+              className={`w-full text-base md:text-sm px-4 py-3 md:py-2.5 bg-background-secondary border rounded-full focus:outline-none focus:bg-background disabled:opacity-50 transition placeholder:text-foreground-muted ${
                 voiceState === 'listening'
                   ? 'border-red-400 ring-2 ring-red-400/30 italic text-foreground-muted'
                   : 'border-transparent focus:border-accent focus:ring-2 focus:ring-accent/20'
@@ -811,42 +811,27 @@ export default function Chat() {
           {voiceState !== 'unsupported' && (
             <button
               type="button"
-              onPointerDown={(e) => {
-                e.preventDefault();
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                if (voiceState === 'listening') {
+                  stopRecognition();
+                  return;
+                }
+                // Drop focus from the text input so the mobile keyboard
+                // collapses and recognition can claim the mic without
+                // competing with input focus.
+                inputRef.current?.blur();
                 startRecognition();
               }}
-              onPointerUp={(e) => {
-                e.preventDefault();
-                if (voiceState === 'listening') stopRecognition();
-              }}
-              onPointerLeave={() => {
-                if (voiceState === 'listening') stopRecognition();
-              }}
-              onPointerCancel={() => {
-                if (voiceState === 'listening') stopRecognition();
-              }}
-              onKeyDown={(e) => {
-                if ((e.key === ' ' || e.key === 'Enter') && voiceState === 'idle' && !e.repeat) {
-                  e.preventDefault();
-                  startRecognition();
-                }
-              }}
-              onKeyUp={(e) => {
-                if ((e.key === ' ' || e.key === 'Enter') && voiceState === 'listening') {
-                  e.preventDefault();
-                  stopRecognition();
-                }
-              }}
-              onContextMenu={(e) => e.preventDefault()}
               disabled={isStreaming}
               aria-pressed={voiceState === 'listening'}
               aria-label={
                 voiceState === 'listening'
-                  ? 'Recording, release to send'
-                  : 'Hold to record a question'
+                  ? 'Stop recording'
+                  : 'Start voice input'
               }
-              title={voiceState === 'listening' ? 'Release to stop' : 'Hold to record'}
-              className={`relative w-10 h-10 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 select-none touch-none ${
+              title={voiceState === 'listening' ? 'Tap to stop' : 'Tap to speak'}
+              className={`relative w-10 h-10 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 select-none ${
                 voiceState === 'listening'
                   ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30'
                   : 'bg-background-secondary text-foreground-secondary hover:bg-accent/10 hover:text-accent active:scale-95'
