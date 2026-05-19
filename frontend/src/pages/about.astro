@@ -12,49 +12,32 @@ const journey = [
     role: 'Senior Product Manager, Loyalty & Growth Products',
     company: 'Al Jazeera Media Network',
     location: 'Doha, Qatar',
-    highlights: [
-      'Owns AI-enabled loyalty, retention and growth across a 20M+ reader portfolio in English and Arabic, with platform, AI delivery framework and data architecture decisions in scope',
-      'Architected an AI-augmented delivery framework now the shared operating model across product, design and engineering. Cycle time fell 16% and post-deployment incidents fell 67%',
-      'Designed an AI-personalisation layer over the existing notification stack on GCP, lifting CTR ~11% above baseline editorial pushes while protecting editorial baseline volume',
-      'Drove bilingual content taxonomy normalisation as product-owned data architecture, now the canonical layer underpinning Follow, notifications, newsletters and personalisation. Delivered bilingual classification parity above 88%',
-      'Defined and launched Follow Topic on native mobile, now driving ~48% of new mobile sign-ups in a typical 30 day window. Loyalty portfolio up ~7% since joining',
-    ],
+    summary: 'Owns AI-enabled loyalty, retention and growth across a multi-million reader portfolio in English and Arabic. Scope spans the AI delivery framework now used across product, design and engineering; an AI-personalisation layer over the editorial notification stack on GCP; bilingual content taxonomy as product-owned data architecture; and the Follow Topic experience on native mobile. Reports to the Head of Product Management & Digital.',
+    highlights: [],
   },
   {
     period: 'August 2023 - July 2025',
     role: 'Product Manager',
     company: 'UULA Technologies',
     location: 'Kuwait City, Kuwait',
-    highlights: [
-      'Led seven engineers and three designers across delivery, sprint architecture and technical decision-making. Delivered 100% of planned business requirements across the full tenure',
-      'Deployed an AI-powered messaging feature embedded into the teacher workflow. Teacher productivity rose 8.5% and students’ negative scoring fell 3%',
-      'Designed a new search interface with custom-architected ranking algorithms achieving over 90% search-to-results conversion',
-      'Shipped the Fixing Mistakes learning feature that lifted knowledge retention ~30% at ~70% sustained adoption',
-    ],
+    summary: 'Led product across an ed-tech platform serving teachers and students, owning delivery, sprint architecture and technical decision-making for a cross-functional team of engineers and designers. Shipped AI-powered teacher workflow tooling, a redesigned search experience built on custom ranking, and learning features focused on retention.',
+    highlights: [],
   },
   {
     period: 'May 2021 - June 2023',
     role: 'Head of Product Management',
     company: 'Bleems',
     location: 'Kuwait City, Kuwait',
-    highlights: [
-      'Founded the product management function from zero as first product hire. Built agile rituals, governance, technical standards and cross-functional architecture. Delivered 22% productivity gains and 100% on-time delivery',
-      'Owned the AI-driven personalisation and merchandising architecture across the shopping surface. Monthly conversion settled at 12.1%; cashback event conversion rose to 36.1%',
-      'Steered 20+ new features and 40+ enhancements over two years against executive-agreed annual roadmaps, with quarterly value reviews to the C-suite',
-      'Designed and launched a customer loyalty program. Daily revenue rose ~23% and average cart size grew ~28%',
-    ],
+    summary: 'Founded the product management function as the first product hire at an e-commerce business. Built the agile rituals, governance and cross-functional architecture from zero, owned the AI-driven personalisation and merchandising layer across the shopping surface, and ran an executive-agreed roadmap with quarterly value reviews to the C-suite. Designed and launched the customer loyalty program.',
+    highlights: [],
   },
   {
     period: 'March 2010 - May 2021',
     role: 'Chief Innovation Officer',
     company: 'MEDCOMM Consulting Group',
     location: 'Kuwait City, Kuwait',
-    highlights: [
-      'Eleven-year tenure rising to Chief Innovation Officer running enterprise IT system design, architecture and vendor management. Governed an average annual KWD 300,000 budget and an 8-person team across portfolios spanning 8 industries',
-      'Conceived and launched Zain eSports from zero to 18,000 participants and 43M social media impressions in 12 months. Owned strategy, GTM, brand, partner ecosystem and live operations end-to-end',
-      'Led the AOU Riyadh campus IT redesign covering audio-visual and integrated e-learning infrastructure. Delivered 24% cost savings through architecture decisions and vendor strategy',
-      'Built internal project management software and standardized RFP creation across the 8-industry portfolio. Cut operational costs 23% and embedded a governance framework still used across the practice',
-    ],
+    summary: 'Eleven-year tenure at a boutique consultancy, rising to Chief Innovation Officer running enterprise IT system design, architecture and vendor management across an eight-industry portfolio including telecom, finance, education, energy and public sector. Conceived and launched Zain eSports end-to-end as their consultant, led the AOU Riyadh campus IT redesign, and built the internal project management software and RFP framework still used across the practice.',
+    highlights: [],
   },
 ];
 
@@ -196,14 +179,18 @@ const aboutPage = await fetchAboutPage();
                     <span class="text-sm font-mono text-accent">{item.period}</span>
                   </div>
                   <div class="text-foreground-secondary font-medium mb-4">{item.role}</div>
-                  <ul class="space-y-3">
-                    {item.highlights.map(highlight => (
-                      <li class="group flex items-start gap-3 text-foreground-secondary text-base leading-relaxed">
-                        <span class="mt-2 w-1.5 h-1.5 rounded-full bg-border group-hover:bg-accent transition-colors flex-shrink-0"></span>
-                        {highlight}
-                      </li>
-                    ))}
-                  </ul>
+                  {item.summary ? (
+                    <p class="text-foreground-secondary text-base leading-relaxed">{item.summary}</p>
+                  ) : (
+                    <ul class="space-y-3">
+                      {item.highlights.map(highlight => (
+                        <li class="group flex items-start gap-3 text-foreground-secondary text-base leading-relaxed">
+                          <span class="mt-2 w-1.5 h-1.5 rounded-full bg-border group-hover:bg-accent transition-colors flex-shrink-0"></span>
+                          {highlight}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ))}
             </div>
