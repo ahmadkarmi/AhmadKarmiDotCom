@@ -17,10 +17,10 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import yaml from 'js-yaml';
 
-import { fetchWordPress, type NormalizedPost } from './lib/wp';
-import { stripHtml, chunkText } from './lib/chunk';
+import { fetchWordPress } from './lib/wp';
 import { embedAll, estimateCostUsd } from './lib/embed';
 import { ChunkStore, type ChunkRow } from './lib/db';
+import { chunksFromInsight, chunksFromWork, type PendingChunk } from './lib/ingest-single';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -40,94 +40,6 @@ function parseArgs(): Args {
     noWp: set.has('no-wp'),
     noVoice: set.has('no-voice'),
   };
-}
-
-interface PendingChunk {
-  id: string;
-  source: string;
-  source_type: string;
-  source_id: string;
-  source_url: string;
-  title: string;
-  content: string;
-  metadata: Record<string, unknown>;
-}
-
-function chunksFromInsight(p: NormalizedPost): PendingChunk[] {
-  const out: PendingChunk[] = [];
-  // 1. Description goes in as a high-priority single chunk (when present).
-  if (p.insightDescription) {
-    const text = stripHtml(p.insightDescription);
-    if (text) {
-      out.push({
-        id: `wp:insight:${p.id}:description:0`,
-        source: 'wp',
-        source_type: 'insight',
-        source_id: String(p.id),
-        source_url: p.url,
-        title: p.title,
-        content: text,
-        metadata: { field: 'description', tags: p.tags, date: p.date, featured: p.featured },
-      });
-    }
-  }
-  // 2. Body chunked semantically.
-  const bodyText = stripHtml(p.body);
-  for (const c of chunkText(bodyText)) {
-    out.push({
-      id: `wp:insight:${p.id}:body:${c.index}`,
-      source: 'wp',
-      source_type: 'insight',
-      source_id: String(p.id),
-      source_url: p.url,
-      title: p.title,
-      content: c.text,
-      metadata: { field: 'body', position: c.index, tags: p.tags, date: p.date, featured: p.featured },
-    });
-  }
-  return out;
-}
-
-function chunksFromWork(p: NormalizedPost): PendingChunk[] {
-  const out: PendingChunk[] = [];
-  const richFields: Array<['brief' | 'scope' | 'details', string | undefined]> = [
-    ['brief', p.workBrief],
-    ['scope', p.workScope],
-    ['details', p.workDetails],
-  ];
-  for (const [name, raw] of richFields) {
-    if (!raw) continue;
-    const text = stripHtml(raw);
-    if (!text) continue;
-    // Brief/scope/details usually short — keep as single chunks unless big.
-    for (const c of chunkText(text)) {
-      out.push({
-        id: `wp:work:${p.id}:${name}:${c.index}`,
-        source: 'wp',
-        source_type: 'work',
-        source_id: String(p.id),
-        source_url: p.url,
-        title: p.title,
-        content: c.text,
-        metadata: { field: name, position: c.index, client: p.workClient, tags: p.tags, date: p.date, featured: p.featured },
-      });
-    }
-  }
-  // Body, if present.
-  const bodyText = stripHtml(p.body);
-  for (const c of chunkText(bodyText)) {
-    out.push({
-      id: `wp:work:${p.id}:body:${c.index}`,
-      source: 'wp',
-      source_type: 'work',
-      source_id: String(p.id),
-      source_url: p.url,
-      title: p.title,
-      content: c.text,
-      metadata: { field: 'body', position: c.index, client: p.workClient, tags: p.tags, date: p.date, featured: p.featured },
-    });
-  }
-  return out;
 }
 
 interface VoicePackEntry {

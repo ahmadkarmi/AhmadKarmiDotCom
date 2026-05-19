@@ -167,6 +167,25 @@ export interface FetchResult {
   }[];
 }
 
+// Single-post fetch for the incremental webhook path. Returns null when the
+// post is missing, not published, or test data — the caller treats null as
+// "nothing to ingest" (and, for the webhook, falls back to a delete).
+export async function fetchWordPressPostById(
+  type: WpPostType,
+  id: number
+): Promise<NormalizedPost | null> {
+  const res = await fetch(
+    `${WP}/wp-json/wp/v2/${type}/${id}?_fields=id,date,modified,slug,status,title,content,tags,acf,link`
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`WP fetch ${type}/${id} -> ${res.status}`);
+  const raw = (await res.json()) as RawWpPost;
+  if (raw.status !== 'publish') return null;
+  if (isTestData(raw)) return null;
+  const tagMap = await fetchTagMap();
+  return normalize(type, raw, tagMap);
+}
+
 export async function fetchWordPress(
   types: WpPostType[] = ['insight', 'work'],
   opts: { onlyPublished?: boolean } = { onlyPublished: true }

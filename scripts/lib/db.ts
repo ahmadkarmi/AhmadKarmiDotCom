@@ -85,6 +85,20 @@ export class ChunkStore {
     return (result as { rowCount?: number }).rowCount ?? 0;
   }
 
+  // Targeted delete for the incremental webhook path: removes every chunk for
+  // one specific post (all fields + body chunks share source_type + source_id).
+  async deleteBySourceIdAndType(source: string, sourceType: string, sourceId: string): Promise<number> {
+    if (this.dryRun || !this.sql) {
+      console.log(`[db] DRY RUN: would delete chunks WHERE source='${source}' AND source_type='${sourceType}' AND source_id='${sourceId}'`);
+      return 0;
+    }
+    const result = await this.sql(
+      `DELETE FROM chunks WHERE source = $1 AND source_type = $2 AND source_id = $3`,
+      [source, sourceType, sourceId]
+    );
+    return (result as { rowCount?: number }).rowCount ?? 0;
+  }
+
   async upsertMany(rows: ChunkRow[]): Promise<number> {
     if (this.dryRun || !this.sql) {
       console.log(`[db] DRY RUN: would upsert ${rows.length} chunks`);
