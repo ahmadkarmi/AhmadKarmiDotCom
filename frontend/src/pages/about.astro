@@ -5,28 +5,31 @@ import avatarImage from '../assets/brand/avatar.jpg';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import { fetchAboutPage, getMediaUrl } from '../lib/wordpress';
 
-// Career Journey - Accurate from CV
+// Career Journey - Accurate from CV (May 2026)
 const journey = [
   {
-    period: 'July 2024 - Present',
-    role: 'Senior Product Manager',
+    period: 'July 2025 - Present',
+    role: 'Senior Product Manager, Loyalty & Growth Products',
     company: 'Al Jazeera Media Network',
     location: 'Doha, Qatar',
     highlights: [
-      'Responsible for loyalty, retention, and growth across all Al Jazeera Properties',
-      'Product Owner for Al Jazeera Mubasher (Live Broadcast Property)',
+      'Owns AI-enabled loyalty, retention and growth across a 20M+ reader portfolio in English and Arabic, with platform, AI delivery framework and data architecture decisions in scope',
+      'Architected an AI-augmented delivery framework now the shared operating model across product, design and engineering. Cycle time fell 16% and post-deployment incidents fell 67%',
+      'Designed an AI-personalisation layer over the existing notification stack on GCP, lifting CTR ~11% above baseline editorial pushes while protecting editorial baseline volume',
+      'Drove bilingual content taxonomy normalisation as product-owned data architecture, now the canonical layer underpinning Follow, notifications, newsletters and personalisation. Delivered bilingual classification parity above 88%',
+      'Defined and launched Follow Topic on native mobile, now driving ~48% of new mobile sign-ups in a typical 30 day window. Loyalty portfolio up ~7% since joining',
     ],
   },
   {
-    period: 'August 2023 - July 2024',
+    period: 'August 2023 - July 2025',
     role: 'Product Manager',
     company: 'UULA Technologies',
     location: 'Kuwait City, Kuwait',
     highlights: [
-      'Increased engagement by 70% via a gamified "Practice Center"',
-      'Achieved 90%+ search-to-results conversion with new search interface',
-      'Led a team of 7 developers and 3 designers',
-      'Improved knowledge retention by 30% with the "Fixing Mistakes" feature',
+      'Led seven engineers and three designers across delivery, sprint architecture and technical decision-making. Delivered 100% of planned business requirements across the full tenure',
+      'Deployed an AI-powered messaging feature embedded into the teacher workflow. Teacher productivity rose 8.5% and students’ negative scoring fell 3%',
+      'Designed a new search interface with custom-architected ranking algorithms achieving over 90% search-to-results conversion',
+      'Shipped the Fixing Mistakes learning feature that lifted knowledge retention ~30% at ~70% sustained adoption',
     ],
   },
   {
@@ -35,10 +38,10 @@ const journey = [
     company: 'Bleems',
     location: 'Kuwait City, Kuwait',
     highlights: [
-      'Increased daily revenue by 23% and average cart size by 28% via loyalty program',
-      'Boosted monthly conversion to 12.1% using AI-driven personalization',
-      'Achieved 36.1% conversion during cashback events',
-      'Established PM department, delivering 22% productivity increase',
+      'Founded the product management function from zero as first product hire. Built agile rituals, governance, technical standards and cross-functional architecture. Delivered 22% productivity gains and 100% on-time delivery',
+      'Owned the AI-driven personalisation and merchandising architecture across the shopping surface. Monthly conversion settled at 12.1%; cashback event conversion rose to 36.1%',
+      'Steered 20+ new features and 40+ enhancements over two years against executive-agreed annual roadmaps, with quarterly value reviews to the C-suite',
+      'Designed and launched a customer loyalty program. Daily revenue rose ~23% and average cart size grew ~28%',
     ],
   },
   {
@@ -47,10 +50,10 @@ const journey = [
     company: 'MEDCOMM Consulting Group',
     location: 'Kuwait City, Kuwait',
     highlights: [
-      'Managed KWD 300,000 annual innovation budget with 8-person team',
-      'Launched Zain eSports, growing to 18,000 participants and 43M impressions',
-      'Achieved 24% cost savings on IT infrastructure for AOU Riyadh',
-      'Reduced operational costs by 23% via internal PM software',
+      'Eleven-year tenure rising to Chief Innovation Officer running enterprise IT system design, architecture and vendor management. Governed an average annual KWD 300,000 budget and an 8-person team across portfolios spanning 8 industries',
+      'Conceived and launched Zain eSports from zero to 18,000 participants and 43M social media impressions in 12 months. Owned strategy, GTM, brand, partner ecosystem and live operations end-to-end',
+      'Led the AOU Riyadh campus IT redesign covering audio-visual and integrated e-learning infrastructure. Delivered 24% cost savings through architecture decisions and vendor strategy',
+      'Built internal project management software and standardized RFP creation across the 8-industry portfolio. Cut operational costs 23% and embedded a governance framework still used across the practice',
     ],
   },
 ];
@@ -85,10 +88,11 @@ const products = [
   },
 ];
 
-// Skills
+// Skills - aligned to CV (May 2026) three-category framing
 const skills = {
-  core: ['AI Product Management', 'Agile Methodologies', 'Strategic Forecasting', 'User-Centric Design', 'Stakeholder Management'],
-  tools: ['Amplitude', 'Tableau', 'Figma', 'Jira', 'Salesforce CRM', 'Power BI', 'Google Analytics'],
+  ai: ['GenAI & Agentic AI', 'Reference Architecture & Integration', 'AI Delivery Frameworks (Claude Code)', 'Prototyping (Windsurf)', 'MLOps Awareness'],
+  engineering: ['GCP', 'AWS & Azure familiarity', 'Data Architecture', 'React', 'React Native', 'Supabase'],
+  governance: ['Vendor Partnerships', 'Commercial Negotiation', 'C-suite Engagement', 'Roadmap & Portfolio Strategy', 'Cross-functional Team Leadership'],
 };
 
 // Fetch About Page Data
@@ -99,7 +103,7 @@ const aboutPage = await fetchAboutPage();
 
 <BaseLayout 
   title="About" 
-  description="Ahmad Al-Karmi - Senior Product Manager with an MBA and over a decade of experience in AI-driven product management and digital transformation."
+  description="Ahmad Al-Karmi - Senior Product & Innovation Leader. Sixteen years across AI platforms, architecture and engineering delivery, currently owning AI-enabled loyalty and growth at Al Jazeera Media Network."
 >
   <!-- Hero -->
   <section class="section pt-32 pb-20">
@@ -110,7 +114,7 @@ const aboutPage = await fetchAboutPage();
         </h1>
         <div class="text-foreground-secondary text-xl leading-relaxed max-w-2xl mx-auto space-y-6">
           <p>
-            {aboutPage?.heroText || `For 14 years, I’ve led teams to ship software by focusing on the "why". Today, I apply that product leadership to help organizations build intelligent AI tools that solve actual business problems.`}
+            {aboutPage?.heroText || `Sixteen years of product and innovation leadership, eleven of them inside a multi-industry consultancy and five owning AI-driven product delivery. Today I architect AI platforms, delivery frameworks and data architecture at Al Jazeera Media Network across a 20M+ reader portfolio in English and Arabic.`}
           </p>
         </div>
       </div>
@@ -134,11 +138,11 @@ const aboutPage = await fetchAboutPage();
               />
             </div>
             <h2 class="font-display text-2xl text-foreground mb-2">{aboutPage?.bioName || "Ahmad Al-Karmi"}</h2>
-            <p class="text-accent font-medium mb-6">{aboutPage?.bioRole || "Senior Product Manager"}</p>
+            <p class="text-accent font-medium mb-6">{aboutPage?.bioRole || "Senior Product & Innovation Leader"}</p>
             <div class="space-y-4 text-sm text-foreground-secondary">
               <div class="flex items-center gap-3">
                 <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                {aboutPage?.bioLocation || "Doha • Kuwait • Toronto"}
+                {aboutPage?.bioLocation || "Kuwait City • Doha (bi-monthly)"}
               </div>
               <div class="flex items-center gap-3">
                 <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -211,11 +215,11 @@ const aboutPage = await fetchAboutPage();
               <span class="w-8 h-[1px] bg-accent"></span>
               Core Capabilities
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <h3 class="font-display text-lg font-semibold mb-4 text-foreground/80">Strategic</h3>
+                <h3 class="font-display text-lg font-semibold mb-4 text-foreground/80">AI Platforms & Architecture</h3>
                 <div class="flex flex-wrap gap-2">
-                  {skills.core.map(skill => (
+                  {skills.ai.map(skill => (
                     <span class="px-3 py-1.5 bg-background-secondary text-foreground-secondary text-sm rounded-lg border border-border/50">
                       {skill}
                     </span>
@@ -223,11 +227,21 @@ const aboutPage = await fetchAboutPage();
                 </div>
               </div>
               <div>
-                <h3 class="font-display text-lg font-semibold mb-4 text-foreground/80">Technical</h3>
+                <h3 class="font-display text-lg font-semibold mb-4 text-foreground/80">Cloud, Data & Engineering</h3>
                 <div class="flex flex-wrap gap-2">
-                  {skills.tools.map(tool => (
+                  {skills.engineering.map(skill => (
                     <span class="px-3 py-1.5 bg-background-secondary text-foreground-secondary text-sm rounded-lg border border-border/50">
-                      {tool}
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 class="font-display text-lg font-semibold mb-4 text-foreground/80">Vendor & Governance</h3>
+                <div class="flex flex-wrap gap-2">
+                  {skills.governance.map(skill => (
+                    <span class="px-3 py-1.5 bg-background-secondary text-foreground-secondary text-sm rounded-lg border border-border/50">
+                      {skill}
                     </span>
                   ))}
                 </div>
