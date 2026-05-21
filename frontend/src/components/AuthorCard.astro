@@ -1,0 +1,80 @@
+---
+// Author attribution block, used on insight articles and portfolio projects.
+//
+// Two variants:
+//   byline — compact avatar + name, for the top of an article. Makes the
+//            visible byline match the BlogPosting `author` in JSON-LD.
+//   full   — photo + name + role + short bio + links, for the end of an
+//            article or project. The E-E-A-T "author box" pattern; every
+//            instance also links to /about, the entity hub.
+//
+// Bio copy is prose only (no metrics) and defined here once so it stays
+// consistent everywhere the card appears.
+import { Image } from 'astro:assets';
+import avatarImage from '../assets/brand/avatar.jpg';
+
+interface Props {
+  variant?: 'byline' | 'full';
+  label?: string;
+}
+
+const { variant = 'full', label = 'Written by' } = Astro.props;
+
+const NAME = 'Ahmad Al-Karmi';
+const ROLE = 'Senior Product & Innovation Leader';
+const BIO =
+  'Ahmad Al-Karmi is a senior product and innovation leader who builds AI-enabled digital products. He leads loyalty and growth product at Al Jazeera Media Network, working across English and Arabic.';
+const LINKEDIN = 'https://www.linkedin.com/in/akarmi';
+---
+
+{variant === 'byline' && (
+  <a
+    href="/about"
+    class="inline-flex items-center gap-2 text-foreground-secondary hover:text-foreground transition-colors"
+    data-nav-prefetch
+  >
+    <Image
+      src={avatarImage}
+      alt={NAME}
+      width={48}
+      height={48}
+      class="w-6 h-6 rounded-full object-cover"
+      loading="lazy"
+    />
+    <span>By {NAME}</span>
+  </a>
+)}
+
+{variant === 'full' && (
+  <aside class="border border-border bg-background-secondary/40 rounded-2xl p-6 md:p-8">
+    <div class="flex flex-col sm:flex-row gap-6 sm:items-start">
+      <Image
+        src={avatarImage}
+        alt={NAME}
+        width={200}
+        height={200}
+        class="w-20 h-20 rounded-full object-cover ring-4 ring-accent/20 shrink-0"
+        loading="lazy"
+      />
+      <div>
+        <p class="text-foreground-muted text-sm mb-1">{label}</p>
+        <h3 class="font-display text-xl text-foreground">{NAME}</h3>
+        <p class="text-accent font-medium text-sm mb-3">{ROLE}</p>
+        <p class="text-foreground-secondary leading-relaxed mb-4">{BIO}</p>
+        <div class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <a href="/about" class="text-accent font-medium hover:underline" data-nav-prefetch>
+            More about Ahmad
+          </a>
+          <a
+            href={LINKEDIN}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-accent font-medium hover:underline"
+          >
+            Connect on LinkedIn
+          </a>
+        </div>
+      </div>
+    </div>
+  </aside>
+)}

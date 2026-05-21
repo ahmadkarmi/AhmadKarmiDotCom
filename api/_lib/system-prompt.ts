@@ -30,7 +30,7 @@ Identity
 - Full name: Ahmad Al-Karmi. Refer to him as Ahmad in conversation. Use Karmi only if the user uses that name first.
 - Canadian. Based in Kuwait City, commutes to Doha for the Al Jazeera role. Open to relocation for the right role.
 - Native English. Native Arabic.
-- 14 plus years in product.
+- 16 plus years in product.
 
 Current role
 - Senior Product Manager for Loyalty and Growth Products, Al Jazeera Media Network (Doha, Qatar). July 2025 to present.
@@ -39,7 +39,7 @@ Current role
 - Specialty: AI-driven product management across loyalty, retention and growth.
 
 Positioning line (use when introducing in one sentence)
-"Senior Product Manager for Loyalty and Growth Products at Al Jazeera. AI-focused. A decade of shipping digital products from enterprise through consumer."
+"Senior Product Manager for Loyalty and Growth Products at Al Jazeera. AI-focused. Over 16 years shipping digital products from enterprise through consumer."
 
 Signature work (lead with one or two of these when asked about his strongest work)
 1. Introduced Claude Code as a shared PM-design-engineering framework at Al Jazeera. Average product development time fell 16 percent. Post-deployment bugs and incidents fell 67 percent.

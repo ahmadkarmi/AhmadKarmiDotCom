@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import avatarImage from '../assets/brand/avatar.jpg';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import { fetchAboutPage, getMediaUrl } from '../lib/wordpress';
+import { graph, personNode, breadcrumbNode, PERSON_ID, SITE_URL } from '../lib/schema';
 
 // Career Journey - Accurate from CV (May 2026)
 const journey = [
@@ -81,12 +82,31 @@ const skills = {
 // Fetch About Page Data
 const aboutPage = await fetchAboutPage();
 
-// ... existing code ...
+// JSON-LD: a ProfilePage whose mainEntity is the canonical Person entity
+// (referenced by @id), plus a breadcrumb. This is the strongest signal for
+// "who is Ahmad Karmi" queries on Google and in AI chats.
+const schema = graph(
+  {
+    '@type': 'ProfilePage',
+    '@id': `${SITE_URL}/about#profilepage`,
+    url: `${SITE_URL}/about`,
+    name: 'About Ahmad Al-Karmi',
+    inLanguage: 'en',
+    mainEntity: { '@id': PERSON_ID },
+  },
+  personNode(),
+  breadcrumbNode([
+    { name: 'Home', url: '/' },
+    { name: 'About', url: '/about' },
+  ])
+);
 ---
 
-<BaseLayout 
-  title="About" 
+<BaseLayout
+  title="About"
   description="Ahmad Al-Karmi - Senior Product & Innovation Leader. Sixteen years across AI platforms, architecture and engineering delivery, currently owning AI-enabled loyalty and growth at Al Jazeera Media Network."
+  ogType="profile"
+  schema={schema}
 >
   <!-- Hero -->
   <section class="section pt-32 pb-20">

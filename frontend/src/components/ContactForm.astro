@@ -208,12 +208,11 @@
         if (response.ok) {
           form.reset();
           showSuccess();
-          // Track successful form submission
+          // Track successful form submission (GA4 recommended lead event).
           const win = window;
           if (typeof win.trackEvent === 'function') {
             win.trackEvent('generate_lead', {
-              event_category: 'contact',
-              event_label: data.subject || 'Contact Form',
+              subject: data.subject || 'unspecified',
             });
           }
         } else {
@@ -227,9 +226,8 @@
         // Track form submission error
         const win = window;
         if (typeof win.trackEvent === 'function') {
-          win.trackEvent('form_error', {
-            event_category: 'contact',
-            event_label: 'Submission Failed',
+          win.trackEvent('contact_form_error', {
+            reason: 'submission_failed',
           });
         }
       } finally {

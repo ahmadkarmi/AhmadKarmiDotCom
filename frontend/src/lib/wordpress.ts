@@ -583,6 +583,7 @@ export interface Insight {
     featured: boolean;
     tags?: string[];
     publishDate?: string;
+    modified?: string;
     description?: string;
     body?: string;
     mainImage?: WPMedia;
@@ -1473,6 +1474,7 @@ function transformInsight(post: any): Insight {
         featured: parseAcfBoolean(acf.featured),
         tags: tags,
         publishDate: post.date,
+        modified: post.modified || post.modified_gmt || post.date,
         description: descriptionFromAcf
             || descriptionFromExcerpt
             || descriptionFromContentSnippet,

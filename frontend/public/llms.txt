@@ -1,24 +1,25 @@
 # Ahmad Al-Karmi
 
-> Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused product manager with 14 plus years shipping digital products from enterprise through consumer. Native English and Arabic. Based in Kuwait, commutes to Doha for the Al Jazeera role. Open to relocation.
+> Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused product manager with 16 plus years shipping digital products from enterprise through consumer. Native English and Arabic. Based in Kuwait, commutes to Doha for the Al Jazeera role. Open to relocation.
 
 This site documents Ahmad's product thinking through long-form articles, a working portfolio, and an AI assistant (K.AI) that surfaces his POVs on demand.
 
 ## Site map
 
 - [About](https://www.ahmadkarmi.com/about): full bio, career history, education, credentials
+- [FAQ](https://www.ahmadkarmi.com/faq): quick factual answers covering who Ahmad is, what he does, his AI experience, location, and availability
 - [Insights](https://www.ahmadkarmi.com/insights): published writing on AI product management, PM craft, digital strategy
 - [Portfolio](https://www.ahmadkarmi.com/portfolio): project case studies (note: portfolio is partial because much current work is under NDA)
 - [Contact](https://www.ahmadkarmi.com/contact): direct outreach
 
 ## Recent AI writing
 
+- [AI features compound. AI organizations don’t. A note on what I’ve learned about AI delivery frameworks.](https://www.ahmadkarmi.com/insights/ai-features-compound-ai-organizations-dont-a-note-on-what-ive-learned-about-ai-delivery-frameworks): 2026-05-08
 - [AI Will Not Fix a Broken GTM Strategy. Here Is What It Will Do.](https://www.ahmadkarmi.com/insights/ai-will-not-fix-a-broken-gtm-strategy-here-is-what-it-will-do): 2026-03-10
 - [AI in Dealership Service: Where Fixed Operations Leak Profit and How to Stop It](https://www.ahmadkarmi.com/insights/ai-in-dealership-service-where-fixed-operations-leak-profit-and-how-to-stop-it): 2026-02-04
 - [Beyond Persuasion: Is AI Engineering a Systematic Threat to Politics?](https://www.ahmadkarmi.com/insights/beyond-persuasion-is-ai-engineering-a-systematic-threat-to-politics): 2026-01-14
 - [When Machines Paint: The Unfolding Debate Over AI-Generated Art](https://www.ahmadkarmi.com/insights/when-machines-paint-the-unfolding-debate-over-ai-generated-art): 2025-02-20
 - [The Energy Cost of Artificial Intelligence](https://www.ahmadkarmi.com/insights/the-energy-cost-of-artificial-intelligence): 2025-02-18
-- [Quantum Computing and AI: The Next Frontier](https://www.ahmadkarmi.com/insights/quantum-computing-and-ai-the-next-frontier): 2025-02-18
 
 ## Recent product management writing
 
@@ -29,8 +30,9 @@ This site documents Ahmad's product thinking through long-form articles, a worki
 - [How to Manage Product Scope and Feature Creep](https://www.ahmadkarmi.com/insights/how-to-manage-product-scope-and-feature-creep): 2024-09-27
 - [The RICE Framework: A Valuable Tool, But Not the Whole Picture](https://www.ahmadkarmi.com/insights/the-rice-framework-a-valuable-tool-but-not-the-whole-picture): 2024-09-09
 
-## Full insight catalog (37 articles)
+## Full insight catalog (38 articles)
 
+- [AI features compound. AI organizations don’t. A note on what I’ve learned about AI delivery frameworks.](https://www.ahmadkarmi.com/insights/ai-features-compound-ai-organizations-dont-a-note-on-what-ive-learned-about-ai-delivery-frameworks): 2026-05-08
 - [AI Will Not Fix a Broken GTM Strategy. Here Is What It Will Do.](https://www.ahmadkarmi.com/insights/ai-will-not-fix-a-broken-gtm-strategy-here-is-what-it-will-do): 2026-03-10
 - [AI in Dealership Service: Where Fixed Operations Leak Profit and How to Stop It](https://www.ahmadkarmi.com/insights/ai-in-dealership-service-where-fixed-operations-leak-profit-and-how-to-stop-it): 2026-02-04
 - [Beyond Persuasion: Is AI Engineering a Systematic Threat to Politics?](https://www.ahmadkarmi.com/insights/beyond-persuasion-is-ai-engineering-a-systematic-threat-to-politics): 2026-01-14
@@ -69,8 +71,9 @@ This site documents Ahmad's product thinking through long-form articles, a worki
 - [Pareto’s Principle And Becoming A More Effective Product Manager](https://www.ahmadkarmi.com/insights/paretos-principle-and-becoming-a-more-effective-product-manager): 2020-12-01
 - [Empowering your Digital Transformation Teams](https://www.ahmadkarmi.com/insights/empowering-your-digital-transformation-teams): 2020-09-01
 
-## Portfolio (11 projects)
+## Portfolio (12 projects)
 
+- [Ekko Health: A Health App That Listens Before It Speaks](https://www.ahmadkarmi.com/portfolio/ekko-health-a-health-app-that-listens-before-it-speaks) — Ekko Health
 - [ZAIN eSports](https://www.ahmadkarmi.com/portfolio/zain-esport) — Zain Group / Zain eSport
 - [Wilson & Bass](https://www.ahmadkarmi.com/portfolio/wilson-bass) — Wilson & Bass
 - [The Story Point Calculator](https://www.ahmadkarmi.com/portfolio/story-point-calculator) — Personal Project

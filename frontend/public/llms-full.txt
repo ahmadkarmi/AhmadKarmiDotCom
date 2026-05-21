@@ -3,13 +3,95 @@
 > Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. This file contains every published article and portfolio entry in full, intended for AI agents that want to ingest the entire corpus in a single fetch.
 
 Site: https://www.ahmadkarmi.com
-Articles: 37
-Portfolio entries: 11
-Generated: 2026-05-07T11:23:24Z
+Articles: 38
+Portfolio entries: 12
+Generated: 2026-05-21T12:20:46Z
 
 ---
 
 # Insights
+
+## AI features compound. AI organizations don’t. A note on what I’ve learned about AI delivery frameworks.
+
+*Published: 2026-05-08*
+*Tags: Artificial Intelligence, Innovation, Product Management*
+
+URL: https://www.ahmadkarmi.com/insights/ai-features-compound-ai-organizations-dont-a-note-on-what-ive-learned-about-ai-delivery-frameworks
+
+> Most senior teams I talk with have shipped a lot of AI features. Most are also quietly worried the portfolio isn't adding up to anything coherent. A note on the unglamorous infrastructure question every AI mandate has to answer in 2026.
+
+The unglamorous question every senior AI mandate has to answer.
+
+Most senior teams I talk with have shipped a lot of AI features in the last two years. Most are also quietly worried that the portfolio isn’t adding up to anything coherent. The discomfort is real and the cause is rarely the features themselves.
+
+The cause is usually that the operating model underneath the features hasn’t been built. AI features only compound when the layer beneath them is honest about who decides what gets shipped, what gets retired, what standards everyone shares and where the value-capture sits. Without that layer, organizations end up with portfolios that look impressive in slide decks and feel chaotic in practice.
+
+I’ve spent just over a year working on this layer rather than on shipping more AI features. Standards, tooling, deployment patterns, the way design and engineering and product hand work to each other in an AI-augmented context. The unglamorous infrastructure work that no executive asks for in the abstract but every leadership team wishes they had once they’re three or four AI launches in.
+
+This piece is the thinking I’ve come to after a year inside that work. Not a framework you can adopt wholesale, more a set of observations that might save someone else twelve months of figuring out the same things from scratch.
+
+The framework is an architecture decision, not a process improvement
+
+The first mistake I see most teams make is treating the AI delivery framework as a productivity initiative, as if the question is how to ship AI features faster. It isn’t. The question is what infrastructure has to exist so that AI features ship correctly, repeatably, with sustained quality, and in a way that the organization can defend to its board two years later.
+
+That’s an architecture question, not a process improvement question. The two get confused because they sometimes use the same language (workflows, standards, handoffs) but the answers diverge sharply.
+
+A process improvement project asks: how do we move faster through the existing structure? An architecture project asks: what is the structure, and is it the right one?
+
+I’ve come to think the AI delivery framework is the single most underrated architectural decision senior product and engineering leaders will make in this decade. It’s also the one most likely to get delegated downward because it doesn’t look like an executive-altitude problem. That’s a mistake. The framework decisions made in the first year of an AI mandate constrain everything that follows.
+
+The value-capture mechanism has to live inside the framework
+
+The second mistake I see is building the AI delivery side of the framework first and adding value capture later. This sounds reasonable. It almost always fails.
+
+The reason is that value capture isn’t measurement. It’s the part of the framework that defines what success looks like, who’s accountable for it, and how outcomes feed back into prioritization. If that’s bolted on after the delivery work has already started, the prioritization stays driven by whatever forces existed before, which is rarely the value the AI features actually generate.
+
+Practically, this means asking value-capture questions at the same time as architecture questions. What outcome are we measuring? At what level of granularity? Who owns the measurement? What’s the loop from measurement back to prioritization? If those answers aren’t designed into the framework, the framework will produce features that ship cleanly but don’t compound.
+
+This is the retroactive measurement problem, and oh boy is it real. It’s why so many AI portfolios become un-defendable to boards by year two. The data wasn’t properly captured (if at all) because the framework didn’t require it.
+
+Federated organizations break harder than centralized ones
+
+The third lesson is about scale. AI delivery frameworks that work in a single team or single business unit don’t translate to federated organizations. By federated I mean any structure where a central group sets direction and operating units actually deliver: multinational groups with country operating companies, conglomerates with vertical business units, holding structures with portfolio companies.
+
+The hub-and-spoke design that gets drawn on whiteboards looks elegant. It fails at the moment a business unit has to integrate the central framework into their commercial reality. The unit has its own legacy stack, its own customer base, its own commercial rhythm, its own assumptions about what AI is for. The central framework either accommodates these or it doesn’t get adopted.
+
+The path I’ve seen work is to design the framework with handoff in mind from day one. That means giving operating units real authorship over the local instantiation, not just consultation. It means accepting that some of the framework will look different in different parts of the organization, and writing the framework so that variation is allowed without compromising the parts that have to be uniform. It means investing as much in the change-management side of the framework as in the architectural side.
+
+The unsexy version of this work is hard, slow and politically uncomfortable. Most people skip it. That’s why most federated AI programs underperform their strategy decks.
+
+The bilingual problem changes the architecture all the way down
+
+There’s a version of this that’s specific to MENA-headquartered organizations and to anywhere serving meaningfully bilingual audiences. Most AI infrastructure imported from Silicon Valley assumes English-first content with translation as a fallback. That assumption breaks immediately for any market where users are reading and acting in two languages with different scripts, different cultural references and different content velocities.
+
+The honest framework for these markets treats Arabic and English (or whatever the bilingual pair is) as parity inputs, not translation pairs. That changes the architecture all the way down. The data layer has to classify content with parity. The recommendation systems have to understand that user behavior in one language doesn’t substitute for behavior in the other. The personalization surfaces have to render natively in both. The evaluation frameworks have to measure parity at the user-experience level, not at the asset-translation level.
+
+This is harder than it sounds. It requires the data engineering team, the ML team, the product team and the editorial team to share assumptions about what bilingual parity actually means. Most organizations don’t have that shared understanding because nobody’s forced the conversation. The framework forces it.
+
+I’m increasingly convinced this is one of the few defensible competitive moats left in the AI space for regional groups. The big platforms can ship better English-first AI than any regional group can. They cannot ship better Arabic-and-English-at-parity AI, because the infrastructure decisions they made years ago foreclose it. Regional groups that build for parity from the architecture layer up have a window to capture customers the big platforms can’t serve. Almost nobody is building for it intentionally.
+
+Why this matters more in 2026 than in 2024
+
+Two years ago, AI experimentation budgets were generous and accountability was loose. Boards trusted that AI investment would pay off because everyone else was investing. The cost of running AI portfolios was small relative to the strategic optionality they bought.
+
+That’s changed. AI portfolios are expensive now. Boards are asking what the spend bought. The answers organizations are scrambling to give depend almost entirely on whether there was a framework underneath the experimentation. The teams that built one are answering in operating-model terms with measurable outcomes. The teams that didn’t are answering in feature lists, which doesn’t satisfy a board.
+
+The senior AI mandates being scoped right now are mostly about cleaning up this gap. Not just shipping more features. Building the framework retroactively, capturing value-realization where it should have been measured eighteen months ago, and getting the operating model into shape before another budget cycle goes by. That’s the real work the next wave of AI Director and VP roles are being asked to do.
+
+It’s also why the senior people taking these roles need a different set of skills than the AI product roles of two years ago. Less about feature ideation, more about architectural judgment. Less about evangelism, more about operating discipline. Less about velocity, more about sustained compounding.
+
+The question to ask first
+
+For senior people looking at AI mandates in 2026, the question I’d ask first isn’t about the strategy or the features. It’s: what’s the operating model underneath? If you can’t answer in two sentences, the strategy doesn’t matter yet. The framework comes first.
+
+If you can answer it, the next question is whether the framework treats value capture as a first-class concern or an afterthought. Then whether it accommodates federated complexity from day one. Then whether it handles bilingual or multi-market contexts honestly.
+
+These are unglamorous questions. They don’t make good keynote content. They also separate AI organizations that compound from organizations that drift.
+
+The discipline matters more than the features. If your AI mandate is going well in 2026, it’s probably because someone has been doing this unglamorous work in the background. If it isn’t, that’s almost certainly where to look.
+
+
+---
 
 ## AI Will Not Fix a Broken GTM Strategy. Here Is What It Will Do.
 
@@ -3113,6 +3195,268 @@ These are not the only ways to empower your digital transformation teams, but th
 ---
 
 # Portfolio
+
+## Ekko Health: A Health App That Listens Before It Speaks
+*Client: Ekko Health*
+URL: https://www.ahmadkarmi.com/portfolio/ekko-health-a-health-app-that-listens-before-it-speaks
+
+TL;DR
+
+Ekko Health is an iOS app that reads your Apple Watch signals on-device, learns your personal baseline over fourteen nights, then speaks up only when something has shifted. The whole intelligence layer runs locally by default. Plus subscribers ($5.99/mo) can opt into Claude for richer answers, off until they explicitly turn it on, with sanitisation, a zero-retention proxy and an on-device audit log.
+
+This case study walks through six product problems Ekko was built to solve, the constraints and alternatives I weighed for each, what the chosen solution looks like in the product and what outcomes I expect or have measured. The technical decisions are in service of the problems, not the other way round.
+
+Why this exists
+
+If you wear a watch to bed for a month, you generate enough physiological signal to fill a small clinical record. Resting heart rate. HRV. Respiratory rate. Sleep stages. Wrist temperature deviation. Apple Watch, Oura, WHOOP and Garmin all collect it. The question is what you do with it.
+
+The category fails in two predictable ways.
+
+The first failure is the dashboard. Charts and rings and percentiles, accurate as a clinical chart and meaningless to a non-clinician. New users open the app on day one, look at a screen full of numbers they cannot interpret, decide they will read about it later and never come back. The retention curve in this category is unforgiving. Most health apps lose seventy percent of installs in the first seven days, and the dashboards are a primary cause.
+
+The second failure is the notification. A ping every morning that says “Your sleep score was 72!” with no context for what 72 means or what to do about it. Users learn within a week that the notification carries no information, develop a Pavlovian swipe-away response and stop reading the very signal they wanted help with. The product trained them not to listen.
+
+Ekko was designed for the gap between those two postures. Not a coach. A witness. The app says nothing for fourteen nights while it learns your baseline. After that, it speaks only when something has shifted against your own history, and it speaks editorially rather than analytically. “Quiet by default” is the brand axiom. Every product decision either supports it or breaks it.
+
+What follows is the structure of those decisions, rebuilt around the problems they solve.
+
+ 
+ 
+ 
+ 
+
+The product, surface by surface
+
+A short orientation, since the problems that follow reference specific surfaces.
+
+Onboarding is five steps: a welcome screen, a brief explanation of how Ekko works, age confirmation, HealthKit permissions and a baseline-period splash that promises the app will stay quiet for two weeks. Each step sits on a slowly intensifying aurora background. The welcome screen features a ListeningWaveform graphic, a slow signature sine with sparse Gaussian blips, suggesting that the watch already noticed something.
+
+Today is the hero surface. A BodyStateHero masthead occupies the top of the screen: one word naming today’s body state, one sentence of editorial context and an ambient aurora tinted by that state, breathing at the user’s actual resting heart rate. Below the hero, a metrics ledger lists each signal Ekko tracks with an inline seven-day sparkline per row.
+
+History is a calendar where each day is tinted with a sliver of its tone-aurora. Tap a day and the app shows you what that day was, written as a short story.
+
+Trends rolls everything up. Weekly summaries, pattern detection and per-metric charts that draw themselves with a DrawingSparkline animation when the tab loads.
+
+You is the settings surface. Privacy posture sits at the top. The Plus subscription card, intelligence preferences and journal export all live below it.The paywall is its own surface and gets its own section further down, because every lever on it is a PM decision.
+
+ 
+ 
+ 
+ 
+
+Six problems the product was built to solve
+
+Each section below opens on the user or business problem, walks through the constraints and the alternatives, names the choice and closes on the outcome that ships, the mechanism by which it should work or the measurement plan that closes the loop.
+
+Problem 1: Thirty percent of iPhones cannot run the AI feature your privacy thesis depends on
+
+Apple Intelligence requires an iPhone 15 Pro or newer. In late 2025, that excludes roughly thirty percent of the active iPhone install base. For a product whose distinctive promise is on-device natural-language interpretation of your health data, that exclusion is not a footnote. It is a category-level problem. A user on an iPhone 13 downloads Ekko, completes onboarding, hits Day 14 and finds the most expressive part of the product greyed out behind a hardware requirement they cannot resolve without buying a new phone.
+
+The business problem inside the user problem: privacy-first health is a small enough TAM that turning away thirty percent of devices at the door makes the unit economics fragile. Plus needs to be available on every supported iPhone if Ekko is going to compound subscribers.
+
+I considered three paths.
+
+The first was on-device only. Cleanest privacy story, simplest architecture, and a permanent thirty percent ceiling on the addressable market. The privacy purists would have loved it. The business would have died of it.
+
+The second was cloud by default. Universal device support, one consistent experience to design and QA, and a privacy thesis that collapses on contact with the App Store description. If every user’s health data flows to a third-party API by default, the brand promise is marketing copy, not architecture.
+
+The third was a hybrid, with on-device as the default and a documented opt-in path to Claude for users whose devices cannot run Apple Intelligence or who want richer answers regardless. More architecture, more screens, more code, and the privacy thesis stays intact for the default user while older devices still get a path to the full feature surface.
+
+I picked the hybrid. The decision logic: the privacy thesis is the brand, the brand is the wedge into a crowded category, and the brand cannot be partially abandoned to ship a more consistent experience. Offering Claude as a documented opt-in respects user autonomy without forcing a privacy compromise on every user. The consent screen is the architecture, not a checkbox at the bottom of a settings menu.
+
+The honest tradeoff is in maintenance cost. Two intelligence backends. Two failure modes to design for. A recurring internal debate about whether Plus is “really” the privacy product or “really” the AI product. The answer is both, by design, and the cost of that answer is paid in code review hours that I think are worth it.
+
+Outcome. Hardware exclusion drops from thirty percent to zero across the supported install base. Plus subscribers on incapable devices can opt into Claude after reading the consent screen. The Apple Intelligence ineligibility card uses a “There’s another way” reframe, which leads with the opportunity instead of the limitation and is the single highest-converting moment in the Plus funnel based on early read. The measurement that would close the loop is Plus conversion rate on Apple-Intelligence-ineligible devices versus eligible ones. My expectation is that ineligible devices convert at a higher rate, because the value proposition is sharper for them.
+
+Problem 2: Every health app on the App Store looks like every other health app
+
+Open the top twenty health apps in the App Store and look only at the screenshots. Stock illustrations of geometric people meditating. Pastel hearts. Soft gradient charts. Cheerful sans-serif type. If you strip the logos, you cannot tell most of them apart. The visual layer is interchangeable, which means it is uncopyable as a differentiator and free to copy as a competitor.
+
+The product problem is brand recognition in a crowded category. The business problem is defensibility. Anything that can be reproduced in a sprint by a competitor with three designers is not a moat.
+
+The conventional response is to invest in illustration. Hire a brand illustrator, commission a custom set, ship a “distinctive” visual layer. The output is usually beautiful and entirely portable. Six months later a competitor has a similar set, the differentiation evaporates and you have a recurring illustration retainer on your books.
+
+I wanted every graphic in Ekko to be a function of the user’s own physiology, so that the design system would be inseparable from the data and uncopyable without copying the entire architecture.
+
+Four examples carry the idea.
+
+The aurora background draws its hue from body-state tone, its intensity from HRV deviation against baseline and its drift cycle from the time of day. It is the same visual primitive on every screen and never the same image twice. The First Prediction Reveal animation takes the user’s actual thirteen-night resting heart rate sparkline, collapses it into a luminous dot and lets that dot ignite the aurora behind the prediction card. The day-progress rod under the masthead is a tone-tinted capsule that fills from 5 AM through midnight, telling you where you are in your day without naming the hour. The metrics ledger renders the last seven days of each signal inline as a sparkline, no tap required.
+
+The defensibility argument is direct. A competitor can copy the copy. They cannot copy the choice to make a user’s body the design system, because to copy it they would have to give up their entire illustration library and rebuild their data layer around aesthetic output. Few teams will do that for a feature they cannot screenshot for marketing.
+
+The cost lives in production. The graphics are harder to design, harder to QA and impossible to fake for a marketing asset, because every screenshot has to come from real user data. I had not solved the marketing-asset content pipeline at ship, which is a real gap I am paying for now in App Store optimisation cycles.
+
+Outcome. Every surface in Ekko is recognisable as Ekko within one screenshot, with no logo visible. Brand recall in a five-second test against three category competitors lands meaningfully higher, based on the small qualitative round I ran with eight users. The measurement that would scale this signal is unaided brand recall at thirty days post-install in a paid survey, which I have not yet funded.
+
+Problem 3: One voice across every surface produces paywalls that sound like haiku and settings screens that sound like marketing
+
+Every brand voice guide I have read insists on one voice. The instinct makes sense in a marketing-led product where every surface is doing the same job: persuasion. It falls apart in a product where the surfaces have genuinely different jobs.
+
+Reflection and onboarding ask the user to feel something. The hero asks them to read one sentence and look up from their phone. The paywall asks them to make a financial decision. The settings screen asks them to find a toggle and not be confused. The error toast asks them to understand what went wrong. Forcing one register across that range produces predictable failure modes: a paywall that reads like a poem and fails to convert, or a settings screen that reads like a marketing email and feels manipulative.
+
+The user problem is comprehension and tone fit. The business problem is conversion on functional surfaces and trust on emotional ones, two outcomes that pull a single-voice system in opposite directions.
+
+I picked a split. Editorial-literary register on the emotional surfaces. Restrained-precise register on the functional surfaces.
+
+Editorial register lives in onboarding, the hero subhead, reflection, anniversary moments and the rare animation captions. It is descriptive, lyrical, never imperative, never numeric. The 19-cell BodyState by TimeWindow matrix in BodyState.swift:subhead(for:) is its home. A cell looks like “the morning is unhurried, your body is steady”. Three variants per cell, rotated by day of year so users do not see the same line twice in a row.
+
+Restrained register lives in metrics, settings, paywall copy, toasts and errors. It is plain, precise and numeric where numbers help. “Hearing 38% today.” “Annual saves you 30%.” “Sync failed, we’ll retry in the background.” It earns trust by being literal.
+
+The split is enforced by tests, not by editorial judgment. Five invariants are asserted across the matrix and the functional copy: no duplicates inside a cell, no register leakage across cells, character limits per surface, no second-person imperatives on functional surfaces and no metric numerals on emotional ones. A pull request that adds a copy string in the wrong register fails CI.
+
+The tradeoff is maintenance overhead. Two registers means two style policies, two sets of tests and two onboarding ramps for any future contributor to the copy. The cost of one voice would have been lower. The cost of two voices, paid in test infrastructure rather than ongoing editorial judgment, is the cost I chose.
+
+Outcome. The paywall reads like a paywall. The hero reads like a sentence the user remembers. The settings screen reads like a settings screen. The split is testable and therefore enforceable in code, which means it survives the next designer and the one after that. The measurement that closes this loop is paywall conversion against a single-voice control, which I designed for but did not ship because the trial-length revision absorbed the testing slot for that sprint.
+
+Problem 4: Animation everywhere is the same as animation nowhere
+
+The temptation in a craft-driven product is to give every screen its hero moment. The result is a hyperactive surface that exhausts the user by the third tab, drains battery, makes the app feel busy and erases the hierarchy that signature moments depend on. If every transition pulses and shimmers, none of them mean anything.
+
+The user problem is attention fatigue. The business problem is battery and complexity, both of which feed back into reviews and uninstalls. The brand problem is the hardest of the three: in a category where the pitch is “this product is calm”, every gratuitous animation is a small betrayal of the promise.
+
+The conventional response is a motion guideline document that no one reads, followed by a slow accretion of animations until the app feels like a slot machine. I have seen this happen at three companies. The motion guideline is necessary and insufficient.
+
+What I picked was a rationing pattern with three signature moments at three different cadences. The pattern is the decision, more than any individual animation.
+
+The Body-State Aurora is the ambient one. It breathes behind Today every time the user opens the app, at the user’s own resting heart rate. It is permanent and almost subliminal, which makes the Today screen feel alive without ever drawing attention to itself.
+
+The First Prediction Reveal is the once-in-a-lifetime one. It fires exactly on Day 14, when Ekko has earned the right to speak for the first time, and it never fires again for that user. The user’s actual thirteen-night sparkline collapses into a luminous dot, the dot ignites the aurora behind the prediction card and the card resolves with the prediction. The whole thing takes about four seconds.
+
+The Day Closes Ritual is the recurring one. It is triggered nightly when the user taps Goodnight in Reflection. It is shorter than the Day 14 reveal, slower than the aurora and uses motion the user can come to expect.
+
+Every other surface in the app gets craft, just not spectacle. Press-scale on buttons. A drift-gradient under the section headlines. The day-progress rod filling slowly across the day. These read as quality without competing for attention.
+
+The hierarchy is the thing that makes the spectacle land. One ambient, one once-in-a-lifetime, one recurring. Nothing else.
+
+The tradeoff that keeps me up: the once-in-a-lifetime moment is exactly that. If Reduce Motion is on, if the user has thin data, if a HealthKit sync delay throws the timing off, there is no replay. I did not spec a fallback. I did not spec the success metric for the moment before shipping it, which is a craft-on-instinct decision I would not repeat.
+
+Outcome. Three named moments at three named cadences. App-wide motion budget visible in code review. No competing animation candidates added during the build, because the rationing pattern made it easy to decline new requests. The measurement that would close the loop is Day-14 reveal completion rate, time on screen for the reveal and a follow-up retention curve at Day 30 conditional on reveal completion. I should have specified all three before ship.
+
+Problem 5: A privacy claim the architecture cannot defend is marketing, not privacy
+
+Every privacy-first app in the App Store says the same things. “Your data stays on your device.” “We never sell your data.” “End-to-end encrypted.” Most of those claims are unverifiable from the binary, contradicted by the network log or true only in the sense that the company has not yet sold the data they continuously collect.
+
+The user problem is trust collapse. Users who care about privacy have heard every claim and learned to discount all of them. Repeating the claims louder does not work. The business problem is that “privacy-first” is the brand wedge, and a wedge that the user does not believe is not a wedge.
+
+The conventional response is a privacy policy page, a marketing landing block and a wordmark with a padlock on it. None of that changes user belief. The architecture is what changes belief, when the architecture is inspectable.
+
+I picked privacy as architecture, not posture, and tried to make each load-bearing claim enforceable in code rather than promised in copy.
+
+Apple Intelligence runs on-device. The default experience never sends health data off the iPhone. This is verifiable in the network log on a jailbroken device and in the Apple Intelligence framework documentation.
+
+Plus subscribers opt into Claude only after reading an explicit consent screen. The opt-in is one-way: turning it on is two taps, turning it off is one tap, and the off state is the default for every Plus user including those who upgraded specifically to use Claude. Planned for Phase 3.
+
+All data sent to Claude is sanitised on-device first via AISanitizer.swift. Journal notes are redacted with a permissive regex set. UUIDs are stripped. Absolute dates are relativised to “yesterday” or “12 days ago”. Seven unit tests assert round-trip integrity against a canonical fixture set, which means a PR that breaks the sanitiser fails CI.
+
+The Cloudflare Worker proxy in front of Claude is zero-retention by design. The Worker logs operational metrics only: latency, error code and request count. Request bodies are never persisted. Planned.
+
+Every Claude call is logged in an on-device transparency view the user can audit, clear or export. This makes the privacy posture inspectable rather than asserted. The user can see what was sent, when and for what purpose. Planned.
+
+The pattern is that every claim Ekko makes is paired with a piece of architecture that enforces it. The architecture is the marketing. When a reviewer or a journalist asks “how is this actually different”, the answer is six artefacts they can look at.
+
+Outcome. Privacy posture moves from claim to defence. The audit log is the most expensive piece of the system to build and the highest-leverage one for trust, because it lets a sceptical user verify the claims themselves. The measurement that would close the loop is Plus opt-in rate to Claude after the consent screen, which I expect to be lower than industry consent flow rates and which I think is the correct direction.
+
+Problem 6: The paywall is the part of the product PMs are not proud of, which is exactly why it underperforms
+
+Most PM portfolios skip the paywall. It feels like the part of the product you are not supposed to be proud of, the commercial moment in an otherwise crafted experience. I think that posture is wrong, and the conversion data agrees. Most of the levers on a subscription paywall are decisions the PM owns directly, and most of them are left on the table because PMs treat the paywall as marketing’s problem.
+
+The user problem is decision overload at the paywall. Two plans, an offer, a trial, a feature list, a comparison table and a CTA, all rendered on one screen. The user defaults to the cognitive shortcut: pick the cheaper option or close the app. The business problem is LTV. A user who picks monthly churns at four to six times the rate of a user who picks annual, and a user who closes the paywall costs the same as the first two combined.
+
+The conventional response is to ship a paywall that defaults to monthly, applies an urgency banner (“offer ends in 23:59”), stacks an intro discount on top of a free trial and runs a discount cycle every quarter to chase numbers. The conventional response works and corrodes the brand. For a product whose pitch is “this app respects you”, urgency banners are an active brand liability.
+
+What I picked, lever by lever.
+
+A seven-day free trial on annual only. Annual-only captures higher LTV. Seven days converts better than fourteen days in current industry benchmarks, because fourteen days gives users enough runway to forget the app before the charge fires. The RevenueCat 2024 dataset puts the conversion delta between seven and fourteen day trials at roughly twelve to fifteen percent on annual.
+
+Default-to-annual selection on the plan picker. This is the single largest conversion lever in subscription paywall design, worth a thirty to fifty percent lift over default-to-monthly in published case studies. It is also the most under-pulled lever, because PMs default to giving the user a choice and frame any default as manipulative. The defence is that the default reflects the recommendation, and the recommendation is the higher-LTV plan.
+
+A “30% OFF” badge on annual, calculated from the effective monthly price ($4.17 vs $5.99) and surfaced in the chip rather than the body copy. Body copy is for explanation, chips are for signal.
+
+CTA copy that adapts based on intro-offer presence. “Start 7-day free trial” when the offer is live, “Subscribe” when it is not. The logic reads StoreKit 2 product state rather than picking from two static strings, which means the copy stays correct if the offer is paused or revoked in App Store Connect.
+
+No intro discount stacked on top of the trial. Stacking adds decision complexity, lowers first-session conversion in the tests I have seen and dilutes the brand voice toward “everything-must-go”.
+
+No urgency banners. No countdown timers. No “23 people are looking at this offer right now”. The brand cannot survive those tactics, and the conversion lift from them is small enough that the brand cost is the wrong trade.
+
+The Apple Intelligence ineligibility card uses a “There’s another way” reframe. The default copy would have read as a limitation: your device cannot run on-device AI. The Plus reframe leads with the opportunity instead: Plus unlocks an alternative path through Claude, gated by explicit opt-in. This converts because it inverts the user’s emotional posture from disappointment to discovery.Outcome. Net margin of around sixty-one percent per annual subscriber, after Apple’s fifteen percent Small Business Program take, cached inference cost and corporate tax. Annual price of $49.99 versus Calm and Headspace at $69.99 and Gentler Streak at $44.99 puts Ekko at a defensible “premium but not punitive” position. The measurement that would close the loop is a paywall A/B test against a default-to-monthly control. The hypothesis sits on benchmark data and brand fit. Being able to name those sources is the starting point for shipping the test, not a substitute for it.
+
+ 
+ 
+ 
+ 
+
+Problems I refused to solve
+
+Restraint is a PM virtue the industry undervalues. The omissions are where the product judgment lives, because every feature is a decision and every refused feature is also a decision. Five things I left out on purpose.
+
+No bespoke illustrations. The data is the design system. Adding illustration would compete with the aurora rather than complement it and would weaken the defensibility argument from Problem 2.
+
+No urgency banners on the paywall. “Offer ends in 23:59:11” works in mobile games and category-leading consumer apps. For a product whose pitch is “this app respects you”, the same banner is brand damage measured in lifetime value, not conversion lift.
+
+No mascot, no coachmark overlays, no pulsing “tap here” hints. The user is an adult and is opening a health app voluntarily. Tutorialising the experience signals that the product does not trust the user, and a product that does not trust the user is not going to be trusted back.
+
+No silent fallback to rule-based text when the user explicitly invokes AI. If the user taps “Why am I Ready?” and Apple Intelligence is unavailable, Ekko shows a card titled “Apple Intelligence is sleeping” with a path to Plus. The alternative would be a quietly worse answer that pretends nothing is wrong, which trains the user to distrust the AI features the moment they notice the seams. The honest failure is better than the silent one.
+
+No third-party SDKs in the MVP. StoreKit 2, FoundationModels and URLSession are hand-rolled per a project rule documented in CLAUDE.md. The rule exists because privacy claims are easier to defend when the boundary of the binary is small and known. Every SDK is a piece of code we did not write and a piece of trust we are asking the user to extend on our behalf.
+
+The unit economics
+
+PlanPriceEffective monthlyTrial
+
+Monthly$5.99/mo$5.99none
+
+Annual$49.99/yr$4.177-day free
+
+Net annual subscriber math, before any retention or churn modelling.
+
+Gross revenue per annual subscriber, $49.99. After Apple’s fifteen percent Small Business Program take, $42.49. After cached AI inference plus infrastructure, estimated at $1.80 per subscriber per year, $40.69. After roughly twenty-five percent effective corporate tax, the net is approximately $30.50 per subscriber per year. Net margin lands around sixty-one percent.
+
+Category positioning is friendly. Calm and Headspace sit at $69.99/yr. Strava at $79.99. Gentler Streak, the closest direct comparable, at $44.99/yr. Plus is five dollars above Gentler Streak’s annual and one dollar above their monthly, which puts Ekko at a defensible “premium but not punitive” price for a privacy-first product.
+
+Plus pays for itself at roughly $2.30 per subscriber per month against running cost. The unit economics survive long before the top of the funnel grows.
+
+ 
+ 
+ 
+ 
+
+What is shipped vs what is planned
+
+Shipped: onboarding, Today, History, Trends and You. Body-State Aurora, First Prediction Reveal and Day Closes Ritual. Apple Intelligence provider with AISanitizer and AppleIntelligenceRequiredCard. SubscriptionService and PaywallView with a conversion-optimised .storekit config. AICacheService with a four-layer caching strategy.
+
+Planned for Phase 3 and beyond: Claude opt-in consent screen. EkkoClaudeProvider and the Cloudflare Worker proxy. AIActivityView transparency log. A “New iPhone with Apple Intelligence” one-time card for users upgrading mid-subscription.
+
+What I would do differently
+
+Five follow-ups I would commit research budget to before a real launch. Each had directional signal at spec time. The gap is validation, not judgment.
+
+The seven-day trial on annual sits on two inputs. RevenueCat’s 2024 subscription benchmark data shows a consistent conversion lift for seven-day trials over fourteen-day on annual plans, and my own experience shipping subscription products before Ekko has matched the pattern: fourteen days gives users enough runway to forget the app before the charge fires. Both inputs pointed the same direction. What I would sequence differently is the design pass. Trial length got finalised after the paywall was already in flight, which meant a revision cycle once I settled on seven days. The correct move is to lock trial length at the top of the paywall brief, since every piece of copy and conversion logic downstream depends on it. The validation that closes the loop is a paywall A/B test against a default-to-monthly control, once the install base supports clean reads at around five thousand paywall views per arm.
+
+Fourteen nights is a physiology decision before it is a UX one. Healthy adult heart rate variability, resting heart rate and sleep architecture show enough night-to-night noise that a seven-night baseline can be skewed by a single outlier: a glass of wine, a stressful day or a one-off sleep hygiene break. Two weeks of data damps the noise without asking for so much patience that users uninstall before the reveal lands. I tested the baseline on myself across four weeks of watch data before committing to the number, and my own signals settled into a stable pattern between nights ten and twelve. That internal testing is a useful starting signal and is not the same as a study. The next pass is a moderated study with eight to twelve participants comparing seven, fourteen and twenty-one night baselines against both stability curves and qualitative interviews. The research budget for that study is the first line item I would fund post-launch.
+
+The First Prediction Reveal was designed around a conversion thesis I held tightly and never committed to a spec. The hypothesis: if a user reaches the Day 14 reveal and then completes the next sixteen nights to hit Day 30, the product has crossed the line from habit into lifestyle. The reveal is the inflection point that earns the user’s continued attention. Day 30 is the validation that the moment did the work it was designed to do. The gap is that I kept the hypothesis in my head rather than writing it into the animation spec. The right PM behaviour is to define the success metric in the same document that specifies the moment, and to instrument it in the same sprint as the build. The metric I would commit to is Day 30 retention conditional on completing the Day 14 reveal, with a target of sixty percent or better for cohorts that clear the first week.
+
+The onboarding personalisation gap is the one I am glad to have caught, even late. The First Prediction Reveal copy already supports the personalised form (“Ahmad, you’re ready”) but onboarding never collected the data the copy needed. I spotted the disconnect well into development, after the reveal animation was already in flight, which meant the personalised line never fired in the build I shipped. The lesson generalises past this product. A name field in onboarding looks insignificant at the data layer and is load-bearing at the experience layer, because every piece of user data in a craft-driven product is connected to a moment somewhere else. The cost of missing one of those connections is always paid at the moment of peak emotional payoff, which is the worst place to under-deliver. If Ekko goes beyond the portfolio piece, the first onboarding revision is a name field with the right framing, and the second is an audit pass on every other input I might be quietly under-using for a moment elsewhere in the product.
+
+Marketing-asset production is the process gap I would close by changing the order of the roadmap rather than by funding more research. Because every graphic in Ekko is a function of real user data, every App Store screenshot has to come from a real cohort. I had not solved that pipeline at ship, which means ASO cycles now compete with the next feature sprint for the same resource. The fix is structural: marketing-asset production goes on the roadmap as a launch dependency in the next product brief, not as a follow-up sprint after launch.
+
+ 
+ 
+ 
+ 
+
+Closing
+
+The strongest product judgments in Ekko are not the features. They are the choices about which problems to solve and which to refuse.
+
+Keep AI on-device by default, even though it costs thirty percent of devices unless you build a second backend. Make privacy enforceable in code rather than promised in marketing, even though it triples the architecture cost. Make every graphic a function of the user’s physiology, even though it kills the marketing-asset pipeline. Pick one tone per surface and write a system for the next designer to extend, even though the test infrastructure is more expensive than a style guide. Ration three hero moments rather than animate everywhere, even though every reviewer asks why the rest of the app is “quieter”. Charge $5.99 and design the paywall around long-term LTV rather than short-term tactics, even though the tactics would convert better in the first week.
+
+Ekko learns who you are in fourteen nights. The app learns who you are by showing you yourself.
+
+The graphics, the words and the motion are all the same data, translated into different senses.
+
+
+---
 
 ## ZAIN eSports
 *Client: Zain Group / Zain eSport*

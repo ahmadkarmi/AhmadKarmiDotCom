@@ -5,6 +5,7 @@ import InsightCard from '../components/InsightCard.astro';
 import ClientLogos from '../components/ClientLogos.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import { fetchWorks, fetchInsights, fetchSiteSettings, fetchHomePage, getMediaUrl } from '../lib/wordpress';
+import { graph, personNode, websiteNode } from '../lib/schema';
 
 import MetricBento from '../components/MetricBento';
 
@@ -52,8 +53,6 @@ const availabilityColors = {
 
 const availabilityColor = availabilityColors[availabilityStatus] || 'bg-green-500';
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
-
 // Expertise Matrix
 const expertise = {
   strategy: ['Zero-to-One Innovation', 'Enterprise & SaaS Scaling', 'Go-to-Market (GTM) Strategy', 'Revenue Modeling & P&L'],
@@ -61,75 +60,18 @@ const expertise = {
   tech: ['Generative AI Integration', 'Technical Product Management', 'End-to-End Architecture', 'Data Science & Analytics'],
 };
 
-// JSON-LD Schema — @graph with WebSite + Person, enriched for AI agent
-// discovery (jobTitle, worksFor, alumniOf, knowsAbout, sameAs).
-const personId = `${siteUrl}#person`;
-const schema = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": `${siteUrl}#website`,
-      "name": "Ahmad Al-Karmi",
-      "url": siteUrl,
-      "inLanguage": "en",
-      "publisher": { "@id": personId }
-    },
-    {
-      "@type": "Person",
-      "@id": personId,
-      "name": "Ahmad Al-Karmi",
-      "givenName": "Ahmad",
-      "familyName": "Al-Karmi",
-      "alternateName": "Karmi",
-      "url": siteUrl,
-      "jobTitle": "Senior Product Manager for Loyalty and Growth Products",
-      "worksFor": {
-        "@type": "Organization",
-        "name": "Al Jazeera Media Network",
-        "url": "https://www.aljazeera.com"
-      },
-      "alumniOf": [
-        {
-          "@type": "EducationalOrganization",
-          "name": "Boston University",
-          "url": "https://www.bu.edu"
-        },
-        {
-          "@type": "EducationalOrganization",
-          "name": "American University of Kuwait",
-          "url": "https://www.auk.edu.kw"
-        }
-      ],
-      "knowsAbout": [
-        "AI Product Management",
-        "Product Management",
-        "Loyalty and Growth",
-        "AI-augmented product development",
-        "Digital Transformation",
-        "Bilingual product strategy"
-      ],
-      "knowsLanguage": ["en", "ar"],
-      "nationality": { "@type": "Country", "name": "Canada" },
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Kuwait City",
-        "addressCountry": "KW"
-      },
-      "description": "Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused. Over 14 years shipping digital products from enterprise through consumer.",
-      "email": "alkarmi.ahmad@gmail.com",
-      "sameAs": [
-        siteSettings?.linkedinUrl || "https://www.linkedin.com/in/akarmi",
-        "https://www.threads.com/@karmi.csd"
-      ].filter(Boolean)
-    }
-  ]
-};
+// JSON-LD Schema: @graph with WebSite + Person, enriched for AI agent
+// discovery (jobTitle, worksFor, alumniOf, knowsAbout, sameAs). The Person
+// entity is defined once in lib/schema.ts and reused across pages by @id.
+const schema = graph(
+  websiteNode(),
+  personNode({ linkedinUrl: siteSettings?.linkedinUrl })
+);
 ---
 
 <BaseLayout 
-  title="Strategic Growth Architect" 
-  description="Ahmad Al-Karmi - Senior Product Manager translating AI innovation into measurable business growth. Decade of experience in digital transformation and AI-driven products."
+  title="AI Product Manager"
+  description="Ahmad Al-Karmi - Senior Product Manager translating AI innovation into measurable business growth. 16 years of experience in digital transformation and AI-driven products."
   schema={schema}
 >
   <!-- Hero Section: The Cover Story -->

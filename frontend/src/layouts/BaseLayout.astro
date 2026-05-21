@@ -31,7 +31,7 @@ const DEFAULT_OG_H = 630;
 
 const {
   title,
-  description = 'Ahmad Al-Karmi — Senior Product Manager for Loyalty and Growth Products at Al Jazeera. AI-focused. Over a decade shipping digital products from enterprise through consumer.',
+  description = 'Ahmad Al-Karmi, Senior Product Manager for Loyalty and Growth Products at Al Jazeera. AI-focused. Over 16 years shipping digital products from enterprise through consumer.',
   ogImage = DEFAULT_OG_IMAGE,
   ogType = 'website',
   ogImageWidth = ogImage === DEFAULT_OG_IMAGE ? DEFAULT_OG_W : undefined,
@@ -68,7 +68,7 @@ const metaDescription = String(description || '')
   .replace(/\s+/g, ' ')
   .trim();
 
-const resolvedAlt = ogImageAlt ?? `${title} — Ahmad Al-Karmi`;
+const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
 ---
 
 <!doctype html>
@@ -149,6 +149,24 @@ const resolvedAlt = ogImageAlt ?? `${title} — Ahmad Al-Karmi`;
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+
+      // Consent Mode v2: default everything to denied so GA sends only
+      // cookieless, anonymized pings until the visitor accepts. A returning
+      // visitor who already accepted is upgraded immediately. The cookie
+      // banner (CookieConsent.astro) calls gtag('consent', 'update', ...).
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500
+      });
+      try {
+        if (localStorage.getItem('cookie-consent') === 'accepted') {
+          gtag('consent', 'update', { analytics_storage: 'granted' });
+        }
+      } catch (e) {}
+
       gtag('js', new Date());
       gtag('config', 'G-1SKBRGQJRM', { send_page_view: false });
 
@@ -157,6 +175,11 @@ const resolvedAlt = ogImageAlt ?? `${title} — Ahmad Al-Karmi`;
         if (typeof gtag !== 'undefined') {
           gtag('event', eventName, params);
         }
+      };
+
+      // Search query tracking (called by the search component).
+      window.trackSearch = function(query, resultsCount) {
+        window.trackEvent('search', { search_term: query, results_count: resultsCount });
       };
 
       // Fire page_view on initial load AND on every Astro view transition.
@@ -607,126 +630,10 @@ const resolvedAlt = ogImageAlt ?? `${title} — Ahmad Al-Karmi`;
       })();
     </script>
 
-    <!-- Automatic Event Tracking -->
-    <script is:inline>
-      document.addEventListener('DOMContentLoaded', function() {
-        if (window.__autoTrackingBound) return;
-        window.__autoTrackingBound = true;
-
-        function schedule(fn) {
-          const ric = window.requestIdleCallback;
-          if (typeof ric === 'function') {
-            ric(fn, { timeout: 2000 });
-            return;
-          }
-          setTimeout(fn, 600);
-        }
-
-        schedule(function () {
-          // Track outbound links (social media, external sites)
-          document.addEventListener('click', function (e) {
-            var target = e.target;
-            var el = target && target.closest ? target.closest('a, button') : null;
-            if (!el) return;
-
-            var a = el.tagName === 'A' ? el : null;
-            var href = a ? a.getAttribute('href') : null;
-            var isDownload = a && a.hasAttribute('download');
-
-            if (a && href && href.indexOf('http') === 0) {
-              var url = a.href;
-              var hostname = new URL(url).hostname;
-              
-              // Skip internal links
-              if (hostname === window.location.hostname) return;
-              
-              // Determine link type
-              var linkType = 'outbound';
-              if (url.includes('linkedin.com')) linkType = 'linkedin';
-              else if (url.includes('threads.net') || url.includes('threads.com')) linkType = 'threads';
-              else if (url.includes('mailto:')) linkType = 'email';
-              
-              if (typeof window.trackEvent === 'function') {
-                window.trackEvent('click', {
-                  event_category: 'outbound_link',
-                  event_label: linkType,
-                  link_url: url,
-                });
-              }
-              return;
-            }
-
-            // Track CTA button clicks
-            var btn = target && target.closest ? target.closest('.btn-primary, .btn-secondary, [class*="btn-"]') : null;
-            if (btn) {
-              var label = (btn.textContent || '').trim() || 'Button';
-              if (typeof window.trackEvent === 'function') {
-                window.trackEvent('click', {
-                  event_category: 'cta',
-                  event_label: label,
-                });
-              }
-              return;
-            }
-            
-            // Track CV downloads
-            if (isDownload && a) {
-              if (typeof window.trackEvent === 'function') {
-                window.trackEvent('file_download', {
-                  event_category: 'download',
-                  event_label: 'CV',
-                  file_name: (a.href || '').split('/').pop(),
-                });
-              }
-            }
-          }, { capture: true, passive: true });
-          
-          // Track newsletter signups (Kit.com form)
-          document.addEventListener('submit', function (e) {
-            var form = e.target;
-            if (!form || !form.matches || !form.matches('form[data-sv-form]')) return;
-            if (typeof window.trackEvent === 'function') {
-              window.trackEvent('sign_up', {
-                event_category: 'newsletter',
-                event_label: 'Newsletter Signup',
-                method: 'kit.com',
-              });
-            }
-          }, { capture: true });
-          
-          // Scroll Depth Tracking (25%, 50%, 75%, 100%)
-          var scrollDepthMarkers = { 25: false, 50: false, 75: false, 100: false };
-          window.addEventListener('scroll', function() {
-            var scrollTop = window.scrollY;
-            var docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            var scrollPercent = Math.round((scrollTop / docHeight) * 100);
-            
-            [25, 50, 75, 100].forEach(function(marker) {
-              if (scrollPercent >= marker && !scrollDepthMarkers[marker]) {
-                scrollDepthMarkers[marker] = true;
-                if (typeof window.trackEvent === 'function') {
-                  window.trackEvent('scroll', {
-                    event_category: 'engagement',
-                    event_label: marker + '%',
-                    page_path: window.location.pathname,
-                  });
-                }
-              }
-            });
-          }, { passive: true });
-        });
-      });
-      
-      // Search Query Tracking (called from Search component)
-      window.trackSearch = function(query, resultsCount) {
-        if (typeof window.trackEvent === 'function') {
-          window.trackEvent('search', {
-            event_category: 'search',
-            search_term: query,
-            results_count: resultsCount,
-          });
-        }
-      };
+    <!-- Automatic Event Tracking — taxonomy + listeners in src/lib/analytics.ts -->
+    <script>
+      import { initAutoTracking } from '../lib/analytics';
+      initAutoTracking();
     </script>
   </body>
 </html>

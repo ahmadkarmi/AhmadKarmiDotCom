@@ -50,3 +50,4 @@ Allow: /
 # Indexes for crawlers and AI agents
 Sitemap: https://www.ahmadkarmi.com/sitemap.xml
 Sitemap: https://www.ahmadkarmi.com/llms.txt
+Sitemap: https://www.ahmadkarmi.com/llms-full.txt

@@ -8,6 +8,8 @@ import ShareButtons from '../../components/ShareButtons.astro';
 import NewsletterForm from '../../components/NewsletterForm.astro';
 import RelatedInsights from '../../components/RelatedInsights.astro';
 import ListenButton from '../../components/insights/ListenButton';
+import AuthorCard from '../../components/AuthorCard.astro';
+import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 
 export async function getStaticPaths() {
   const insights = await fetchInsights();
@@ -61,6 +63,11 @@ function calculateReadTime(text?: string): number {
 }
 
 const readTime = calculateReadTime(insightData.body);
+
+// Word count for the BlogPosting schema (helps engines gauge article depth).
+const wordCount = insightData.body
+  ? insightData.body.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length
+  : undefined;
 
 // Configure marked to preserve HTML (iframes, videos, etc.)
 marked.setOptions({
@@ -172,33 +179,37 @@ const bodyHtmlRaw = !containsHtml || hasTable || hasSignals
   : rawBody;
 const bodyHtml = wrapTablesInOverflow(bodyHtmlRaw);
 
-const schema = {
-  "@context": "https://schema.org",
+// JSON-LD: BlogPosting + breadcrumb. The author/publisher reference the
+// canonical Person entity by @id so engines and AI tie every article back to
+// the same Ahmad Karmi entity established on the homepage.
+const blogPosting = {
   "@type": "BlogPosting",
   "headline": insightData.name,
   "description": insightData.description || insightData.body?.slice(0, 160)?.replace(/<[^>]*>?/gm, ''),
   "image": heroImageUrl ? [heroImageUrl] : [],
-  "author": {
-    "@type": "Person",
-    "name": "Ahmad Al-Karmi",
-    "url": siteUrl
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "Ahmad Al-Karmi",
-    "logo": {
-      "@type": "ImageObject",
-      "url": `${siteUrl}/brand/logo-mark.png`
-    }
-  },
+  "url": shareUrl,
+  "inLanguage": "en",
+  "author": { "@id": PERSON_ID },
+  "publisher": { "@id": PERSON_ID },
   "datePublished": insightData.publishDate,
-  "dateModified": insightData.publishDate,
+  "dateModified": insightData.modified || insightData.publishDate,
+  "wordCount": wordCount,
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": shareUrl
   },
   "keywords": insightData.tags?.join(', ') || undefined
 };
+
+const schema = graph(
+  blogPosting,
+  personNode(),
+  breadcrumbNode([
+    { name: 'Home', url: '/' },
+    { name: 'Insights', url: '/insights' },
+    { name: insightData.name, url: `/insights/${insightData.slug}` },
+  ])
+);
 
 ---
 <BaseLayout 
@@ -230,10 +241,14 @@ const schema = {
         
         <!-- Meta -->
         <div class="flex flex-wrap items-center gap-4 mb-6 text-sm text-foreground-secondary">
+          <AuthorCard variant="byline" />
           {insightData.publishDate && (
-            <time datetime={insightData.publishDate}>
-              {formatDate(insightData.publishDate)}
-            </time>
+            <>
+              <span class="w-1 h-1 rounded-full bg-foreground-muted" />
+              <time datetime={insightData.publishDate}>
+                {formatDate(insightData.publishDate)}
+              </time>
+            </>
           )}
           <span class="w-1 h-1 rounded-full bg-foreground-muted" />
           <span>{readTime} min read</span>
@@ -341,8 +356,13 @@ const schema = {
           />
         )}
         
+        <!-- Author Card -->
+        <div class="mt-16">
+          <AuthorCard variant="full" label="Written by" />
+        </div>
+
         <!-- Newsletter Signup -->
-        <div class="mt-16 mb-12">
+        <div class="mt-12 mb-12">
           <NewsletterForm />
         </div>
         

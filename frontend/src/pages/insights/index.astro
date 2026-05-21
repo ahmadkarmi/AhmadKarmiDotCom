@@ -2,17 +2,47 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import InsightsFilter from '../../components/InsightsFilter';
 import { fetchInsights } from '../../lib/wordpress';
+import { graph, breadcrumbNode, personNode, PERSON_ID, SITE_URL } from '../../lib/schema';
 
 const insights = await fetchInsights();
 
 // Get unique tags for filtering
 const allTags = insights.flatMap(insight => insight.tags || []);
 const uniqueTags = [...new Set(allTags)].sort();
+
+// JSON-LD: a Blog listing every article, plus a breadcrumb. Gives engines and
+// AI crawlers a structured map of the writing rather than just a wall of links.
+const schema = graph(
+  {
+    '@type': 'Blog',
+    '@id': `${SITE_URL}/insights#blog`,
+    name: 'Insights by Ahmad Al-Karmi',
+    description:
+      'Articles on AI product management, digital transformation, and building products that matter.',
+    url: `${SITE_URL}/insights`,
+    inLanguage: 'en',
+    author: { '@id': PERSON_ID },
+    blogPost: insights.map((insight) => ({
+      '@type': 'BlogPosting',
+      headline: insight.name,
+      url: `${SITE_URL}/insights/${insight.slug}`,
+      datePublished: insight.publishDate,
+      dateModified: insight.modified || insight.publishDate,
+      author: { '@id': PERSON_ID },
+    })),
+  },
+  personNode(),
+  breadcrumbNode([
+    { name: 'Home', url: '/' },
+    { name: 'Insights', url: '/insights' },
+  ])
+);
 ---
 
-<BaseLayout 
-  title="Insights" 
+<BaseLayout
+  title="Insights"
   description="Articles and insights on product management, digital transformation, innovation, and technology."
+  schema={schema}
 >
   <!-- Header -->
   <section class="section pt-32 pb-8">

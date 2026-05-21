@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { graph, breadcrumbNode, personNode, SITE_URL } from '../lib/schema';
+
+// Q&A pairs: the single source of truth for both the rendered page and the
+// FAQPage JSON-LD below. Answers are short, factual prose (no metrics), so AI
+// chat tools can lift them directly when answering "who is Ahmad Karmi" style
+// questions, and so the page reads cleanly for human visitors.
+const faqs = [
+  {
+    q: 'Who is Ahmad Al-Karmi?',
+    a: 'Ahmad Al-Karmi is a senior product and innovation leader who builds AI-enabled digital products. He currently leads loyalty and growth product at Al Jazeera Media Network, working on AI-driven experiences for a multilingual audience in English and Arabic.',
+  },
+  {
+    q: 'What does Ahmad Al-Karmi do?',
+    a: 'Ahmad works as a Senior Product Manager focused on loyalty and growth. He owns the strategy and delivery of AI-enabled product experiences, leading cross-functional teams and translating AI innovation into products that engage and retain audiences.',
+  },
+  {
+    q: "What is Ahmad Al-Karmi's experience with AI?",
+    a: 'Ahmad specialises in AI product management. He builds AI-augmented product experiences and the delivery frameworks teams use to ship them, applying generative and agentic AI to real product problems across personalisation, search, and workflow tooling.',
+  },
+  {
+    q: 'Where is Ahmad Al-Karmi based?',
+    a: 'Ahmad is based in Kuwait City and works with Al Jazeera Media Network in Doha, Qatar. He is Canadian and works in both English and Arabic.',
+  },
+  {
+    q: 'Is Ahmad Al-Karmi available for work or consulting?',
+    a: 'Ahmad selectively takes on product strategy and consulting engagements. The best way to check his current availability is to reach out through the contact page.',
+  },
+  {
+    q: 'How can I contact Ahmad Al-Karmi?',
+    a: 'You can reach Ahmad through the contact page on this site or connect with him on LinkedIn. The contact page is the most reliable channel for project enquiries and speaking requests.',
+  },
+];
+
+const schema = graph(
+  {
+    '@type': 'FAQPage',
+    '@id': `${SITE_URL}/faq#faqpage`,
+    url: `${SITE_URL}/faq`,
+    name: 'Frequently Asked Questions about Ahmad Al-Karmi',
+    inLanguage: 'en',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  personNode(),
+  breadcrumbNode([
+    { name: 'Home', url: '/' },
+    { name: 'FAQ', url: '/faq' },
+  ])
+);
+---
+
+<BaseLayout
+  title="FAQ"
+  description="Frequently asked questions about Ahmad Al-Karmi: who he is, what he does, his AI product experience, where he is based, and how to get in touch."
+  schema={schema}
+>
+  <section class="section pt-32 pb-16">
+    <div class="container-custom">
+      <div class="max-w-3xl mx-auto">
+        <p class="text-accent font-medium mb-4">Frequently Asked Questions</p>
+        <h1 class="font-display text-display-md text-foreground mb-8">
+          About Ahmad Al-Karmi
+        </h1>
+        <p class="text-foreground-secondary text-lg mb-12">
+          Quick answers to the questions people most often ask about Ahmad's
+          work, his focus on AI product management, and how to reach him.
+        </p>
+
+        <div class="space-y-10">
+          {faqs.map((faq) => (
+            <div>
+              <h2 class="font-display text-2xl text-foreground mb-3">
+                {faq.q}
+              </h2>
+              <p class="text-foreground-secondary text-lg leading-relaxed">
+                {faq.a}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-16 pt-8 border-t border-border">
+          <p class="text-foreground-secondary">
+            Still have a question?{' '}
+            <a href="/contact" class="text-accent font-medium hover:underline">
+              Get in touch
+            </a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

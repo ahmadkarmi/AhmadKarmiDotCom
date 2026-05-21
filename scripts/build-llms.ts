@@ -41,13 +41,14 @@ function buildLlmsIndex(insights: NormalizedPost[], works: NormalizedPost[]): st
 
   return `# Ahmad Al-Karmi
 
-> Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused product manager with 14 plus years shipping digital products from enterprise through consumer. Native English and Arabic. Based in Kuwait, commutes to Doha for the Al Jazeera role. Open to relocation.
+> Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused product manager with 16 plus years shipping digital products from enterprise through consumer. Native English and Arabic. Based in Kuwait, commutes to Doha for the Al Jazeera role. Open to relocation.
 
 This site documents Ahmad's product thinking through long-form articles, a working portfolio, and an AI assistant (K.AI) that surfaces his POVs on demand.
 
 ## Site map
 
 - [About](${SITE}/about): full bio, career history, education, credentials
+- [FAQ](${SITE}/faq): quick factual answers covering who Ahmad is, what he does, his AI experience, location, and availability
 - [Insights](${SITE}/insights): published writing on AI product management, PM craft, digital strategy
 - [Portfolio](${SITE}/portfolio): project case studies (note: portfolio is partial because much current work is under NDA)
 - [Contact](${SITE}/contact): direct outreach
