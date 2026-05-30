@@ -602,8 +602,6 @@ export default function Chat() {
     );
   }
 
-  const showQuickReplies = messages.length === 0;
-
   return (
     <div className="fixed inset-0 md:relative md:inset-auto z-[60] pointer-events-auto motion-safe:animate-fade-in-fast">
       <div className="bg-background border-0 md:border md:border-border rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden flex flex-col w-full h-full md:w-[460px] md:h-[700px] md:max-h-[calc(100vh-6rem)] motion-safe:animate-panel-in origin-bottom-right">
@@ -648,21 +646,41 @@ export default function Chat() {
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
           {messages.length === 0 && (
-            <div className="flex items-start gap-3 motion-safe:animate-fade-up">
-              <AssistantAvatar />
-              <div className="space-y-1.5 pt-0.5">
-                <p
-                  className="text-[15px] text-foreground leading-relaxed motion-safe:animate-fade-up motion-safe:opacity-0"
-                  style={{ animationDelay: '120ms' }}
-                >
-                  Hi, I&rsquo;m K.AI.
-                </p>
-                <p
-                  className="text-[15px] text-foreground-secondary leading-relaxed motion-safe:animate-fade-up motion-safe:opacity-0"
-                  style={{ animationDelay: '260ms' }}
-                >
-                  What brought you here today?
-                </p>
+            <div className="min-h-full flex flex-col items-center justify-center text-center gap-8 motion-safe:animate-fade-up">
+              {/* Hero: serif heading + soft light radial glow, matching /ask */}
+              <div className="relative">
+                <div
+                  aria-hidden
+                  className="absolute -inset-16 pointer-events-none"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse 70% 80% at 50% 50%, rgba(59,130,246,0.12) 0%, transparent 70%)',
+                    filter: 'blur(24px)',
+                  }}
+                />
+                <div className="relative">
+                  <h2 className="font-display text-3xl text-foreground tracking-tight">
+                    Ask K.AI anything
+                  </h2>
+                  <p className="mt-2.5 text-sm text-foreground-muted">
+                    Trained on Ahmad&rsquo;s writing and projects.
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick-reply chips, centered under the hero */}
+              <div className="flex flex-wrap gap-2 justify-center px-2">
+                {QUICK_REPLIES.map((q, i) => (
+                  <button
+                    key={q.label}
+                    type="button"
+                    onClick={() => submit(q.message, 'quick_reply')}
+                    style={{ animationDelay: `${400 + i * 70}ms` }}
+                    className="text-[13px] text-foreground-secondary bg-background-secondary border border-border rounded-full px-4 py-2 font-medium transition-all motion-safe:animate-fade-up motion-safe:opacity-0 hover:text-foreground hover:bg-background-tertiary hover:border-foreground/20 hover:-translate-y-0.5"
+                  >
+                    {q.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -724,22 +742,6 @@ export default function Chat() {
             );
           })}
 
-          {showQuickReplies && (
-            <div className="flex flex-wrap gap-2 pt-3 pl-[40px]">
-              {QUICK_REPLIES.map((q, i) => (
-                <button
-                  key={q.label}
-                  type="button"
-                  onClick={() => submit(q.message, 'quick_reply')}
-                  style={{ animationDelay: `${400 + i * 70}ms` }}
-                  className="text-[13px] text-foreground bg-background hover:bg-accent hover:text-accent-foreground border border-border hover:border-accent rounded-full px-4 py-2 transition-all font-medium motion-safe:animate-fade-up motion-safe:opacity-0 hover:-translate-y-0.5"
-                >
-                  {q.label}
-                </button>
-              ))}
-            </div>
-          )}
-
           {error && (
             <div className="flex items-start gap-3 motion-safe:animate-fade-up">
               <AssistantAvatar />
@@ -782,96 +784,104 @@ export default function Chat() {
             : ''}
         </div>
 
-        {/* Input */}
+        {/* Input — unified pill with `+`, mic, and up-arrow send, matching /ask */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             if (voiceState === 'listening') return;
             submit(input, 'input');
           }}
-          className="border-t border-border/60 px-4 py-3 flex items-center gap-2 flex-shrink-0 bg-background"
+          className="border-t border-border/60 px-4 py-3 flex-shrink-0 bg-background"
         >
-          <div className="flex-1 relative">
+          <div
+            className={`flex items-center gap-1.5 rounded-full border bg-background-secondary/60 pl-4 pr-1.5 py-1.5 transition-colors ${
+              voiceState === 'listening'
+                ? 'border-red-300 ring-2 ring-red-400/20'
+                : 'border-border focus-within:border-accent/40 focus-within:bg-background'
+            }`}
+          >
+            <span
+              aria-hidden
+              className="text-foreground-muted/70 text-lg leading-none select-none mr-0.5"
+            >
+              +
+            </span>
             <input
               ref={inputRef}
               type="text"
               value={voiceState === 'listening' ? interimTranscript : input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
-                voiceState === 'listening'
-                  ? 'Listening…'
-                  : 'Tell K.AI what you’re working on…'
+                voiceState === 'listening' ? 'Listening…' : 'Ask anything…'
               }
               disabled={isStreaming}
               readOnly={voiceState === 'listening'}
-              className={`w-full text-base md:text-sm px-4 py-3 md:py-2.5 bg-background-secondary border rounded-full focus:outline-none focus:bg-background disabled:opacity-50 transition placeholder:text-foreground-muted ${
-                voiceState === 'listening'
-                  ? 'border-red-400 ring-2 ring-red-400/30 italic text-foreground-muted'
-                  : 'border-transparent focus:border-accent focus:ring-2 focus:ring-accent/20'
+              className={`flex-1 min-w-0 bg-transparent border-0 outline-none text-[15px] py-1 placeholder:text-foreground-muted disabled:opacity-50 ${
+                voiceState === 'listening' ? 'italic text-foreground-muted' : ''
               }`}
             />
-          </div>
-          {voiceState !== 'unsupported' && (
+            {voiceState !== 'unsupported' && (
+              <button
+                type="button"
+                onPointerDown={() => {
+                  // Blur the text input on pointerdown so iOS dismisses the
+                  // keyboard and resolves any focus-related dead-tap before
+                  // the click event runs.
+                  if (document.activeElement === inputRef.current) {
+                    inputRef.current?.blur();
+                  }
+                }}
+                onClick={() => {
+                  if (voiceState === 'listening') {
+                    stopRecognition();
+                    return;
+                  }
+                  startRecognition();
+                }}
+                disabled={isStreaming}
+                aria-pressed={voiceState === 'listening'}
+                aria-label={
+                  voiceState === 'listening'
+                    ? 'Stop recording'
+                    : 'Start voice input'
+                }
+                title={voiceState === 'listening' ? 'Tap to stop' : 'Tap to speak'}
+                className={`relative w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 select-none ${
+                  voiceState === 'listening'
+                    ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
+                    : 'text-foreground-muted hover:text-accent hover:bg-background-tertiary active:scale-95'
+                } disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="3" width="6" height="11" rx="3" />
+                  <path d="M5 11a7 7 0 0 0 14 0" />
+                  <line x1="12" y1="18" x2="12" y2="22" />
+                  <line x1="8" y1="22" x2="16" y2="22" />
+                </svg>
+                {voiceState === 'listening' && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-300 motion-safe:animate-ping" />
+                )}
+              </button>
+            )}
             <button
-              type="button"
-              onPointerDown={() => {
-                // Blur the text input on the *down* event so iOS dismisses
-                // the keyboard and resolves any focus-related dead-tap
-                // before the click event runs.
-                if (document.activeElement === inputRef.current) {
-                  inputRef.current?.blur();
-                }
-              }}
-              onClick={() => {
-                if (voiceState === 'listening') {
-                  stopRecognition();
-                  return;
-                }
-                startRecognition();
-              }}
-              disabled={isStreaming}
-              aria-pressed={voiceState === 'listening'}
-              aria-label={
-                voiceState === 'listening'
-                  ? 'Stop recording'
-                  : 'Start voice input'
-              }
-              title={voiceState === 'listening' ? 'Tap to stop' : 'Tap to speak'}
-              className={`relative w-10 h-10 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 select-none ${
-                voiceState === 'listening'
-                  ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30'
-                  : 'bg-background-secondary text-foreground-secondary hover:bg-accent/10 hover:text-accent active:scale-95'
-              } disabled:opacity-40 disabled:cursor-not-allowed`}
+              type="submit"
+              disabled={isStreaming || !input.trim() || voiceState === 'listening'}
+              aria-label="Send"
+              className="w-8 h-8 rounded-full bg-foreground text-background hover:bg-accent active:scale-95 disabled:bg-background-tertiary disabled:text-foreground-muted transition-all duration-150 flex items-center justify-center flex-shrink-0"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="3" width="6" height="11" rx="3" />
-                <path d="M5 11a7 7 0 0 0 14 0" />
-                <line x1="12" y1="18" x2="12" y2="22" />
-                <line x1="8" y1="22" x2="16" y2="22" />
-              </svg>
-              {voiceState === 'listening' && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-300 motion-safe:animate-ping" />
+              {isStreaming ? (
+                <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
+                  <path d="M12 2 a 10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19V5" />
+                  <path d="m5 12 7-7 7 7" />
+                </svg>
               )}
             </button>
-          )}
-          <button
-            type="submit"
-            disabled={isStreaming || !input.trim() || voiceState === 'listening'}
-            aria-label="Send"
-            className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-foreground text-background hover:bg-accent hover:scale-105 active:scale-95 disabled:bg-background-tertiary disabled:text-foreground-muted disabled:hover:scale-100 transition-all duration-150 flex items-center justify-center flex-shrink-0"
-          >
-            {isStreaming ? (
-              <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
-                <path d="M12 2 a 10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="13 6 19 12 13 18" />
-              </svg>
-            )}
-          </button>
+          </div>
         </form>
 
         {/* Footer: disclaimer + escape hatches */}
