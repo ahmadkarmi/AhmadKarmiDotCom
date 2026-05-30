@@ -313,6 +313,21 @@ export default function Chat() {
       new DefaultChatTransport({
         api: '/api/ask-ahmad',
         body: () => ({ mode: 'anyone' }),
+        // Guard against non-stream responses (HTML error pages, proxy errors)
+        // being silently parsed and dumped as a message bubble. Throw on a bad
+        // content type so useChat surfaces a clean error instead.
+        fetch: async (input, init) => {
+          const res = await fetch(input, init);
+          const ct = res.headers.get('content-type') || '';
+          if (!res.ok || !/event-stream|application\/json|text\/plain/i.test(ct)) {
+            throw new Error(
+              res.status === 503
+                ? 'K.AI is temporarily unavailable. Please try again later.'
+                : `K.AI is unreachable (HTTP ${res.status}). Please try again in a moment.`
+            );
+          }
+          return res;
+        },
       }),
     []
   );
@@ -697,7 +712,7 @@ export default function Chat() {
             if (m.role === 'user') {
               return (
                 <div key={m.id} className="flex justify-end motion-safe:animate-fade-up">
-                  <div className="max-w-[82%] bg-foreground text-background rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap">
+                  <div className="max-w-[82%] min-w-0 bg-foreground text-background rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                     {visibleText}
                   </div>
                 </div>
@@ -710,7 +725,7 @@ export default function Chat() {
                 <div className="flex-1 min-w-0 space-y-2 pt-0.5">
                   {status && status.stage !== 'done' && <StatusPill key={status.stage} status={status} />}
                   {visibleText && (
-                    <div className="text-[15px] text-foreground leading-relaxed whitespace-pre-wrap">
+                    <div className="text-[15px] text-foreground leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                       {visibleText}
                     </div>
                   )}

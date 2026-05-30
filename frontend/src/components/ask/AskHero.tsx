@@ -58,6 +58,21 @@ export default function AskHero() {
       new DefaultChatTransport({
         api: '/api/ask-ahmad',
         body: () => ({ mode: 'anyone' }),
+        // Guard against non-stream responses (HTML 404 pages, proxy errors)
+        // being silently parsed and dumped as a message bubble. Throw on a
+        // bad content type so useChat surfaces a clean error instead.
+        fetch: async (input, init) => {
+          const res = await fetch(input, init);
+          const ct = res.headers.get('content-type') || '';
+          if (!res.ok || !/event-stream|application\/json|text\/plain/i.test(ct)) {
+            throw new Error(
+              res.status === 503
+                ? 'K.AI is temporarily unavailable. Please try again later.'
+                : `K.AI is unreachable (HTTP ${res.status}). Please try again in a moment.`
+            );
+          }
+          return res;
+        },
       }),
     []
   );
@@ -253,15 +268,15 @@ export default function AskHero() {
                 if (m.role === 'user') {
                   return (
                     <div key={m.id} className="flex justify-end">
-                      <div className="max-w-[82%] rounded-2xl rounded-tr-md bg-white text-black px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap">
+                      <div className="max-w-[82%] min-w-0 rounded-2xl rounded-tr-md bg-white text-black px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                         {text}
                       </div>
                     </div>
                   );
                 }
                 return (
-                  <div key={m.id} className="flex">
-                    <div className="text-[15px] leading-relaxed text-white/90 whitespace-pre-wrap">
+                  <div key={m.id} className="flex min-w-0">
+                    <div className="min-w-0 text-[15px] leading-relaxed text-white/90 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                       {text || (isStreaming ? <span className="text-white/40">…</span> : '')}
                     </div>
                   </div>
