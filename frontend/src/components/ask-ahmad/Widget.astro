@@ -1,8 +1,11 @@
 ---
 import Chat from './Chat';
 const enabled = import.meta.env.PUBLIC_ASK_AHMAD_ENABLED === 'true';
+// /ask is the full-page K.AI destination — the floating widget would be
+// redundant and visually noisy on that page.
+const onAskPage = Astro.url.pathname.replace(/\/$/, '') === '/ask';
 ---
-{enabled && (
+{enabled && !onAskPage && (
   <div class="fixed bottom-6 right-6 z-[60]" transition:persist="ask-ahmad">
     <Chat client:load />
   </div>
