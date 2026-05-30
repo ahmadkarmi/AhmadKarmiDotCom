@@ -189,11 +189,17 @@ function StatusPill({ status }: { status: StatusData }) {
   );
 }
 
-function AssistantAvatar({ size = 'sm' }: { size?: 'sm' | 'lg' } = {}) {
-  const dim = size === 'lg' ? 'w-10 h-10 text-base' : 'w-7 h-7 text-xs';
+function AssistantAvatar({ size = 'sm' }: { size?: 'sm' | 'lg' | 'xl' } = {}) {
+  const dim =
+    size === 'xl'
+      ? 'w-14 h-14 text-[1.75rem]'
+      : size === 'lg'
+        ? 'w-10 h-10 text-base'
+        : 'w-7 h-7 text-xs';
+  const ring = size === 'xl' ? 'ring-4 ring-accent/15 shadow-md shadow-accent/20' : 'shadow-sm';
   return (
     <div
-      className={`${dim} rounded-full bg-accent text-accent-foreground flex items-center justify-center flex-shrink-0 shadow-sm`}
+      className={`${dim} ${ring} rounded-full bg-accent text-accent-foreground flex items-center justify-center flex-shrink-0`}
     >
       <span className="font-display font-semibold leading-none tracking-tight">K</span>
     </div>
@@ -661,25 +667,28 @@ export default function Chat() {
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
           {messages.length === 0 && (
-            <div className="min-h-full flex flex-col items-center justify-center text-center gap-8 motion-safe:animate-fade-up">
-              {/* Hero: serif heading + soft light radial glow, matching /ask */}
+            <div className="min-h-full flex flex-col items-center justify-center text-center gap-7 motion-safe:animate-fade-up">
+              {/* Hero: K brand mark + voice-y greeting, anchored by a soft accent glow */}
               <div className="relative">
                 <div
                   aria-hidden
-                  className="absolute -inset-16 pointer-events-none"
+                  className="absolute -inset-20 pointer-events-none"
                   style={{
                     background:
-                      'radial-gradient(ellipse 70% 80% at 50% 50%, rgba(59,130,246,0.12) 0%, transparent 70%)',
-                    filter: 'blur(24px)',
+                      'radial-gradient(circle at 50% 35%, rgba(59,130,246,0.18) 0%, rgba(99,102,241,0.06) 35%, transparent 65%)',
+                    filter: 'blur(28px)',
                   }}
                 />
-                <div className="relative">
-                  <h2 className="font-display text-3xl text-foreground tracking-tight">
-                    Ask K.AI anything
-                  </h2>
-                  <p className="mt-2.5 text-sm text-foreground-muted">
-                    Trained on Ahmad&rsquo;s writing and projects.
-                  </p>
+                <div className="relative flex flex-col items-center gap-4">
+                  <AssistantAvatar size="xl" />
+                  <div>
+                    <h2 className="font-display text-[1.75rem] text-foreground tracking-tight leading-tight">
+                      Hi, I&rsquo;m K.AI.
+                    </h2>
+                    <p className="mt-2 text-sm text-foreground-muted">
+                      Ahmad&rsquo;s assistant. Ask me what you want to know.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -809,18 +818,12 @@ export default function Chat() {
           className="border-t border-border/60 px-4 py-3 flex-shrink-0 bg-background"
         >
           <div
-            className={`flex items-center gap-1.5 rounded-full border bg-background-secondary/60 pl-4 pr-1.5 py-1.5 transition-colors ${
+            className={`flex items-center gap-1.5 rounded-full border bg-background-secondary/60 pl-5 pr-1.5 py-1.5 transition-colors ${
               voiceState === 'listening'
                 ? 'border-red-300 ring-2 ring-red-400/20'
                 : 'border-border focus-within:border-accent/40 focus-within:bg-background'
             }`}
           >
-            <span
-              aria-hidden
-              className="text-foreground-muted/70 text-lg leading-none select-none mr-0.5"
-            >
-              +
-            </span>
             <input
               ref={inputRef}
               type="text"
@@ -882,7 +885,7 @@ export default function Chat() {
               type="submit"
               disabled={isStreaming || !input.trim() || voiceState === 'listening'}
               aria-label="Send"
-              className="w-8 h-8 rounded-full bg-foreground text-background hover:bg-accent active:scale-95 disabled:bg-background-tertiary disabled:text-foreground-muted transition-all duration-150 flex items-center justify-center flex-shrink-0"
+              className="w-8 h-8 rounded-full bg-accent text-white hover:bg-accent/90 active:scale-95 disabled:bg-background-tertiary disabled:text-foreground-muted transition-all duration-150 flex items-center justify-center flex-shrink-0"
             >
               {isStreaming ? (
                 <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">

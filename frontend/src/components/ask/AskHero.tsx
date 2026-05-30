@@ -143,14 +143,8 @@ export default function AskHero() {
         e.preventDefault();
         submit(input);
       }}
-      className="relative flex items-end gap-2 rounded-[28px] border border-white/10 bg-white/5 px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md focus-within:border-white/20 transition-colors"
+      className="relative flex items-end gap-2 rounded-[28px] border border-white/10 bg-white/5 px-5 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md focus-within:border-white/20 transition-colors"
     >
-      <span
-        aria-hidden="true"
-        className="text-white/50 text-xl leading-none select-none mb-1.5"
-      >
-        +
-      </span>
       <textarea
         ref={inputRef}
         value={input}
@@ -166,12 +160,12 @@ export default function AskHero() {
         type="submit"
         disabled={!input.trim() || isStreaming}
         aria-label="Send message"
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition-opacity disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white shadow-md shadow-accent/30 transition-all disabled:opacity-30 disabled:shadow-none disabled:cursor-not-allowed hover:bg-accent/90 active:scale-95"
       >
         {isStreaming ? (
           <span
             aria-hidden="true"
-            className="h-3 w-3 rounded-full bg-black animate-pulse"
+            className="h-3 w-3 rounded-full bg-white animate-pulse"
           />
         ) : (
           <svg
@@ -229,12 +223,18 @@ export default function AskHero() {
       {/* Hero state */}
       {!hasMessages && (
         <div className="relative z-[1] flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center">
+            {/* K brand mark — anchors the hero with Ahmad's identity */}
+            <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-accent text-white ring-4 ring-accent/15 shadow-lg shadow-accent/30 mb-6">
+              <span className="font-display font-semibold text-3xl sm:text-4xl tracking-tight leading-none">
+                K
+              </span>
+            </div>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-tight text-white">
-              Ask K.AI anything
+              Hi, I&rsquo;m K.AI.
             </h1>
             <p className="mt-4 text-white/60 text-base sm:text-lg">
-              Trained on Ahmad's writing and projects.
+              Ahmad&rsquo;s assistant. Ask me what you want to know.
             </p>
           </div>
 
