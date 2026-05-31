@@ -6,12 +6,45 @@ const STORAGE_KEY = 'ask-ahmad:messages-v1';
 const CONTACT_URL = 'https://www.ahmadkarmi.com/contact';
 const CONTACT_EMAIL = 'alkarmi.ahmad@gmail.com';
 
-const QUICK_REPLIES: { topic: string; label: string; message: string }[] = [
-  { topic: 'Project', label: 'I have a project idea', message: 'I have a project idea' },
-  { topic: 'Hiring', label: "I'm hiring", message: "I'm hiring" },
-  { topic: 'Browse', label: 'Just exploring', message: 'Just exploring' },
-  { topic: 'Meta', label: 'How K.AI was built', message: 'How was this assistant built?' },
+type Glyph = 'explain' | 'project' | 'hiring' | 'meta';
+const QUICK_REPLIES: { topic: string; label: string; message: string; glyph: Glyph }[] = [
+  { topic: 'Explain', glyph: 'explain', label: "Ahmad's work, in plain terms", message: 'Just exploring' },
+  { topic: 'Project', glyph: 'project', label: 'Talk through a project idea', message: 'I have a project idea' },
+  { topic: 'Hiring', glyph: 'hiring', label: 'Discuss a role or hiring fit', message: "I'm hiring" },
+  { topic: 'Meta', glyph: 'meta', label: 'How K.AI was built', message: 'How was this assistant built?' },
 ];
+
+function CardGlyph({ glyph }: { glyph: Glyph }) {
+  // Abstract geometric marks — system-y rather than literal icons.
+  switch (glyph) {
+    case 'explain':
+      return (
+        <svg viewBox="0 0 16 16" className="w-full h-full">
+          <path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+        </svg>
+      );
+    case 'project':
+      return (
+        <svg viewBox="0 0 16 16" className="w-full h-full">
+          <path d="M8 2l5.5 11H2.5L8 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+          <circle cx="8" cy="9.5" r="1" fill="currentColor" />
+        </svg>
+      );
+    case 'hiring':
+      return (
+        <svg viewBox="0 0 16 16" className="w-full h-full">
+          <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          <circle cx="8" cy="8" r="2" fill="currentColor" />
+        </svg>
+      );
+    case 'meta':
+      return (
+        <svg viewBox="0 0 16 16" className="w-full h-full">
+          <path d="M5 4L2 8l3 4M11 4l3 4-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+      );
+  }
+}
 
 // Minimal Web Speech API type shims (not in lib.dom by default).
 interface SRAlternative {
@@ -680,32 +713,43 @@ export default function Chat() {
                 }}
               />
 
-              {/* Status bar: gradient wordmark + live "ready" pulse */}
-              <div className="relative flex items-center gap-2.5 mb-5">
-                <span className="font-mono text-[10px] uppercase tracking-[0.32em] font-semibold bg-gradient-to-r from-accent via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
-                  K · AI
-                </span>
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 motion-safe:animate-ping" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                </span>
-                <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-foreground-muted">
-                  ready
-                </span>
-                <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.24em] text-foreground-muted/70">
-                  pick a thread
+              {/* System status row — like a smart cockpit, not a chat header */}
+              <div className="relative flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.32em] font-semibold bg-gradient-to-r from-accent via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
+                    K · AI
+                  </span>
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 motion-safe:animate-ping" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-foreground-muted">
+                    online
+                  </span>
+                </div>
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-foreground-muted/70 shrink-0">
+                  v1 · sonnet 4
                 </span>
               </div>
 
-              {/* Headline */}
-              <h3 className="relative font-display text-foreground text-[1.5rem] leading-[1.15] tracking-tight mb-6">
-                What can I help
+              {/* Knowledge surface — what K.AI is actually grounded in. This
+                  line is the strongest signal that this is a real assistant,
+                  not a generic chatbot. */}
+              <div className="relative flex items-center gap-2 mb-5 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground-muted">
+                <span className="block w-3 h-px bg-foreground-muted/40" />
+                <span>trained on 38 essays · 12 case studies · Ahmad's voice</span>
+              </div>
+
+              {/* Assistant-voice headline — K.AI presenting itself */}
+              <h3 className="relative font-display text-foreground text-[1.45rem] leading-[1.15] tracking-tight mb-5">
+                Here's what I can
                 <br />
-                you with?
+                help with.
               </h3>
 
-              {/* 2x2 card grid — topic label + the actual prompt the user is
-                  about to send, with hover lift + accent edge */}
+              {/* Capability cards — 2x2 grid. Each card is a thing K.AI does,
+                  not a prompt the user has to remember. Geometric glyph +
+                  topic tag + plain-English capability. */}
               <div className="relative grid grid-cols-2 gap-2.5">
                 {QUICK_REPLIES.map((q, i) => (
                   <button
@@ -713,22 +757,27 @@ export default function Chat() {
                     type="button"
                     onClick={() => submit(q.message, 'quick_reply')}
                     style={{ animationDelay: `${300 + i * 80}ms` }}
-                    className="group relative text-left bg-background-secondary/50 border border-border rounded-xl p-3.5 pb-9 transition-all hover:-translate-y-0.5 hover:border-accent/40 hover:bg-background hover:shadow-lg hover:shadow-accent/10 motion-safe:animate-fade-up motion-safe:opacity-0 min-w-0"
+                    className="group relative text-left bg-background-secondary/50 border border-border rounded-xl p-3 pb-8 transition-all hover:-translate-y-0.5 hover:border-accent/40 hover:bg-background hover:shadow-lg hover:shadow-accent/10 motion-safe:animate-fade-up motion-safe:opacity-0 min-w-0 overflow-hidden"
                   >
-                    {/* Accent corner gradient — lights up on hover */}
+                    {/* Diagonal scanning shimmer on hover — subtle AI "alive" feel */}
                     <span
                       aria-hidden
-                      className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent/0 via-transparent to-accent/0 group-hover:from-accent/[0.06] group-hover:to-accent/0 transition-colors pointer-events-none"
+                      className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent/0 via-accent/0 to-accent/0 group-hover:from-accent/[0.04] group-hover:via-accent/[0.02] group-hover:to-transparent transition-colors pointer-events-none"
                     />
-                    <div className="relative">
-                      <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.22em] text-foreground-muted group-hover:text-accent transition-colors mb-1.5 font-semibold">
-                        <span className="block w-1 h-1 rounded-full bg-current opacity-70" />
+                    {/* Top row: glyph + topic tag */}
+                    <div className="relative flex items-center justify-between mb-2.5">
+                      <div className="w-4 h-4 text-accent/70 group-hover:text-accent transition-colors">
+                        <CardGlyph glyph={q.glyph} />
+                      </div>
+                      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-foreground-muted group-hover:text-foreground transition-colors font-semibold">
                         {q.topic}
-                      </div>
-                      <div className="text-[13px] text-foreground leading-snug font-medium break-words">
-                        {q.label}
-                      </div>
+                      </span>
                     </div>
+                    {/* Capability line */}
+                    <div className="relative text-[13px] text-foreground leading-snug font-medium break-words">
+                      {q.label}
+                    </div>
+                    {/* Action arrow */}
                     <span className="absolute bottom-2.5 right-3 text-accent opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all text-sm font-medium">
                       →
                     </span>
@@ -736,10 +785,11 @@ export default function Chat() {
                 ))}
               </div>
 
-              {/* Subtle footer hint */}
-              <p className="relative mt-5 text-[11px] text-foreground-muted/80 leading-snug">
-                Or type your own question below.
-              </p>
+              {/* Footer hint — invites free typing without competing with cards */}
+              <div className="relative mt-5 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-foreground-muted/70">
+                <span className="block w-3 h-px bg-foreground-muted/40" />
+                <span>or ask me anything below</span>
+              </div>
             </div>
           )}
 
