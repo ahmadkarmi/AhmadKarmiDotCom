@@ -713,39 +713,17 @@ export default function Chat() {
                 }}
               />
 
-              {/* System status row — like a smart cockpit, not a chat header */}
-              <div className="relative flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.32em] font-semibold bg-gradient-to-r from-accent via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
-                    K · AI
-                  </span>
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 motion-safe:animate-ping" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  </span>
-                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-foreground-muted">
-                    online
-                  </span>
-                </div>
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-foreground-muted/70 shrink-0">
-                  v1 · sonnet 4
-                </span>
-              </div>
-
-              {/* Knowledge surface — what K.AI is actually grounded in. This
-                  line is the strongest signal that this is a real assistant,
-                  not a generic chatbot. */}
-              <div className="relative flex items-center gap-2 mb-5 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground-muted">
-                <span className="block w-3 h-px bg-foreground-muted/40" />
-                <span>trained on 38 essays · 12 case studies · Ahmad's voice</span>
-              </div>
-
-              {/* Assistant-voice headline — K.AI presenting itself */}
-              <h3 className="relative font-display text-foreground text-[1.45rem] leading-[1.15] tracking-tight mb-5">
+              {/* Assistant-voice headline + warm subtitle. The subtitle is
+                  the one grounding signal — friendly prose, not a system bar. */}
+              <h3 className="relative font-display text-foreground text-[1.7rem] leading-[1.1] tracking-tight mb-3">
                 Here's what I can
                 <br />
                 help with.
               </h3>
+              <p className="relative text-[13px] text-foreground-secondary leading-relaxed mb-6 max-w-[26ch]">
+                I've read everything Ahmad has written. Ask me about his work,
+                or pick a thread.
+              </p>
 
               {/* Capability cards — 2x2 grid. Each card is a thing K.AI does,
                   not a prompt the user has to remember. Geometric glyph +
@@ -785,11 +763,10 @@ export default function Chat() {
                 ))}
               </div>
 
-              {/* Footer hint — invites free typing without competing with cards */}
-              <div className="relative mt-5 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-foreground-muted/70">
-                <span className="block w-3 h-px bg-foreground-muted/40" />
-                <span>or ask me anything below</span>
-              </div>
+              {/* Footer hint — sentence-case so the welcome reads warm */}
+              <p className="relative mt-5 text-[12px] text-foreground-muted leading-snug">
+                Or ask me anything below.
+              </p>
             </div>
           )}
 
