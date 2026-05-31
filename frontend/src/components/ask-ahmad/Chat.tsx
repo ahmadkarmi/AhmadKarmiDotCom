@@ -667,45 +667,36 @@ export default function Chat() {
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
           {messages.length === 0 && (
-            <div className="min-h-full flex flex-col items-center justify-center text-center gap-7 motion-safe:animate-fade-up">
-              {/* Hero: K brand mark + voice-y greeting, anchored by a soft accent glow */}
-              <div className="relative">
-                <div
-                  aria-hidden
-                  className="absolute -inset-20 pointer-events-none"
-                  style={{
-                    background:
-                      'radial-gradient(circle at 50% 35%, rgba(59,130,246,0.18) 0%, rgba(99,102,241,0.06) 35%, transparent 65%)',
-                    filter: 'blur(28px)',
-                  }}
-                />
-                <div className="relative flex flex-col items-center gap-4">
-                  <AssistantAvatar size="xl" />
-                  <div>
-                    <h2 className="font-display text-[1.75rem] text-foreground tracking-tight leading-tight">
-                      Hi, I&rsquo;m K.AI.
-                    </h2>
-                    <p className="mt-2 text-sm text-foreground-muted">
-                      Ahmad&rsquo;s assistant. Ask me what you want to know.
-                    </p>
-                  </div>
+            <div className="min-h-full flex flex-col justify-center px-1 motion-safe:animate-fade-up">
+              {/* Editorial wordmark + lead-in. The conversation starts when the
+                  visitor picks a numbered item or types in the bar below. */}
+              <div className="mb-9">
+                <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-foreground-muted mb-3">
+                  K · AI
                 </div>
+                <p className="font-display italic text-foreground text-[1.4rem] leading-snug">
+                  What brings you here?
+                </p>
               </div>
 
-              {/* Quick-reply chips, centered under the hero */}
-              <div className="flex flex-wrap gap-2 justify-center px-2">
+              {/* Numbered, editorial list. Arrow appears on hover. */}
+              <ol className="space-y-3">
                 {QUICK_REPLIES.map((q, i) => (
-                  <button
-                    key={q.label}
-                    type="button"
-                    onClick={() => submit(q.message, 'quick_reply')}
-                    style={{ animationDelay: `${400 + i * 70}ms` }}
-                    className="text-[13px] text-foreground-secondary bg-background-secondary border border-border rounded-full px-4 py-2 font-medium transition-all motion-safe:animate-fade-up motion-safe:opacity-0 hover:text-foreground hover:bg-background-tertiary hover:border-foreground/20 hover:-translate-y-0.5"
-                  >
-                    {q.label}
-                  </button>
+                  <li key={q.label} style={{ animationDelay: `${400 + i * 70}ms` }} className="motion-safe:animate-fade-up motion-safe:opacity-0">
+                    <button
+                      type="button"
+                      onClick={() => submit(q.message, 'quick_reply')}
+                      className="group w-full flex items-baseline gap-4 text-left text-foreground-secondary hover:text-foreground transition-colors py-1 -mx-1 px-1 rounded-sm"
+                    >
+                      <span className="font-mono text-[10px] text-foreground-muted group-hover:text-accent transition-colors w-5 shrink-0 tabular-nums">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-[15px] leading-snug">{q.label}</span>
+                      <span className="ml-auto pl-2 text-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                    </button>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
           )}
 
@@ -808,20 +799,21 @@ export default function Chat() {
             : ''}
         </div>
 
-        {/* Input — unified pill with `+`, mic, and up-arrow send, matching /ask */}
+        {/* Input — editorial thin-underline. Mic as a small icon. Submit is a
+            tracked "Ask →" text-button rather than a colored circle. */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             if (voiceState === 'listening') return;
             submit(input, 'input');
           }}
-          className="border-t border-border/60 px-4 py-3 flex-shrink-0 bg-background"
+          className="border-t border-border/60 px-5 py-3 flex-shrink-0 bg-background"
         >
           <div
-            className={`flex items-center gap-1.5 rounded-full border bg-background-secondary/60 pl-5 pr-1.5 py-1.5 transition-colors ${
+            className={`flex items-center gap-3 border-b pb-1.5 transition-colors ${
               voiceState === 'listening'
-                ? 'border-red-300 ring-2 ring-red-400/20'
-                : 'border-border focus-within:border-accent/40 focus-within:bg-background'
+                ? 'border-red-400'
+                : 'border-border focus-within:border-accent'
             }`}
           >
             <input
@@ -834,7 +826,7 @@ export default function Chat() {
               }
               disabled={isStreaming}
               readOnly={voiceState === 'listening'}
-              className={`flex-1 min-w-0 bg-transparent border-0 outline-none text-[15px] py-1 placeholder:text-foreground-muted disabled:opacity-50 ${
+              className={`flex-1 min-w-0 bg-transparent border-0 outline-none text-[15px] py-1.5 placeholder:text-foreground-muted disabled:opacity-50 ${
                 voiceState === 'listening' ? 'italic text-foreground-muted' : ''
               }`}
             />
@@ -864,20 +856,20 @@ export default function Chat() {
                     : 'Start voice input'
                 }
                 title={voiceState === 'listening' ? 'Tap to stop' : 'Tap to speak'}
-                className={`relative w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 select-none ${
+                className={`relative shrink-0 transition-colors select-none ${
                   voiceState === 'listening'
-                    ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
-                    : 'text-foreground-muted hover:text-accent hover:bg-background-tertiary active:scale-95'
+                    ? 'text-red-500'
+                    : 'text-foreground-muted hover:text-accent'
                 } disabled:opacity-40 disabled:cursor-not-allowed`}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="9" y="3" width="6" height="11" rx="3" />
                   <path d="M5 11a7 7 0 0 0 14 0" />
                   <line x1="12" y1="18" x2="12" y2="22" />
                   <line x1="8" y1="22" x2="16" y2="22" />
                 </svg>
                 {voiceState === 'listening' && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-300 motion-safe:animate-ping" />
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-red-400 motion-safe:animate-ping" />
                 )}
               </button>
             )}
@@ -885,19 +877,9 @@ export default function Chat() {
               type="submit"
               disabled={isStreaming || !input.trim() || voiceState === 'listening'}
               aria-label="Send"
-              className="w-8 h-8 rounded-full bg-accent text-white hover:bg-accent/90 active:scale-95 disabled:bg-background-tertiary disabled:text-foreground-muted transition-all duration-150 flex items-center justify-center flex-shrink-0"
+              className="font-medium text-accent text-[11px] uppercase tracking-[0.22em] shrink-0 hover:opacity-80 disabled:opacity-25 disabled:cursor-not-allowed transition-opacity py-1"
             >
-              {isStreaming ? (
-                <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
-                  <path d="M12 2 a 10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 19V5" />
-                  <path d="m5 12 7-7 7 7" />
-                </svg>
-              )}
+              {isStreaming ? 'Asking…' : 'Ask →'}
             </button>
           </div>
         </form>

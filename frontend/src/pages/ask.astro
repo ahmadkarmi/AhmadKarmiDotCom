@@ -23,7 +23,8 @@ import AskHero from '../components/ask/AskHero';
     background: #0a0a0c;
   }
 
-  /* The pulsating radial glow behind the input. Pure CSS, no JS. */
+  /* Two restrained, off-center accents. No pulsing, no spotlight — the
+     type carries the page; the gradient is just atmospheric weight. */
   .ask-glow {
     position: fixed;
     inset: 0;
@@ -31,51 +32,27 @@ import AskHero from '../components/ask/AskHero';
     z-index: 0;
     background:
       radial-gradient(
-        ellipse 60% 50% at 50% 55%,
-        rgba(59, 130, 246, 0.35) 0%,
-        rgba(59, 130, 246, 0.18) 25%,
-        rgba(30, 64, 175, 0.08) 50%,
-        transparent 75%
+        ellipse 50% 45% at 20% 30%,
+        rgba(59, 130, 246, 0.12) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 40% 35% at 85% 80%,
+        rgba(99, 102, 241, 0.08) 0%,
+        transparent 65%
       );
-    filter: blur(40px);
-    transform-origin: 50% 55%;
-    animation: ask-glow-pulse 8s ease-in-out infinite;
-    will-change: transform, opacity;
+    filter: blur(60px);
   }
 
-  @keyframes ask-glow-pulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.85;
-    }
-    50% {
-      transform: scale(1.08);
-      opacity: 1;
-    }
-  }
-
-  /* A subtle deeper-blue spot under the center, slightly out of phase so the
-     pulse feels organic rather than mechanical. */
+  /* Subtle vignette so the corners settle. */
   .ask-glow::after {
     content: '';
     position: absolute;
     inset: 0;
     background: radial-gradient(
-      ellipse 30% 25% at 50% 55%,
-      rgba(99, 102, 241, 0.25) 0%,
-      transparent 70%
+      ellipse 80% 70% at 50% 50%,
+      transparent 55%,
+      rgba(0, 0, 0, 0.35) 100%
     );
-    filter: blur(30px);
-    animation: ask-glow-pulse 8s ease-in-out infinite;
-    animation-delay: -3s;
-    opacity: 0.8;
-  }
-
-  /* Respect reduced motion. */
-  @media (prefers-reduced-motion: reduce) {
-    .ask-glow,
-    .ask-glow::after {
-      animation: none;
-    }
   }
 </style>
