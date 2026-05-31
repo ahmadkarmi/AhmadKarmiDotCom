@@ -701,15 +701,16 @@ export default function Chat() {
         <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-6 space-y-6">
           {messages.length === 0 && (
             <div className="min-h-full flex flex-col justify-center motion-safe:animate-fade-up relative min-w-0">
-              {/* Soft atmospheric backdrop. Off-center, no animation — adds
-                  depth behind the type without spotlighting the input. */}
+              {/* Faint dot-grid backdrop — "graph paper" texture that reads
+                  as designed/technical without color noise. Scoped to the
+                  welcome wrapper so it never appears in chat state. */}
               <div
                 aria-hidden
                 className="absolute -inset-x-6 -inset-y-12 pointer-events-none"
                 style={{
-                  background:
-                    'radial-gradient(ellipse 55% 45% at 25% 25%, rgba(59,130,246,0.12) 0%, transparent 65%), radial-gradient(ellipse 45% 40% at 90% 85%, rgba(99,102,241,0.07) 0%, transparent 70%)',
-                  filter: 'blur(40px)',
+                  backgroundImage:
+                    'radial-gradient(circle, rgba(15, 23, 42, 0.07) 1px, transparent 1px)',
+                  backgroundSize: '18px 18px',
                 }}
               />
 

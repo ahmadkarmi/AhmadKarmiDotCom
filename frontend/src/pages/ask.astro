@@ -23,36 +23,18 @@ import AskHero from '../components/ask/AskHero';
     background: #0a0a0c;
   }
 
-  /* Two restrained, off-center accents. No pulsing, no spotlight — the
-     type carries the page; the gradient is just atmospheric weight. */
+  /* Faint dot grid — "graph paper" texture that reads as designed and
+     technical, without color noise. Replaces the gradient blob backdrop. */
   .ask-glow {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background:
-      radial-gradient(
-        ellipse 50% 45% at 20% 30%,
-        rgba(59, 130, 246, 0.12) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 40% 35% at 85% 80%,
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 65%
-      );
-    filter: blur(60px);
-  }
-
-  /* Subtle vignette so the corners settle. */
-  .ask-glow::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      ellipse 80% 70% at 50% 50%,
-      transparent 55%,
-      rgba(0, 0, 0, 0.35) 100%
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.07) 1px,
+      transparent 1px
     );
+    background-size: 22px 22px;
   }
 </style>
