@@ -667,32 +667,64 @@ export default function Chat() {
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
           {messages.length === 0 && (
-            <div className="min-h-full flex flex-col justify-center px-1 motion-safe:animate-fade-up">
-              {/* Editorial wordmark + lead-in. The conversation starts when the
-                  visitor picks a numbered item or types in the bar below. */}
-              <div className="mb-9">
-                <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-foreground-muted mb-3">
-                  K · AI
+            <div className="min-h-full flex flex-col justify-center px-1 motion-safe:animate-fade-up relative">
+              {/* Soft atmospheric backdrop, off-center, no animation. Adds depth
+                  behind the type without being a Gemini-style spotlight. */}
+              <div
+                aria-hidden
+                className="absolute -inset-x-8 -inset-y-12 pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(ellipse 55% 45% at 25% 30%, rgba(59,130,246,0.10) 0%, transparent 65%), radial-gradient(ellipse 40% 35% at 85% 75%, rgba(99,102,241,0.06) 0%, transparent 70%)',
+                  filter: 'blur(36px)',
+                }}
+              />
+
+              {/* Wordmark + live status pulse + serif lead-in */}
+              <div className="relative mb-9">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.32em] font-semibold bg-gradient-to-r from-accent via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
+                    K · AI
+                  </span>
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 motion-safe:animate-ping" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-foreground-muted">
+                    ready
+                  </span>
                 </div>
-                <p className="font-display italic text-foreground text-[1.4rem] leading-snug">
+                <p className="font-display italic text-foreground text-[1.45rem] leading-snug">
                   What brings you here?
                 </p>
               </div>
 
-              {/* Numbered, editorial list. Arrow appears on hover. */}
-              <ol className="space-y-3">
+              {/* Numbered list — modern hover: bg tint, number lights up,
+                  title nudges right, arrow slides in from the left. */}
+              <ol className="relative space-y-1.5">
                 {QUICK_REPLIES.map((q, i) => (
-                  <li key={q.label} style={{ animationDelay: `${400 + i * 70}ms` }} className="motion-safe:animate-fade-up motion-safe:opacity-0">
+                  <li
+                    key={q.label}
+                    style={{ animationDelay: `${400 + i * 70}ms` }}
+                    className="motion-safe:animate-fade-up motion-safe:opacity-0"
+                  >
                     <button
                       type="button"
                       onClick={() => submit(q.message, 'quick_reply')}
-                      className="group w-full flex items-baseline gap-4 text-left text-foreground-secondary hover:text-foreground transition-colors py-1 -mx-1 px-1 rounded-sm"
+                      className="group relative w-full flex items-center gap-3.5 text-left text-foreground-secondary hover:text-foreground transition-all py-2.5 px-2 -mx-2 rounded-lg hover:bg-gradient-to-r hover:from-accent/5 hover:via-accent/[0.02] hover:to-transparent"
                     >
-                      <span className="font-mono text-[10px] text-foreground-muted group-hover:text-accent transition-colors w-5 shrink-0 tabular-nums">
-                        {String(i + 1).padStart(2, '0')}
+                      <span className="relative flex items-center justify-center w-6 h-6 shrink-0">
+                        <span className="absolute inset-0 rounded-md bg-accent/0 group-hover:bg-accent/10 transition-colors" />
+                        <span className="relative font-mono text-[10px] tabular-nums font-semibold text-foreground-muted group-hover:text-accent transition-colors">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
                       </span>
-                      <span className="text-[15px] leading-snug">{q.label}</span>
-                      <span className="ml-auto pl-2 text-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                      <span className="text-[15px] leading-snug group-hover:translate-x-0.5 transition-transform duration-200">
+                        {q.label}
+                      </span>
+                      <span className="ml-auto pl-2 text-accent opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
+                        →
+                      </span>
                     </button>
                   </li>
                 ))}

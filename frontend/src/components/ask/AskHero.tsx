@@ -142,9 +142,18 @@ export default function AskHero() {
       {/* Soft off-center backdrop. Restrained, not centered, so type leads. */}
       <div className="ask-glow" aria-hidden="true" />
 
-      {/* Editorial wordmark — brand stamp in the corner */}
-      <div className="absolute top-6 left-6 sm:top-8 sm:left-10 font-display text-[11px] tracking-[0.32em] uppercase text-white/35 select-none z-10">
-        K · AI
+      {/* Editorial wordmark with gradient + live "ready" pulse */}
+      <div className="absolute top-6 left-6 sm:top-8 sm:left-10 flex items-center gap-2.5 select-none z-10">
+        <span className="font-mono text-[11px] tracking-[0.32em] uppercase font-semibold bg-gradient-to-r from-accent via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+          K · AI
+        </span>
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 motion-safe:animate-ping" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+        </span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/40">
+          ready
+        </span>
       </div>
       <div className="absolute top-6 right-6 sm:top-8 sm:right-10 font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 select-none z-10">
         Ahmad's assistant
@@ -200,22 +209,27 @@ export default function AskHero() {
             </form>
 
             {/* Editorial numbered list — Ahmad's voice continues the sentence */}
-            <ol className="mt-14 sm:mt-16 space-y-3 sm:space-y-3.5">
+            <ol className="mt-14 sm:mt-16 space-y-1.5">
               {SUGGESTIONS.map((s, i) => (
                 <li key={s}>
                   <button
                     type="button"
                     onClick={() => submit(s, 'suggestion')}
-                    className="group w-full flex items-baseline gap-5 text-left text-white/60 hover:text-white transition-colors py-1 -mx-2 px-2 rounded-sm"
+                    className="group relative w-full flex items-center gap-5 text-left text-white/55 hover:text-white transition-all py-2.5 -mx-3 px-3 rounded-lg hover:bg-gradient-to-r hover:from-accent/10 hover:via-accent/5 hover:to-transparent"
                   >
-                    <span className="font-mono text-[11px] text-white/30 group-hover:text-accent transition-colors w-6 shrink-0 tabular-nums">
-                      {String(i + 1).padStart(2, '0')}
+                    <span className="relative flex items-center justify-center w-7 h-7 shrink-0">
+                      <span className="absolute inset-0 rounded-md bg-accent/0 group-hover:bg-accent/15 transition-colors" />
+                      <span className="relative font-mono text-[11px] tabular-nums font-semibold text-white/35 group-hover:text-accent transition-colors">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
                     </span>
                     <span className="font-display italic text-white/40 text-base sm:text-lg shrink-0 select-none">
                       …
                     </span>
-                    <span className="text-base sm:text-lg leading-snug">{s}</span>
-                    <span className="ml-auto pl-2 text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-base sm:text-lg leading-snug group-hover:translate-x-0.5 transition-transform duration-200">
+                      {s}
+                    </span>
+                    <span className="ml-auto pl-2 text-accent opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
                       →
                     </span>
                   </button>
