@@ -8,14 +8,6 @@ const STORAGE_KEY = 'ask-ahmad:messages-v1';
 const CONTACT_URL = 'https://www.ahmadkarmi.com/contact';
 const CONTACT_EMAIL = 'alkarmi.ahmad@gmail.com';
 
-// Generic follow-up prompts shown under each completed answer. Static for now;
-// they fit any topic and avoid an extra model call per reply.
-const FOLLOW_UPS = [
-  'Tell me more',
-  'Why does that matter?',
-  'A concrete example?',
-];
-
 // Themed markdown renderer for K.AI answers. Editorial / restrained — matches
 // the site's typography rather than a generic chat-bubble look.
 const MARKDOWN_COMPONENTS = {
@@ -206,12 +198,16 @@ function applyStyleGuard(input: string): string {
   return out;
 }
 
-// Special block parser: extract intent + handoff blocks from streamed text.
+// Special block parser: extract intent, handoff, and followups blocks
+// from streamed assistant text. Each block is fenced (```name ... ```)
+// and stripped from the visible text before render.
 type ParsedAssistantText = {
   visibleText: string;
   intent?: 'project' | 'recruiter' | 'explorer';
   handoff?: string;
   handoffOpen: boolean;
+  followups?: string[];
+  followupsOpen: boolean;
 };
 
 function parseAssistantText(raw: string): ParsedAssistantText {
@@ -219,6 +215,8 @@ function parseAssistantText(raw: string): ParsedAssistantText {
   let intent: ParsedAssistantText['intent'];
   let handoff: string | undefined;
   let handoffOpen = false;
+  let followups: string[] | undefined;
+  let followupsOpen = false;
 
   const intentRe = /```intent\s*\n([\s\S]*?)\n?```/i;
   const im = visible.match(intentRe);
@@ -240,7 +238,22 @@ function parseAssistantText(raw: string): ParsedAssistantText {
     visible = visible.replace(/```handoff[\s\S]*$/i, '').trimEnd();
   }
 
-  return { visibleText: visible, intent, handoff, handoffOpen };
+  const followupsRe = /```followups\s*\n([\s\S]*?)\n?```/i;
+  const fm = visible.match(followupsRe);
+  if (fm) {
+    followups = fm[1]
+      .split('\n')
+      .map((line) => line.replace(/^[\s\-\d.)•]+/, '').trim())
+      .filter((line) => line.length > 0)
+      .slice(0, 3);
+    if (followups.length === 0) followups = undefined;
+    visible = visible.replace(fm[0], '').replace(/\n{3,}/g, '\n\n').trim();
+  } else if (/```followups\b/i.test(visible)) {
+    followupsOpen = true;
+    visible = visible.replace(/```followups[\s\S]*$/i, '').trimEnd();
+  }
+
+  return { visibleText: visible, intent, handoff, handoffOpen, followups, followupsOpen };
 }
 
 // Only show citations actually referenced via [^N] markers in the answer text.
@@ -842,13 +855,17 @@ export default function Chat() {
               isStreaming;
 
             // Show follow-up pills only under a fully-completed assistant
-            // answer (text is in, not streaming, no pending handoff).
+            // answer (text is in, not streaming, no pending handoff, and
+            // the followups block has fully arrived and parsed).
+            const followups = parsed?.followups ?? [];
             const showFollowUps =
               m.role === 'assistant' &&
               !!visibleText &&
               !isStreamingThisOne &&
               !parsed?.handoffOpen &&
-              !parsed?.handoff;
+              !parsed?.handoff &&
+              !parsed?.followupsOpen &&
+              followups.length > 0;
 
             if (m.role === 'user') {
               return (
@@ -906,7 +923,7 @@ export default function Chat() {
                   )}
                   {showFollowUps && (
                     <div className="flex flex-wrap gap-1.5 pt-1 motion-safe:animate-fade-in-fast">
-                      {FOLLOW_UPS.map((prompt) => (
+                      {followups.map((prompt) => (
                         <button
                           key={prompt}
                           type="button"
