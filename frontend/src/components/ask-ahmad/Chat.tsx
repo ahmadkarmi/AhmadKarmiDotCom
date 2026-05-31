@@ -1,10 +1,63 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const STORAGE_KEY = 'ask-ahmad:messages-v1';
 const CONTACT_URL = 'https://www.ahmadkarmi.com/contact';
 const CONTACT_EMAIL = 'alkarmi.ahmad@gmail.com';
+
+// Generic follow-up prompts shown under each completed answer. Static for now;
+// they fit any topic and avoid an extra model call per reply.
+const FOLLOW_UPS = [
+  'Tell me more',
+  'Why does that matter?',
+  'A concrete example?',
+];
+
+// Themed markdown renderer for K.AI answers. Editorial / restrained — matches
+// the site's typography rather than a generic chat-bubble look.
+const MARKDOWN_COMPONENTS = {
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="leading-relaxed mb-2 last:mb-0">{children}</p>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="list-disc pl-5 space-y-1 mb-2 last:mb-0">{children}</ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="list-decimal pl-5 space-y-1 mb-2 last:mb-0">{children}</ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => (
+    <li className="leading-relaxed">{children}</li>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold">{children}</strong>
+  ),
+  em: ({ children }: { children?: React.ReactNode }) => (
+    <em className="italic">{children}</em>
+  ),
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-accent underline underline-offset-2 hover:opacity-80"
+    >
+      {children}
+    </a>
+  ),
+  code: ({ children }: { children?: React.ReactNode }) => (
+    <code className="px-1.5 py-0.5 rounded bg-background-secondary font-mono text-[13px]">
+      {children}
+    </code>
+  ),
+  blockquote: ({ children }: { children?: React.ReactNode }) => (
+    <blockquote className="border-l-2 border-accent/40 pl-3 italic text-foreground-secondary my-2">
+      {children}
+    </blockquote>
+  ),
+};
 
 type Glyph = 'explain' | 'project' | 'hiring' | 'meta';
 const QUICK_REPLIES: { topic: string; label: string; message: string; glyph: Glyph }[] = [
@@ -771,7 +824,7 @@ export default function Chat() {
             </div>
           )}
 
-          {messages.map((m) => {
+          {messages.map((m, idx) => {
             const parts = (m.parts ?? []) as AnyPart[];
             const raw = getRawText(parts);
             const parsed = m.role === 'assistant' ? parseAssistantText(raw) : null;
@@ -780,10 +833,27 @@ export default function Chat() {
             const citations = m.role === 'assistant' ? getCitations(parts) : null;
             const usedCitations = parsed && citations ? citationsActuallyUsed(visibleText, citations) : [];
 
+            // Only the latest assistant message can be actively streaming.
+            const isLastMessage = idx === messages.length - 1;
+            const isStreamingThisOne =
+              isLastMessage &&
+              m.role === 'assistant' &&
+              (status?.stage !== 'done') &&
+              isStreaming;
+
+            // Show follow-up pills only under a fully-completed assistant
+            // answer (text is in, not streaming, no pending handoff).
+            const showFollowUps =
+              m.role === 'assistant' &&
+              !!visibleText &&
+              !isStreamingThisOne &&
+              !parsed?.handoffOpen &&
+              !parsed?.handoff;
+
             if (m.role === 'user') {
               return (
                 <div key={m.id} className="flex justify-end motion-safe:animate-fade-up">
-                  <div className="max-w-[82%] min-w-0 bg-foreground text-background rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                  <div className="max-w-[82%] min-w-0 border border-border bg-background-secondary/60 text-foreground rounded-2xl rounded-tr-md px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                     {visibleText}
                   </div>
                 </div>
@@ -796,8 +866,19 @@ export default function Chat() {
                 <div className="flex-1 min-w-0 space-y-2 pt-0.5">
                   {status && status.stage !== 'done' && <StatusPill key={status.stage} status={status} />}
                   {visibleText && (
-                    <div className="text-[15px] text-foreground leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-                      {visibleText}
+                    <div className="text-[15px] text-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={MARKDOWN_COMPONENTS}
+                      >
+                        {visibleText}
+                      </ReactMarkdown>
+                      {isStreamingThisOne && (
+                        <span
+                          aria-hidden
+                          className="inline-block w-[2px] h-[1em] ml-0.5 align-text-bottom bg-accent motion-safe:animate-pulse"
+                        />
+                      )}
                     </div>
                   )}
                   {parsed?.handoff && (
@@ -821,6 +902,20 @@ export default function Chat() {
                         items={usedCitations}
                         onClick={(c) => track('ask_ahmad_citation_clicked', { url: c.url, source_type: c.sourceType })}
                       />
+                    </div>
+                  )}
+                  {showFollowUps && (
+                    <div className="flex flex-wrap gap-1.5 pt-1 motion-safe:animate-fade-in-fast">
+                      {FOLLOW_UPS.map((prompt) => (
+                        <button
+                          key={prompt}
+                          type="button"
+                          onClick={() => submit(prompt, 'follow_up')}
+                          className="text-[12px] text-foreground-secondary border border-border rounded-full px-3 py-1 hover:text-foreground hover:bg-background-secondary hover:border-foreground/20 transition-colors"
+                        >
+                          {prompt}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
