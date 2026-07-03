@@ -271,12 +271,16 @@ function decodeHtmlEntities(value: string): string {
     });
 }
 
+// Generic words that appear in many logo filenames and must not count as a
+// client-name match (e.g. "brand-logo.png" contains "and").
+const GENERIC_LOGO_TOKENS = new Set(['and', 'the', 'for', 'logo', 'png', 'jpg', 'jpeg', 'svg', 'webp']);
+
 function tokenize(value: any): string[] {
     return String(value || '')
         .toLowerCase()
         .split(/[^a-z0-9]+/)
         .map((t) => t.trim())
-        .filter((t) => t.length >= 3);
+        .filter((t) => t.length >= 3 && !GENERIC_LOGO_TOKENS.has(t));
 }
 
 function scoreLogoCandidate(filename: string, tokens: string[]): number {
@@ -345,7 +349,11 @@ async function guessClientLogo(work: Work): Promise<WPMedia | undefined> {
             }
         }
 
-        if (!best || best.score < 10) return undefined;
+        // 13 = "logo" in filename (10) + at least one client/slug token (3).
+        // A bare 10 means the filename merely contains "logo" with no relation
+        // to this client, and every logo-less work would inherit whichever
+        // logo file was uploaded most recently.
+        if (!best || best.score < 13) return undefined;
 
         return {
             id: best.id,

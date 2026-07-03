@@ -54,8 +54,8 @@ const descriptionText = toPlainText(work.brief) || toPlainText(work.details);
     <!-- Client & Meta -->
     <div class="flex items-center justify-between mb-3 h-8">
       {clientLogoUrl ? (
-        <Image 
-          src={clientLogoUrl} 
+        <Image
+          src={clientLogoUrl}
           alt={work.client || 'Client Logo'}
           width={clientLogoWidth}
           height={clientLogoHeight}
@@ -63,9 +63,13 @@ const descriptionText = toPlainText(work.brief) || toPlainText(work.details);
           loading="lazy"
         />
       ) : (
-        <span class="text-xs font-bold text-foreground-secondary uppercase tracking-wider">
-          {work.client || 'Internal Project'}
-        </span>
+        <img
+          src="/brand/logo-mark.png"
+          alt={work.client || 'Ahmad Al-Karmi'}
+          class="h-6 w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+          loading="lazy"
+          decoding="async"
+        />
       )}
       
       {/* Status Pill */}
