@@ -109,12 +109,14 @@ export default function BodyImageLightbox({ rootSelector = '[data-lightbox-root]
     useEffect(() => {
         const loadListeners: Array<{ img: HTMLImageElement; handler: () => void }> = [];
 
-        function enhance(img: HTMLImageElement) {
-            if (img.dataset.lightboxBound !== undefined) return;
-            if (img.closest('a')) return;
+        function isTiny(img: HTMLImageElement) {
             const width = img.naturalWidth || img.offsetWidth;
             const height = img.naturalHeight || img.offsetHeight;
-            if (width < MIN_SIZE && height < MIN_SIZE) return;
+            return width < MIN_SIZE && height < MIN_SIZE;
+        }
+
+        function enhance(img: HTMLImageElement) {
+            if (img.dataset.lightboxBound !== undefined) return;
             img.dataset.lightboxBound = '';
             img.classList.add('cursor-zoom-in');
             img.setAttribute('role', 'button');
@@ -124,14 +126,29 @@ export default function BodyImageLightbox({ rootSelector = '[data-lightbox-root]
             }
         }
 
+        function unenhance(img: HTMLImageElement) {
+            delete img.dataset.lightboxBound;
+            img.classList.remove('cursor-zoom-in');
+            img.removeAttribute('role');
+            img.removeAttribute('tabindex');
+        }
+
+        // Bind every body image up front (not just loaded ones) so the slide
+        // set and counter always cover the whole post, even before lazy
+        // images below the fold have loaded. Icon-sized images are unbound
+        // once their real dimensions are known.
         document.querySelectorAll<HTMLImageElement>(`${rootSelector} img`).forEach((img) => {
+            if (img.closest('a')) return;
             if (img.complete) {
-                enhance(img);
-            } else {
-                const handler = () => enhance(img);
-                img.addEventListener('load', handler, { once: true });
-                loadListeners.push({ img, handler });
+                if (!isTiny(img)) enhance(img);
+                return;
             }
+            enhance(img);
+            const handler = () => {
+                if (isTiny(img)) unenhance(img);
+            };
+            img.addEventListener('load', handler, { once: true });
+            loadListeners.push({ img, handler });
         });
 
         const onClick = (e: MouseEvent) => {
@@ -258,7 +275,7 @@ export default function BodyImageLightbox({ rootSelector = '[data-lightbox-root]
                         <>
                             <button
                                 type="button"
-                                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/55 transition-colors flex items-center justify-center z-10 shadow-lg shadow-black/40 ring-1 ring-white/20"
+                                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/55 transition-colors items-center justify-center z-10 shadow-lg shadow-black/40 ring-1 ring-white/20 flex [@media(pointer:coarse)]:hidden"
                                 onClick={() => paginate(-1)}
                                 aria-label="Previous image"
                             >
@@ -268,7 +285,7 @@ export default function BodyImageLightbox({ rootSelector = '[data-lightbox-root]
                             </button>
                             <button
                                 type="button"
-                                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/55 transition-colors flex items-center justify-center z-10 shadow-lg shadow-black/40 ring-1 ring-white/20"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/55 transition-colors items-center justify-center z-10 shadow-lg shadow-black/40 ring-1 ring-white/20 flex [@media(pointer:coarse)]:hidden"
                                 onClick={() => paginate(1)}
                                 aria-label="Next image"
                             >
@@ -291,7 +308,11 @@ export default function BodyImageLightbox({ rootSelector = '[data-lightbox-root]
                             setZoomOffset((o) => (nextScale === 1 ? { x: 0, y: 0 } : clampOffsetForScale(o, nextScale)));
                         }}
                         onPointerDown={(e) => {
-                            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                            try {
+                                (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                            } catch {
+                                // stale/synthetic pointer id; tracking below still works
+                            }
                             pointerMapRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
                             if (pointerMapRef.current.size === 1) {
@@ -342,6 +363,20 @@ export default function BodyImageLightbox({ rootSelector = '[data-lightbox-root]
                             }
                         }}
                         onPointerUp={(e) => {
+                            // Swipe navigation at rest zoom; pan handles movement when zoomed
+                            const start = panStartRef.current;
+                            if (
+                                pointerMapRef.current.size === 1 &&
+                                start &&
+                                zoomScale === 1 &&
+                                slides.length > 1
+                            ) {
+                                const dx = e.clientX - start.x;
+                                const dy = e.clientY - start.y;
+                                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+                                    paginate(dx < 0 ? 1 : -1);
+                                }
+                            }
                             pointerMapRef.current.delete(e.pointerId);
                             panStartRef.current = null;
                             if (pointerMapRef.current.size < 2) pinchStartRef.current = null;
