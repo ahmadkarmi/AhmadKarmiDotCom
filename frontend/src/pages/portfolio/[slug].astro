@@ -5,6 +5,7 @@ import { marked } from 'marked';
 import type { GetStaticPaths } from 'astro';
 import ShareButtons from '../../components/ShareButtons.astro';
 import GalleryCarousel from '../../components/GalleryCarousel';
+import BodyImageLightbox from '../../components/BodyImageLightbox';
 import AuthorCard from '../../components/AuthorCard.astro';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 
@@ -297,7 +298,7 @@ const schema = graph(
         </aside>
         
         <!-- Main Content (shows second on mobile, first on desktop) -->
-        <div class="flex-1 order-2 lg:order-1 space-y-12">
+        <div class="flex-1 order-2 lg:order-1 space-y-12" data-lightbox-root>
           {workData.brief && (
             <div>
               <h2 class={workSectionHeadingClass}>
@@ -342,7 +343,9 @@ const schema = graph(
           )}
         </div>
       </div>
-      
+
+      {(workData.brief || workData.scope || workData.details) && <BodyImageLightbox client:idle />}
+
       <!-- Gallery -->
       {galleryImages.length > 0 && (
         <div class="mt-16">

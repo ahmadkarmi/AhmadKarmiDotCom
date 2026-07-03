@@ -9,6 +9,7 @@ import NewsletterForm from '../../components/NewsletterForm.astro';
 import RelatedInsights from '../../components/RelatedInsights.astro';
 import ListenButton from '../../components/insights/ListenButton';
 import AuthorCard from '../../components/AuthorCard.astro';
+import BodyImageLightbox from '../../components/BodyImageLightbox';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 
 export async function getStaticPaths() {
@@ -327,6 +328,7 @@ const schema = graph(
         {insightData.body && (
           <div
             id="article-body"
+            data-lightbox-root
             class="prose prose-lg max-w-none
                    prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-tight prose-headings:leading-tight prose-headings:font-semibold
                    prose-h1:text-3xl md:prose-h1:text-4xl prose-h1:mb-6 prose-h1:font-bold
@@ -352,9 +354,10 @@ const schema = graph(
                    [&_video]:w-full [&_video]:rounded-xl [&_video]:my-8
                    [&_.video-container]:relative [&_.video-container]:pb-[56.25%] [&_.video-container]:h-0 [&_.video-container]:overflow-hidden [&_.video-container]:rounded-xl [&_.video-container]:my-8
                    [&_.video-container_iframe]:absolute [&_.video-container_iframe]:inset-0 [&_.video-container_iframe]:w-full [&_.video-container_iframe]:h-full"
-            set:html={bodyHtml} 
+            set:html={bodyHtml}
           />
         )}
+        {insightData.body && <BodyImageLightbox client:idle />}
         
         <!-- Author Card -->
         <div class="mt-16">
