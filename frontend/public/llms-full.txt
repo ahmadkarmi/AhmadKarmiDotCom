@@ -4,8 +4,8 @@
 
 Site: https://www.ahmadkarmi.com
 Articles: 38
-Portfolio entries: 12
-Generated: 2026-05-21T12:20:46Z
+Portfolio entries: 13
+Generated: 2026-08-28T01:54:14Z
 
 ---
 
@@ -3195,6 +3195,95 @@ These are not the only ways to empower your digital transformation teams, but th
 ---
 
 # Portfolio
+
+## World Cup 2026
+*Client: Al Jazeera Media Network*
+URL: https://www.ahmadkarmi.com/portfolio/world-cup-2026
+
+Real-Time Sports Coverage at Al Jazeera: Live Blog + Live Scores Ticker
+
+A product case study: how we turned match days into a real-time, multi-language experience for Al Jazeera’s sports audience.
+
+My role
+
+I was the product manager and owner of Al Jazeera’s real-time sports coverage experience. I owned the vision, roadmap and delivery, and I led a cross-functional team of engineers and QA, coordinating alongside editorial and our external sports-data partner (Opta / Stats Perform). My job was to define what we were building and why, make the key product and architecture trade-off calls with my engineering lead, and get it shipped and hardened across Al Jazeera’s Arabic and English editions.
+
+This has been released on both web and mobile app.
+
+The opportunity
+
+Live sport is one of the highest-intent, highest-traffic moments a news brand can own. During a big match, readers don’t want to refresh a page. They expect scores, goals, cards and commentary to arrive the instant they happen, on any device, and in their language. Al Jazeera serves audiences in both Arabic and English, spanning left-to-right and right-to-left reading directions, and a single high-profile fixture can drive enormous amounts of traffic.
+
+The goal I set was to make match day feel genuinely live: a real-time editorial experience that our newsroom could stand up quickly for any fixture, that held up under sudden traffic surges and that worked equally well for an Arabic reader and an English one.
+
+Both the Arabic and English editions cover the same game, but each approaches it from a distinct editorial perspective. While their requirements differed, the shared goal was clear: to create a solution that automates routine tasks, saving time on work that requires minimal editorial input, while still delivering content that is engaging and enjoyable for our readers.
+
+What we shipped
+
+Two connected products that together make up the live match experience:
+
+The Sports Live Blog: a minute-by-minute editorial feed that streams basic commentary in real time such as goals, cards, substitutions, match phases, penalties and VAR decisions to readers as they happen. For football matches it expands into a richer experience with a sticky live score card and dedicated tabs for key events, lineups, match stats and standings, so a reader gets both the story and the data in one place.
+
+The Live Scores Ticker: a horizontally-scrollable strip of live and upcoming match scores that sits on our highest-traffic homepage and topic pages. It automatically brings the match that’s currently in play into focus, and updates scores and match status live throughout the game.
+
+Both were built on top of a server-rendered site, so pages load fast and fully-formed for readers and search engines, with the live layer enhancing the experience once loaded rather than blocking it.
+
+The defining product decision: two speeds of “real-time”
+
+The most important call was recognising that our two features needed two different real-time strategies, because their data comes from two very different places.
+
+Editorial updates are unpredictable and human-authored. A journalist publishes a their commentary update the moment it happens or there’s insights to add to the match; there’s no schedule. For this, we used a push approach: the instant an editor publishes, the update is pushed out to every connected reader over a live connection. Waiting and re-checking would have been either too slow for readers or wastefully constant. Crucially, we pushed only a lightweight signal rather than heavy content, which kept the live channel cheap and fast even at massive concurrency.
+
+Score data is bounded and comes from a third party. Live scores flow from our sports-data partner (Opta / Stats Perform) and only change during the roughly ninety minutes a match is live. For this, we used a poll approach, but a smart, tightly-scoped one: the ticker only starts checking for updates around kickoff, pauses itself entirely when a reader’s browser tab isn’t visible, and stops once the match ends. Outside of live play, it’s effectively dormant.
+
+Matching the mechanism to the data profile is what let us deliver a genuinely live feel while keeping infrastructure cost and load under control, which mattered enormously given how spiky sports traffic is. It’s a decision I’m proud of because it was invisible to the reader by design: they just experienced “live,” and we didn’t typically need to deal with the resource strain of “live” when nothing was happening.
+
+To make the push side scale across editions and multiple servers without readers ever crossing wires, we ran a dedicated real-time service backed by a distributed pub/sub layer, with every live update strictly scoped to the correct edition and the correct match. Multi-tenancy, two editions sharing one platform safely, was a first-class requirement.
+
+Page-level activation as an editorial capability
+
+A guiding principle was that the newsroom should control the sports experience without needing an engineer to deploy. Rather than tying the live experience to special URLs, we made it a data-driven capability: when an editor marks an article as a match and links it to the relevant fixture, the full football experience lights up automatically, the live score card, the stats and lineups tabs and the live commentary all included. A regular article and a live match article use the same publishing flow; the sports layer simply activates when the match data is present.
+
+I also insisted on a graceful fallback: if the match data isn’t fully available for any reason, the page quietly renders as a standard, complete article with state management rather than showing a broken or empty score card. The reader should never see the seams, only wait for things to happen.
+
+The homepage ticker works the same way. Editors can switch on a league ticker for a major tournament and choose which competition it shows, entirely through the CMS, with no code change. This editor-first control was a deliberate product bet: it turned “put us live for this match” from an engineering ticket into a task that took the newsroom a few seconds.
+
+Key product decisions and trade-offs I drove
+
+Resilience over completeness on high-traffic pages. The scores ticker sits on our busiest templates, so we made isolation a hard requirement: if the live component ever fails, whether from a bad data response or a slow load, it must remove only itself and never take down the homepage around it. Reliability at scale outranked any single feature.
+
+Right-to-left support was a first-class constraint from the start, not a later fix. Because we serve Arabic audiences, the experience had to mirror correctly for right-to-left reading and be fully usable by keyboard and screen reader, across the live ticker, the carousel controls and the feed alike.
+
+Server-side rendering plus code-splitting handled performance and perceived speed: readers got a fast, complete page immediately, with the heavier live and interactive pieces loaded only where and when they were actually needed.
+
+Managing the third-party integration was its own discipline. Bringing in a combination of live football data, stats, lineups, standings and match widgets from Opta / Stats Perform meant handling an external dependency’s data quality, timing and failure modes, and designing the product so a vendor hiccup degraded gracefully rather than visibly.
+
+One platform, two editions: everything had to work across Arabic and English from shared foundations, so we shipped consistency and maintainability rather than two divergent one-off builds, but kept in mind the operational differences in reporting a live match.
+
+Cross-functional execution
+
+Delivering this meant orchestrating several groups toward one experience. Engineering built the real-time and rendering foundations. QA validated the hardest-to-test part of the product: behaviour during a genuinely live, changing match, across editions, languages and devices. Editorial shaped a publishing workflow fast and simple enough to use under the pressure of a live game. Our data vendor aligned with us on the sports feeds we depended on. I set the priorities and the quality bar, sequenced the work so we could de-risk the real-time behaviour early and kept the trade-offs, cost, speed, resilience, reach, balanced against a fixed set of match-day deadlines.
+
+Impact
+
+The result was a real-time sports experience that let Al Jazeera own match day: readers followed goals, cards and commentary as they happened rather than refreshing, and got scores, stats and standings in one place. The newsroom could stand up a fully-featured live match, or switch on a homepage scores ticker for a major tournament, in minutes, without engineering involvement, freeing the team to cover more fixtures. And because we designed for resilience and for smart, bounded real-time from the start, the experience stayed fast and stable through the traffic spikes that big matches bring, working consistently for Arabic and English audiences alike.
+
+Built for discovery: SEO and the search results page
+
+Live sport is also one of the largest organic search moments a news brand can chase, and I treated search visibility as a requirement for the live blog, not an afterthought. Structured data marked each page’s coverage window and described it as a sports event, which is what made it eligible for Google’s live badge and Top Stories carousel, while individual updates were tagged so a goal or a red card could surface directly in results. Continuous updates kept the page’s freshness signal current for the full match before it settled into an evergreen report at the final whistle. Server rendering gave crawlers complete content on the first request instead of an empty shell, and a lightweight mobile variant kept us competitive for mobile placements, where much of that search traffic lands. 
+
+All of it ran identically across the Arabic and English editions, so we competed for visibility in both markets, and the coverage stayed discoverable both at the moment demand peaked and long after the match ended.
+
+At a glance
+
+Role: Product Manager / Product Owner: vision, roadmap, delivery, cross-functional leadership. 
+
+Team: Engineering + QA, with editorial and an external sports-data partner. Surface: Al Jazeera Arabic and English editions. 
+
+Approach (high level): Server-side-rendered web platform · real-time push via live WebSocket connections and a distributed pub/sub backend · smart, bounded polling for third-party score data · headless CMS-driven editorial control · Opta / Stats Perform data integration.
+
+
+---
 
 ## Ekko Health: A Health App That Listens Before It Speaks
 *Client: Ekko Health*
