@@ -11,6 +11,7 @@ import ListenButton from '../../components/insights/ListenButton';
 import AuthorCard from '../../components/AuthorCard.astro';
 import BodyImageLightbox from '../../components/BodyImageLightbox';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
+import { absoluteUrl } from '../../lib/urls';
 
 export async function getStaticPaths() {
   const insights = await fetchInsights();
@@ -34,8 +35,7 @@ if (!insightData) {
   return Astro.redirect('/404');
 }
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
-const shareUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const shareUrl = absoluteUrl(Astro.url.pathname);
 
 const heroMedia = insightData.mainImage || insightData.thumbnailImage;
 const heroImageUrl = getMediaUrl(heroMedia);

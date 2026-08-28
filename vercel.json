@@ -2,16 +2,18 @@
   "buildCommand": "npm install --prefix frontend && npm run build:llms && npm run build --prefix frontend",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install",
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/articles-insights/:slug", "destination": "/insights/:slug", "permanent": true },
+    { "source": "/articles-insights", "destination": "/insights", "permanent": true },
+    { "source": "/my-work/:slug", "destination": "/portfolio/:slug", "permanent": true },
+    { "source": "/my-work", "destination": "/portfolio", "permanent": true },
+    { "source": "/projects/portfolio", "destination": "/portfolio", "permanent": true },
+    { "source": "/projects/:slug", "destination": "/portfolio/:slug", "permanent": true },
+    { "source": "/projects", "destination": "/portfolio", "permanent": true },
+    { "source": "/about-me", "destination": "/about", "permanent": true }
+  ],
   "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "index, follow"
-        }
-      ]
-    },
     {
       "source": "/sitemap(.*).xml",
       "headers": [

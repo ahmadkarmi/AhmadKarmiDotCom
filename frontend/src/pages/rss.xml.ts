@@ -7,6 +7,7 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
 import { fetchInsights } from '../lib/wordpress';
+import { absoluteUrl } from '../lib/urls';
 
 export async function GET(context: APIContext) {
   const insights = await fetchInsights();
@@ -19,7 +20,10 @@ export async function GET(context: APIContext) {
     site,
     items: insights.map((insight) => ({
       title: insight.name,
-      link: `/insights/${insight.slug}`,
+      // Absolute, already canonical. A relative link here gets resolved by
+      // @astrojs/rss against `site`, which re-adds the trailing slash the rest
+      // of the site does not use.
+      link: absoluteUrl(`/insights/${insight.slug}`),
       pubDate: insight.publishDate ? new Date(insight.publishDate) : undefined,
       description: insight.description,
       categories: insight.tags,

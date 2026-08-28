@@ -81,14 +81,23 @@ function decodeEntities(s: string): string {
 function frontendUrl(type: WpPostType, slugStemValue: string): string {
   // Live site uses plural paths: /insights/<slug> and /portfolio/<slug>.
   // The WP REST `link` field returns the singular type slug (/insight/, /work/),
-  // so we ignore it and build the canonical frontend URL from the deduped stem.
+  // so we ignore it and build the canonical frontend URL from the real slug.
+  //
+  // Uses the deduped stem, matching Astro's dedupeBySlug winner (the clean
+  // slug, not the `-2` duplicate). See slugStem() for the year-suffix caveat.
   const segment = type === 'insight' ? 'insights' : 'portfolio';
   return `https://www.ahmadkarmi.com/${segment}/${slugStemValue}`;
 }
 
 function slugStem(slug: string): string {
   // Strip trailing -N (the WP duplicate suffix). E.g., "story-point-calculator-2" -> "story-point-calculator".
-  return slug.replace(/-\d+$/, '');
+  //
+  // Bounded to 1-2 digits deliberately. The old /-\d+$/ also ate legitimate
+  // trailing years: `world-cup-2026` became `/portfolio/world-cup`, publishing
+  // a 404 into llms.txt, which robots.txt declares to crawlers. WP's duplicate
+  // suffixes are small counters, so 1-2 digits covers them without touching a
+  // four-digit year.
+  return slug.replace(/-\d{1,2}$/, '');
 }
 
 const TEST_PATTERNS = [/\bacf-?test\b/i, /\btest[-_]?client\b/i];

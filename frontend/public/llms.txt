@@ -71,8 +71,9 @@ This site documents Ahmad's product thinking through long-form articles, a worki
 - [Pareto’s Principle And Becoming A More Effective Product Manager](https://www.ahmadkarmi.com/insights/paretos-principle-and-becoming-a-more-effective-product-manager): 2020-12-01
 - [Empowering your Digital Transformation Teams](https://www.ahmadkarmi.com/insights/empowering-your-digital-transformation-teams): 2020-09-01
 
-## Portfolio (12 projects)
+## Portfolio (13 projects)
 
+- [World Cup 2026](https://www.ahmadkarmi.com/portfolio/world-cup-2026) — Al Jazeera Media Network
 - [Ekko Health: A Health App That Listens Before It Speaks](https://www.ahmadkarmi.com/portfolio/ekko-health-a-health-app-that-listens-before-it-speaks) — Ekko Health
 - [ZAIN eSports](https://www.ahmadkarmi.com/portfolio/zain-esport) — Zain Group / Zain eSport
 - [Wilson & Bass](https://www.ahmadkarmi.com/portfolio/wilson-bass) — Wilson & Bass

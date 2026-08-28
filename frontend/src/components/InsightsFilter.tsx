@@ -1,19 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import avatarImage from '../assets/brand/avatar.jpg';
-import type { Insight } from '../lib/wordpress';
-import { getMediaUrl } from '../lib/wordpress';
+import type { InsightCardData } from '../lib/insightCard';
 
 interface Props {
-    insights: Insight[];
+    // Slim card data, not full Insight objects. Passing full Insights here
+    // serialised every article body into the island's props attribute.
+    insights: InsightCardData[];
     tags: string[];
-}
-
-// Calculate read time (same logic as InsightCard.astro)
-function calculateReadTime(text?: string): number {
-    if (!text) return 1;
-    const wordsPerMinute = 200;
-    const words = text.replace(/<[^>]+>/g, '').split(/\s+/).length;
-    return Math.max(1, Math.ceil(words / wordsPerMinute));
 }
 
 // Format date
@@ -117,9 +110,8 @@ export default function InsightsFilter({ insights, tags }: Props) {
 }
 
 // React version of InsightCard for use in the filter component
-function InsightCardReact({ insight, index }: { insight: Insight; index: number }) {
-    const imageUrl = getMediaUrl(insight.mainImage) || getMediaUrl(insight.thumbnailImage);
-    const readTime = calculateReadTime(insight.body);
+function InsightCardReact({ insight, index }: { insight: InsightCardData; index: number }) {
+    const { imageUrl, readTime } = insight;
 
     return (
         <a

@@ -20,6 +20,13 @@ export default defineConfig({
                 // Endpoints (rss.xml, search-index.json) are not content pages.
                 if (/\.(xml|json)$/.test(path)) return undefined;
 
+                // The site canonicalises on the no-trailing-slash form, so the
+                // sitemap must emit that form too. Previously `path` was used
+                // only for the priority matching below and the emitted <loc>
+                // kept its slash, which disagreed with every internal link and
+                // left Google unable to settle on one URL per page.
+                item.url = new URL(path, item.url).toString();
+
                 item.lastmod = new Date().toISOString();
 
                 if (path === '/') {
@@ -44,6 +51,15 @@ export default defineConfig({
         }),
     ],
     output: 'static',
+    // Keep 'directory' output (about/index.html) so Vercel's clean-URL
+    // resolution keeps working. `trailingSlash` is deliberately left at the
+    // default: @astrojs/sitemap applies it AFTER serialize(), and 'never'
+    // stripped the root slash too, emitting a bare-origin <loc> for the
+    // homepage while its canonical stayed `/`. The no-slash form is enforced
+    // by lib/urls.ts and by serialize() above, both of which special-case `/`.
+    build: {
+        format: 'directory',
+    },
     image: {
         domains: ['localhost', '127.0.0.1', 'admin.ahmadkarmi.com'],
     },

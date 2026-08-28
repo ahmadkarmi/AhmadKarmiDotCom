@@ -29,7 +29,18 @@ function toPlainText(value?: string): string {
     .trim();
 }
 
-const descriptionText = toPlainText(work.brief) || toPlainText(work.details);
+// Cap the card blurb. The card already clamps visually, but the untruncated
+// string still entered the DOM: works with an empty ACF `brief` fell through
+// to the full case study, putting up to 34,000 characters of body text on the
+// homepage and on /portfolio, competing with the work's own detail page.
+function truncate(value: string, max = 200): string {
+  if (value.length <= max) return value;
+  const cut = value.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd() + '…';
+}
+
+const descriptionText = truncate(toPlainText(work.brief) || toPlainText(work.details));
 ---
 
 <a 

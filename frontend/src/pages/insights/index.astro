@@ -2,9 +2,22 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import InsightsFilter from '../../components/InsightsFilter';
 import { fetchInsights } from '../../lib/wordpress';
+import { toCardData } from '../../lib/insightCard';
 import { graph, breadcrumbNode, personNode, PERSON_ID, SITE_URL } from '../../lib/schema';
 
 const insights = await fetchInsights();
+
+// Build guard: an empty list here means the WordPress fetch failed. Every
+// fetch in lib/wordpress.ts swallows errors and returns [], so without this
+// the build would succeed and publish an empty index and an empty sitemap.
+if (insights.length === 0) {
+  throw new Error(
+    'fetchInsights() returned no insights. Refusing to build an empty /insights page. Check PUBLIC_WP_URL and WP credentials.'
+  );
+}
+
+// Strip everything the filter does not render, above all `body`.
+const cards = insights.map(toCardData);
 
 // Get unique tags for filtering
 const allTags = insights.flatMap(insight => insight.tags || []);
@@ -76,7 +89,7 @@ const schema = graph(
     <div class="container-custom">
       <InsightsFilter 
         client:load 
-        insights={insights} 
+        insights={cards} 
         tags={uniqueTags} 
       />
     </div>
