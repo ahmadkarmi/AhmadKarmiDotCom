@@ -5,6 +5,15 @@ import GridLayout from '../../components/GridLayout.astro';
 import { fetchWorks } from '../../lib/wordpress';
 
 const works = await fetchWorks();
+
+// Build guard: see the matching note in insights/index.astro. fetchWorks()
+// returns [] on any error, so without this a WordPress outage would publish a
+// live site with no portfolio and no sitemap entries.
+if (works.length === 0) {
+  throw new Error(
+    'fetchWorks() returned no works. Refusing to build an empty /portfolio page. Check PUBLIC_WP_URL and WP credentials.'
+  );
+}
 ---
 
 <BaseLayout 

@@ -22,7 +22,9 @@ const Counter = ({ value }: { value: string }) => {
 
         const node = nodeRef.current;
 
-        // Animate from 0 to the target number
+        // Animate from 0 to the target number. The final value is already the
+        // server-rendered text, so this only replays it as a count-up; it is
+        // never the only way the figure reaches the DOM.
         const controls = animate(0, number, {
             duration: 2,
             ease: "easeOut",
@@ -38,7 +40,10 @@ const Counter = ({ value }: { value: string }) => {
         return () => controls.stop();
     }, [isInView, number, suffix, value]);
 
-    return <span ref={nodeRef} className="tabular-nums">{0}</span>;
+    // Render the real figure server-side. This previously returned a literal 0,
+    // so `23%`, `90%+`, `70%` and `36.1%` existed only inside the JS bundle and,
+    // being mounted client:visible, never reached a crawler at all.
+    return <span ref={nodeRef} className="tabular-nums">{value}</span>;
 };
 
 export default function MetricBento() {

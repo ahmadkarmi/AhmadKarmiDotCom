@@ -8,6 +8,7 @@ import GalleryCarousel from '../../components/GalleryCarousel';
 import BodyImageLightbox from '../../components/BodyImageLightbox';
 import AuthorCard from '../../components/AuthorCard.astro';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
+import { absoluteUrl } from '../../lib/urls';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const works = await fetchWorks();
@@ -29,8 +30,7 @@ if (!workData) {
   return Astro.redirect('/404');
 }
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
-const shareUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const shareUrl = absoluteUrl(Astro.url.pathname);
 
 const mainImageUrl = getMediaUrl(workData.mainImage);
 const coverImageUrl = getMediaUrl(workData.coverImage);
