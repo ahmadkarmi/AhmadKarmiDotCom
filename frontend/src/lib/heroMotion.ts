@@ -1,8 +1,10 @@
 // Home hero motion. Deliberately tiny and dependency-free.
 //
 // - Desktop (xl+, fine pointer): the board tilts toward the cursor. One rAF
-//   loop lerps toward the target and writes two CSS custom properties, and
-//   stops as soon as it settles, so an idle page runs no frames.
+//   loop lerps toward the target and writes the board's inline transform,
+//   and stops as soon as it settles, so an idle page runs no frames. (Not a
+//   CSS custom property: those inherit, so every change re-styled all ~115
+//   elements on the board instead of just the board itself.)
 // - Below xl: CSS runs the "loop" mode (drift + ticket) by default. If the
 //   device reports real orientation data within 2s we switch to "gyro" mode
 //   and move each column by its depth. We never call
@@ -57,8 +59,9 @@ function init() {
 
     function render() {
         if (mode === 'tilt' && board) {
-            board.style.setProperty('--rx', `${(REST_RX - current.y * TILT_X).toFixed(3)}deg`);
-            board.style.setProperty('--ry', `${(REST_RY + current.x * TILT_Y).toFixed(3)}deg`);
+            const rx = (REST_RX - current.y * TILT_X).toFixed(3);
+            const ry = (REST_RY + current.x * TILT_Y).toFixed(3);
+            board.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
         } else if (mode === 'gyro') {
             for (const { el, depth } of columns) {
                 const dx = (current.x * depth * GYRO_TRAVEL).toFixed(2);

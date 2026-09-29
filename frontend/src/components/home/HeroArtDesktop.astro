@@ -8,7 +8,8 @@
 // letting it spill.
 //
 // Motion (see scripts/heroMotion.ts):
-// - the board tilts toward the pointer via --rx / --ry (fine pointers only)
+// - the board tilts toward the pointer (fine pointers only); the script
+//   overrides the resting transform below inline
 // - a ticket ships from In Progress to Done on a 9s CSS loop
 // Only transform and opacity animate, so nothing here triggers layout or paint.
 ---
@@ -110,13 +111,12 @@
     perspective: 180cqw;
   }
 
+  /* Resting tilt; keep in sync with REST_RX / REST_RY in heroMotion.ts. */
   .board {
-    --rx: 4deg;
-    --ry: -8deg;
     position: absolute;
     inset: 0;
     transform-style: preserve-3d;
-    transform: rotateX(var(--rx)) rotateY(var(--ry));
+    transform: rotateX(4deg) rotateY(-8deg);
   }
 
   /* ---- Columns (positions in stage units, cqw) ---- */
