@@ -116,3 +116,5 @@ function init() {
 
 // astro:page-load fires on the first load and after every client navigation.
 document.addEventListener('astro:page-load', init);
+
+export {};

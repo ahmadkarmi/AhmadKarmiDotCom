@@ -169,6 +169,139 @@
   .btn-secondary {
     @apply inline-flex items-center justify-center px-6 py-3 bg-background-secondary text-foreground font-medium rounded-lg border border-border transition-all duration-200 hover:border-accent/50 hover:bg-background-tertiary;
   }
+
+  /*
+   * Content tables (wrapped by lib/contentTables.ts). A wide table scrolls
+   * inside its own region and never widens the page. The first column stays
+   * pinned so each row keeps its label while scrolling, edges fade where
+   * there is more to see, and phones get a one-line hint until the reader
+   * scrolls. Fades and hint are driven by lib/tableScroll.ts; everything
+   * else works without JS.
+   */
+  .table-scroll {
+    position: relative;
+    max-width: 100%;
+    margin: 2rem 0;
+  }
+
+  /* WordPress table blocks: the figure already spaces the table. */
+  figure > .table-scroll {
+    margin: 0;
+  }
+
+  .table-scroll__viewport {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    scrollbar-width: thin;
+  }
+
+  .table-scroll__viewport:focus-visible {
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: 2px;
+  }
+
+  /* Fill the column on wide screens; grow past it (and scroll) on narrow
+     ones rather than crushing text into one-word lines. */
+  .table-scroll table {
+    width: 100%;
+    min-width: 100%;
+    margin: 0;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .table-scroll :is(th, td) {
+    min-width: 10rem;
+    vertical-align: top;
+  }
+
+  /* Row dividers. Prose draws them on <tr>, which the separate-borders model
+     (needed for the pinned column) ignores, so draw them on the cells. Zero
+     specificity, so templates that style cells themselves still win. */
+  :where(.table-scroll) :where(thead) :where(th, td) {
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  :where(.table-scroll) :where(tbody tr:not(:last-child)) > :where(th, td) {
+    border-bottom: 1px solid hsl(var(--border) / 0.7);
+  }
+
+  /* Prose zeroes the outer cell padding; inside a bordered box it's needed. */
+  .table-scroll :is(th, td):first-child {
+    padding-inline-start: 1rem;
+  }
+
+  .table-scroll :is(th, td):last-child {
+    padding-inline-end: 1rem;
+  }
+
+  /* Pinned first column. Background via :where() so a template's own cell
+     colours (e.g. the insight tables) still win. */
+  .table-scroll :is(th, td):first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 7rem;
+    max-width: 40vw;
+    transition: box-shadow 150ms ease-out;
+  }
+
+  :where(.table-scroll) :where(th, td):first-child {
+    background-color: hsl(var(--background));
+  }
+
+  .table-scroll[data-more-left] :is(th, td):first-child {
+    box-shadow: 8px 0 10px -8px hsl(var(--foreground) / 0.25);
+  }
+
+  /* Right-edge fade while more columns are hidden. */
+  .table-scroll::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    height: calc(100% - 2px);
+    width: 2rem;
+    border-radius: 0 0.75rem 0.75rem 0;
+    background: linear-gradient(to left, hsl(var(--background)), hsl(var(--background) / 0));
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  .table-scroll[data-more-right]::after {
+    opacity: 1;
+  }
+
+  /* The ::after fade must not cover the hint below the table. */
+  .table-scroll[data-overflowing]:not([data-scrolled])::after {
+    height: calc(100% - 2px - 1.75rem);
+  }
+
+  .table-scroll__hint {
+    display: none;
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    color: hsl(var(--foreground-muted));
+    text-align: right;
+  }
+
+  @media (pointer: coarse) {
+    .table-scroll[data-overflowing]:not([data-scrolled]) .table-scroll__hint {
+      display: block;
+    }
+  }
+
+  @media not (pointer: coarse) {
+    .table-scroll[data-overflowing]:not([data-scrolled])::after {
+      height: calc(100% - 2px);
+    }
+  }
 }
 
 @layer utilities {

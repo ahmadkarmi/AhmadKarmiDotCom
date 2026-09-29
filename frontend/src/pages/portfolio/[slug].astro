@@ -10,6 +10,7 @@ import AuthorCard from '../../components/AuthorCard.astro';
 import ContentVideo from '../../components/ContentVideo.astro';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
+import { wrapContentTables } from '../../lib/contentTables';
 import { OG_CARD_SIZE, ogCardPath, resolveWorkHeroUrl } from '../../lib/og/urls';
 import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
 
@@ -328,7 +329,7 @@ const schema = graph(
               <h2 class={workSectionHeadingClass}>
                 Project Brief
               </h2>
-              <div class={workProseClass} set:html={briefHtml} />
+              <div class={workProseClass} set:html={wrapContentTables(briefHtml)} />
             </div>
           )}
           
@@ -337,7 +338,7 @@ const schema = graph(
               <h2 class={workSectionHeadingClass}>
                 Scope of Work
               </h2>
-              <div class={workProseClass} set:html={scopeHtml} />
+              <div class={workProseClass} set:html={wrapContentTables(scopeHtml)} />
             </div>
           )}
           
@@ -346,7 +347,7 @@ const schema = graph(
               <h2 class={workSectionHeadingClass}>
                 Project Details
               </h2>
-              <div class={workProseClass} set:html={detailsHtml} />
+              <div class={workProseClass} set:html={wrapContentTables(detailsHtml)} />
             </div>
           )}
           

@@ -14,6 +14,7 @@ import ContentVideo from '../../components/ContentVideo.astro';
 import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
+import { wrapContentTables } from '../../lib/contentTables';
 import { OG_CARD_SIZE, ogCardPath, resolveInsightHeroUrl } from '../../lib/og/urls';
 
 export async function getStaticPaths() {
@@ -155,13 +156,6 @@ function unwrapHtmlWrappedMarkdownTables(html: string): string {
   });
 }
 
-function wrapTablesInOverflow(html: string): string {
-  if (!/<\s*table\b/i.test(html)) return html;
-  return html
-    .replace(/<table\b/gi, '<div class="overflow-x-auto my-10 rounded-xl overflow-hidden"><table')
-    .replace(/<\/table>/gi, '</table></div>');
-}
-
 const rawBody = insightData.body || '';
 const containsHtml = /<\s*[a-z][\s\S]*>/i.test(rawBody);
 const hasTable = hasMarkdownTableDelimiter(rawBody);
@@ -182,7 +176,7 @@ const bodyHtmlRaw = !containsHtml || hasTable || hasSignals
   ? await marked.parse(bodyCandidate)
   : rawBody;
 // Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
-const { html: bodyHtml, videos: bodyVideos } = await enhanceContentVideos(wrapTablesInOverflow(bodyHtmlRaw));
+const { html: bodyHtml, videos: bodyVideos } = await enhanceContentVideos(wrapContentTables(bodyHtmlRaw));
 const hasBodyVideo = bodyHtml.includes('data-content-video');
 
 // JSON-LD: BlogPosting + breadcrumb. The author/publisher reference the
