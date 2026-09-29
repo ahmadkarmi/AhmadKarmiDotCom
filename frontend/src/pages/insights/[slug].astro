@@ -12,6 +12,7 @@ import AuthorCard from '../../components/AuthorCard.astro';
 import BodyImageLightbox from '../../components/BodyImageLightbox';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
+import { OG_CARD_SIZE, ogCardPath, resolveInsightHeroUrl } from '../../lib/og/urls';
 
 export async function getStaticPaths() {
   const insights = await fetchInsights();
@@ -216,11 +217,12 @@ const schema = graph(
 <BaseLayout 
   title={insightData.name} 
   description={insightData.description || insightData.body?.slice(0, 160)}
-  ogImage={heroImageUrl || undefined}
+  ogImage={ogCardPath('insights', insightData.slug, insightData.modified || insightData.publishDate)}
   ogType="article"
-  ogImageWidth={heroMedia?.width}
-  ogImageHeight={heroMedia?.height}
-  ogImageAlt={heroMedia?.alternativeText || insightData.name}
+  ogImageWidth={OG_CARD_SIZE.width}
+  ogImageHeight={OG_CARD_SIZE.height}
+  ogImageAlt={insightData.name}
+  searchImage={resolveInsightHeroUrl(insightData) || undefined}
   publishDate={insightData.publishDate}
   tags={insightData.tags}
   schema={schema}
