@@ -613,15 +613,6 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
           return true;
         }
 
-        function schedule(fn) {
-          const ric = window.requestIdleCallback;
-          if (typeof ric === 'function') {
-            ric(fn, { timeout: 2000 });
-            return;
-          }
-          setTimeout(fn, 800);
-        }
-
         function prefetchHref(href) {
           if (!href) return;
           try {
@@ -640,14 +631,14 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
           }
         }
 
-        function initPrefetch() {
-          if (!canPrefetch()) return;
-          document.querySelectorAll('a[data-nav-prefetch]').forEach(function (a) {
-            prefetchHref(a.getAttribute('href'));
-          });
-        }
-
+        // Prefetch on intent (hover / touch) only. This used to also prefetch
+        // every nav link on idle, which ran inside Googlebot's renderer too:
+        // each render of any page re-fetched /, /about, /insights, /portfolio
+        // and /contact as "page resource loads". Search Console showed those
+        // eating most of the crawl budget while the same pages sat in
+        // "Discovered, not indexed" (resource fetches are not index crawls).
         function onPrefetchEvent(e) {
+          if (!canPrefetch()) return;
           const target = e.target;
           const a = target && target.closest ? target.closest('a[data-nav-prefetch]') : null;
           if (!a) return;
@@ -656,18 +647,6 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
 
         document.addEventListener('pointerover', onPrefetchEvent, { capture: true, passive: true });
         document.addEventListener('touchstart', onPrefetchEvent, { capture: true, passive: true });
-
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function () {
-            schedule(initPrefetch);
-          }, { once: true });
-        } else {
-          schedule(initPrefetch);
-        }
-
-        document.addEventListener('astro:after-swap', function () {
-          schedule(initPrefetch);
-        });
       })();
     </script>
 
