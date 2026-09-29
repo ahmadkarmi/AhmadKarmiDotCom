@@ -10,7 +10,7 @@
 // Motion (see lib/heroMotion.ts):
 // - the board tilts toward the pointer (fine pointers only); the script
 //   overrides the resting transform below inline
-// - a Jira-style conveyor on a 9s CSS loop: the ticket under the active card
+// - a Jira-style conveyor on a 6s CSS loop: the ticket under the active card
 //   finishes loading and ships to Done, the queued card below slides up into
 //   its slot and starts loading, and a new one fades in behind it; Done's
 //   stack is pushed down and its oldest card fades out. Queue cards and Done cards each share one template (Done
@@ -444,16 +444,17 @@
   .tcard--done-2 { left: 0; top: 17.9cqw; }
 
   /*
-   * One 9s cycle, shared by every conveyor piece. The loading bar never
-   * idles: the next card starts filling the moment it reaches the slot and
+   * One 6s cycle, shared by every conveyor piece. Moves keep a readable
+   * ~1.4s; the only "rest" is the next card loading, and its bar never
+   * idles: it starts filling the moment the card reaches the slot and
    * carries on across the loop reset into the ticket's final stretch.
-   *  0-14%  the ticket's bar finishes filling (0.82 -> 1)
-   * 18-36%  it flies to Done, shrinking to Done's width (26/34)
-   * 20-30%  Done's stack slides down to open the top slot first
-   * 30-40%  the ticket swaps its queue face for a Done face; check pops in
-   * 30-44%  the queued card slides up into the empty slot...
-   * 46-100% ...and its bar fills 0.15 -> 0.82 (the ticket picks up at 0.82)
-   * 38-54%  a new card fades in behind it
+   *  0-10%  the ticket's bar finishes filling (0.82 -> 1)       0.0-0.6s
+   * 13-37%  it flies to Done, shrinking to Done's width (26/34)  0.8-2.2s
+   * 15-28%  Done's stack slides down to open the top slot first
+   * 28-38%  the ticket swaps its queue face for a Done face; check pops in
+   * 30-48%  the queued card slides up into the empty slot...
+   * 50-100% ...and its bar fills 0.15 -> 0.82 (the ticket picks up at 0.82)
+   * 40-57%  a new card fades in behind it
    * 70-90%  Done's oldest card fades out
    * At 100% every piece snaps back in the same frame and the result looks
    * identical, so the loop has no seam.
@@ -462,19 +463,18 @@
    * container units inside @keyframes against a different box than layout.
    */
   @media (prefers-reduced-motion: no-preference) {
-    /* Start ~4% in so the first ticket flies ~1.2s after load, right after
-       the board fades in. Every piece is still at rest at that point. */
-    .hero-art { --conveyor-start: -0.4s; }
-    .ticket { animation: ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
-    .ticket .tface--queue { animation: face-out 9s linear var(--conveyor-start) infinite both; }
-    .ticket .tface--done { animation: face-in 9s linear var(--conveyor-start) infinite both; }
-    .ticket .ticket-check { animation: check-in 9s ease-out var(--conveyor-start) infinite both; }
-    .ticket .progress-fill { animation: ticket-progress 9s linear var(--conveyor-start) infinite both; }
-    .queue-next { animation: queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
-    .queue-next .progress-fill { animation: next-progress 9s linear var(--conveyor-start) infinite both; }
-    .queue-new { animation: queue-new-in 9s linear var(--conveyor-start) infinite both; }
-    .done-stack-move { animation: stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
-    .done-oldest { animation: oldest-out 9s linear var(--conveyor-start) infinite both; }
+    /* The first ticket flies ~1s after load, as the board finishes fading in. */
+    .hero-art { --conveyor-start: 0.2s; }
+    .ticket { animation: ticket-ship 6s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .ticket .tface--queue { animation: face-out 6s linear var(--conveyor-start) infinite both; }
+    .ticket .tface--done { animation: face-in 6s linear var(--conveyor-start) infinite both; }
+    .ticket .ticket-check { animation: check-in 6s ease-out var(--conveyor-start) infinite both; }
+    .ticket .progress-fill { animation: ticket-progress 6s linear var(--conveyor-start) infinite both; }
+    .queue-next { animation: queue-up 6s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .queue-next .progress-fill { animation: next-progress 6s linear var(--conveyor-start) infinite both; }
+    .queue-new { animation: queue-new-in 6s linear var(--conveyor-start) infinite both; }
+    .done-stack-move { animation: stack-push 6s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .done-oldest { animation: oldest-out 6s linear var(--conveyor-start) infinite both; }
 
     :global([data-hero-paused]) .hero-art * {
       animation-play-state: paused;
@@ -483,51 +483,51 @@
 
   /* To Done's slot: 39cqw / 34cqw wide, -16cqw / 14cqw tall. */
   @keyframes ticket-ship {
-    0%, 18% { transform: translate(0, 0) scale(1); }
-    27% { transform: translate(55.8824%, -71.4286%) scale(0.88); }
-    36%, 100% { transform: translate(114.7059%, -114.2857%) scale(0.7647); }
+    0%, 13% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(55.8824%, -71.4286%) scale(0.88); }
+    37%, 100% { transform: translate(114.7059%, -114.2857%) scale(0.7647); }
   }
 
   @keyframes face-out {
-    0%, 30% { opacity: 1; }
-    40%, 100% { opacity: 0; }
+    0%, 28% { opacity: 1; }
+    38%, 100% { opacity: 0; }
   }
 
   @keyframes face-in {
-    0%, 30% { opacity: 0; }
-    40%, 100% { opacity: 1; }
+    0%, 28% { opacity: 0; }
+    38%, 100% { opacity: 1; }
   }
 
   @keyframes check-in {
-    0%, 36% { transform: scale(0.4); }
+    0%, 35% { transform: scale(0.4); }
     42%, 100% { transform: scale(1); }
   }
 
   @keyframes ticket-progress {
     0% { transform: scaleX(0.82); }
-    14%, 100% { transform: scaleX(1); }
+    10%, 100% { transform: scaleX(1); }
   }
 
   @keyframes next-progress {
-    0%, 46% { transform: scaleX(0.15); }
+    0%, 50% { transform: scaleX(0.15); }
     100% { transform: scaleX(0.82); }
   }
 
   /* One card (14) plus gap (3), on a 14cqw card. */
   @keyframes queue-up {
     0%, 30% { transform: translateY(0); }
-    44%, 100% { transform: translateY(-121.4286%); }
+    48%, 100% { transform: translateY(-121.4286%); }
   }
 
   @keyframes queue-new-in {
-    0%, 38% { opacity: 0; }
-    54%, 100% { opacity: 1; }
+    0%, 40% { opacity: 0; }
+    57%, 100% { opacity: 1; }
   }
 
   /* One scaled slot: 17.9cqw of the 31.9cqw-tall stack. */
   @keyframes stack-push {
-    0%, 20% { transform: translateY(0); }
-    30%, 100% { transform: translateY(56.1129%); }
+    0%, 15% { transform: translateY(0); }
+    28%, 100% { transform: translateY(56.1129%); }
   }
 
   @keyframes oldest-out {

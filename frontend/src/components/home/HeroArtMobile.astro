@@ -12,7 +12,7 @@
 // Motion is pure CSS (lib/heroMotion.ts only pauses it off screen):
 // - the columns drift slowly up and down (never sideways, so cards never
 //   cross the column dividers)
-// - a Jira-style conveyor. Every 9s the top In Progress ticket
+// - a Jira-style conveyor. Every 5s the top In Progress ticket
 //   moves to Done, the queue below it slides up and a new card fades in at
 //   the bottom; Done's stack is pushed down and its oldest card fades out.
 //   Queue cards are identical, and so are Done cards, so at the end of each
@@ -212,19 +212,24 @@ const doneCard = (y: number, dx = 0) => `
     .mcol--progress,
     .mcol--done { animation: drift-down 20s ease-in-out 1.2s infinite; }
 
-    /* Conveyor: every piece shares one 9s timeline, and all of them snap
-       back in the same frame at the end of the cycle. The negative delay
-       starts the first cycle 22% in, where everything is still at rest, so
-       the first ticket moves at ~0.9s (as the headline settles) instead of
-       ~4s, when most people have already looked away. */
-    #mobile-roadmap { --conveyor-start: -2s; }
-    .mticket { animation: m-ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
-    .mticket-base { animation: m-fade-out 9s linear var(--conveyor-start) infinite both; }
-    .mticket-done { animation: m-fade-in 9s linear var(--conveyor-start) infinite both; }
-    .mstack { animation: m-stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
-    .mstack-old { animation: m-stack-old-out 9s linear var(--conveyor-start) infinite both; }
-    .mqueue { animation: m-queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
-    .mqueue-new { animation: m-queue-new-in 9s linear var(--conveyor-start) infinite both; }
+    /* Conveyor: every piece shares one 5s timeline, and all of them snap
+       back in the same frame at the end of the cycle. Each move keeps a
+       readable ~1.4s; only the rest between tickets is short (~2.5s). The
+       first ticket moves at ~0.9s, as the headline settles:
+        10-38%  ticket flies to Done (0.5s-1.9s)
+        12-28%  Done's stack opens the slot before it lands
+        30-42%  ticket turns into a Done card
+        34-56%  the queue slides up into the empty slot
+        44-64%  a new card fades in at the bottom
+        68-92%  Done's oldest card fades out */
+    #mobile-roadmap { --conveyor-start: 0.4s; }
+    .mticket { animation: m-ticket-ship 5s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .mticket-base { animation: m-fade-out 5s linear var(--conveyor-start) infinite both; }
+    .mticket-done { animation: m-fade-in 5s linear var(--conveyor-start) infinite both; }
+    .mstack { animation: m-stack-push 5s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .mstack-old { animation: m-stack-old-out 5s linear var(--conveyor-start) infinite both; }
+    .mqueue { animation: m-queue-up 5s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .mqueue-new { animation: m-queue-new-in 5s linear var(--conveyor-start) infinite both; }
 
     :global([data-hero-paused]) #mobile-roadmap * {
       animation-play-state: paused;
@@ -252,42 +257,42 @@ const doneCard = (y: number, dx = 0) => `
   /* Top In Progress card (y=295) moves 128 right, 30 up, to Done's slot
      (y=265). The ticket layer is 107 x 77 units: 128/107, -30/77. */
   @keyframes m-ticket-ship {
-    0%, 32% { transform: translate3d(0, 0, 0); }
-    50%, 100% { transform: translate3d(119.6262%, -38.961%, 0); }
+    0%, 10% { transform: translate3d(0, 0, 0); }
+    38%, 100% { transform: translate3d(119.6262%, -38.961%, 0); }
   }
 
   /* The ticket turns from a queue card into a Done card as it lands. */
   @keyframes m-fade-out {
-    0%, 44% { opacity: 1; }
-    54%, 100% { opacity: 0; }
+    0%, 30% { opacity: 1; }
+    42%, 100% { opacity: 0; }
   }
 
   @keyframes m-fade-in {
-    0%, 44% { opacity: 0; }
-    54%, 100% { opacity: 1; }
+    0%, 30% { opacity: 0; }
+    42%, 100% { opacity: 1; }
   }
 
   /* Done makes room: one card (75) plus gap (15), on a 167-unit layer... */
   @keyframes m-stack-push {
-    0%, 34% { transform: translate3d(0, 0, 0); }
-    44%, 100% { transform: translate3d(0, 53.8922%, 0); }
+    0%, 12% { transform: translate3d(0, 0, 0); }
+    28%, 100% { transform: translate3d(0, 53.8922%, 0); }
   }
 
   /* ...and its oldest card leaves. */
   @keyframes m-stack-old-out {
-    0%, 78% { opacity: 1; }
-    96%, 100% { opacity: 0; }
+    0%, 68% { opacity: 1; }
+    92%, 100% { opacity: 0; }
   }
 
   /* In Progress closes the gap the ticket left... */
   @keyframes m-queue-up {
-    0%, 42% { transform: translate3d(0, 0, 0); }
+    0%, 34% { transform: translate3d(0, 0, 0); }
     56%, 100% { transform: translate3d(0, -53.8922%, 0); }
   }
 
   /* ...and a new card arrives at the bottom. */
   @keyframes m-queue-new-in {
-    0%, 50% { opacity: 0; }
-    66%, 100% { opacity: 1; }
+    0%, 44% { opacity: 0; }
+    64%, 100% { opacity: 1; }
   }
 </style>
