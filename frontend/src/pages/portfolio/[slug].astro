@@ -9,6 +9,7 @@ import BodyImageLightbox from '../../components/BodyImageLightbox';
 import AuthorCard from '../../components/AuthorCard.astro';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
+import { OG_CARD_SIZE, ogCardPath, resolveWorkHeroUrl } from '../../lib/og/urls';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const works = await fetchWorks();
@@ -36,8 +37,8 @@ const mainImageUrl = getMediaUrl(workData.mainImage);
 const coverImageUrl = getMediaUrl(workData.coverImage);
 const clientLogoUrl = getMediaUrl(workData.clientLogo);
 
-const ogMedia = workData.mainImage || workData.coverImage;
-const ogImageUrl = getMediaUrl(ogMedia);
+// Hero for schema.org and search: main image (or featured), then cover.
+const heroImageUrl = resolveWorkHeroUrl(workData);
 
 const galleryImages = (workData.gallery || [])
   .map((img) => ({ url: getMediaUrl(img) || '', alt: (img as any)?.alt_text || workData.name }))
@@ -99,7 +100,7 @@ const creativeWork: Record<string, any> = {
   "url": shareUrl,
   "inLanguage": "en",
   "image": [
-    ogImageUrl,
+    heroImageUrl,
     ...galleryImages.map(img => img.url)
   ].filter(Boolean),
   "author": { "@id": PERSON_ID },
@@ -134,10 +135,12 @@ const schema = graph(
 <BaseLayout 
   title={workData.name} 
   description={metaDescription}
-  ogImage={ogImageUrl || undefined}
-  ogImageWidth={ogMedia?.width}
-  ogImageHeight={ogMedia?.height}
-  ogImageAlt={(ogMedia as any)?.alternativeText || workData.name}
+  ogImage={ogCardPath('portfolio', workData.slug, workData.modified || workData.publishDate)}
+  ogType="article"
+  ogImageWidth={OG_CARD_SIZE.width}
+  ogImageHeight={OG_CARD_SIZE.height}
+  ogImageAlt={workData.name}
+  searchImage={heroImageUrl || undefined}
   schema={schema}
 >
   <!-- Hero -->

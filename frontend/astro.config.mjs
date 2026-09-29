@@ -17,8 +17,10 @@ export default defineConfig({
             serialize(item) {
                 const path = new URL(item.url).pathname.replace(/\/$/, '') || '/';
 
-                // Endpoints (rss.xml, search-index.json) are not content pages.
-                if (/\.(xml|json)$/.test(path)) return undefined;
+                // Endpoints (rss.xml, search-index.json, og/*.png share
+                // cards) and the /og card preview grid are not content pages.
+                if (/\.(xml|json|png)$/.test(path)) return undefined;
+                if (path === '/og' || path.startsWith('/og/')) return undefined;
 
                 // The site canonicalises on the no-trailing-slash form, so the
                 // sitemap must emit that form too. Previously `path` was used

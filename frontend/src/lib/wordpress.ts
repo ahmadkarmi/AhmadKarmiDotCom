@@ -572,6 +572,7 @@ export interface Work {
     status: 'completed' | 'proposal' | 'concept' | 'in_progress' | 'backlog';
     featured: boolean;
     publishDate?: string;
+    modified?: string;
     brief?: string;
     scope?: string;
     details?: string;
@@ -1436,6 +1437,7 @@ function transformWork(post: any): Work {
         status: acf.status || 'backlog',
         featured: parseAcfBoolean(acf.featured),
         publishDate: post.date || post.date_gmt,
+        modified: post.modified || post.modified_gmt || post.date,
         brief: processMarkdownContent(acf.brief),
         scope: processMarkdownContent(acf.scope),
         details: processMarkdownContent(acf.details || post.content?.rendered),

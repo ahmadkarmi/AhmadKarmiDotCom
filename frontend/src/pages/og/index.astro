@@ -1,0 +1,62 @@
+---
+// Review grid for every generated share card. Not linked anywhere, noindex,
+// and filtered out of the sitemap in astro.config.mjs.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchInsights, fetchWorks } from '../../lib/wordpress';
+import { ogCardPath } from '../../lib/og/urls';
+
+const [insights, works] = await Promise.all([fetchInsights(), fetchWorks()]);
+
+const groups = [
+  {
+    heading: 'Insights',
+    cards: insights.map((i) => ({
+      name: i.name,
+      page: `/insights/${i.slug}`,
+      src: ogCardPath('insights', i.slug, i.modified || i.publishDate),
+    })),
+  },
+  {
+    heading: 'Portfolio',
+    cards: works.map((w) => ({
+      name: w.name,
+      page: `/portfolio/${w.slug}`,
+      src: ogCardPath('portfolio', w.slug, w.modified || w.publishDate),
+    })),
+  },
+];
+---
+
+<BaseLayout title="Share cards" noindex>
+  <section class="section pt-32">
+    <div class="container-custom">
+      <h1 class="font-display text-4xl font-bold mb-2">Share cards</h1>
+      <p class="text-foreground-secondary mb-12">
+        The og:image each insight and work shows when shared on WhatsApp, LinkedIn, X and Facebook.
+      </p>
+
+      {groups.map((group) => (
+        <div class="mb-16">
+          <h2 class="font-display text-2xl font-bold mb-6">
+            {group.heading} <span class="text-foreground-secondary font-sans text-base">({group.cards.length})</span>
+          </h2>
+          <div class="grid gap-8 md:grid-cols-2">
+            {group.cards.map((card) => (
+              <a href={card.page} class="block group">
+                <img
+                  src={card.src}
+                  alt={card.name}
+                  width="1200"
+                  height="630"
+                  loading="lazy"
+                  class="w-full h-auto rounded-lg border border-border"
+                />
+                <span class="block mt-2 text-sm text-foreground-secondary group-hover:text-accent">{card.page}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
