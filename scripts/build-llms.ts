@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 import { fetchWordPress, type NormalizedPost } from './lib/wp';
 import { stripHtml } from './lib/chunk';
+import { PROFILES } from '../frontend/src/lib/profiles';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -77,7 +78,7 @@ ${workLines.join('\n')}
 
 - [Trakr](https://trakr-mobile.vercel.app/): compliance audit SAAS Ahmad shipped solo
 - [Story Point Calculator](https://www.storypointcalculator.com/): agile sprint planning tool Ahmad shipped solo
-- [LinkedIn](https://www.linkedin.com/in/akarmi)
+${PROFILES.map((p) => `- [${p.label}](${p.url})`).join('\n')}
 - [Email](mailto:alkarmi.ahmad@gmail.com)
 `;
 }

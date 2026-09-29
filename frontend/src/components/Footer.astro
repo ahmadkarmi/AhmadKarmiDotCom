@@ -1,12 +1,10 @@
 ---
 import { Image } from 'astro:assets';
 import logoDarkHorizontal from '../assets/brand/logo-dark-horizontal.png';
+import { PROFILES } from '../lib/profiles';
 const currentYear = new Date().getFullYear();
 
-const socialLinks = [
-  { href: 'https://www.linkedin.com/in/akarmi', label: 'LinkedIn' },
-  { href: 'https://www.threads.com/@karmi.csd', label: 'Threads' },
-];
+const socialLinks = PROFILES.map((p) => ({ href: p.url, label: p.label }));
 ---
 
 <footer class="border-t border-border bg-background-secondary/50">
@@ -65,7 +63,7 @@ const socialLinks = [
               <a 
                 href={link.href}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="me noopener noreferrer"
                 class="text-foreground-secondary hover:text-foreground text-sm transition-colors"
               >
                 {link.label}

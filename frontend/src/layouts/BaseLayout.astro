@@ -8,6 +8,7 @@ import ReadingProgress from '../components/ReadingProgress.astro';
 import AskAhmadWidget from '../components/ask-ahmad/Widget.astro';
 import { SITE_URL, absoluteUrl } from '../lib/urls';
 import { clampDescription } from '../lib/seo';
+import { PROFILES, X_HANDLE } from '../lib/profiles';
 
 export interface Props {
   title: string;
@@ -97,7 +98,9 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
     <meta name="description" content={metaDescription} data-pagefind-meta="description[content]" />
     <meta content={fullSearchImage} data-pagefind-meta="image[content]" />
     <meta name="author" content="Ahmad Al-Karmi" />
-    
+    <!-- Identity: the profiles this site's owner controls (see lib/profiles.ts) -->
+    {PROFILES.map((p) => <link rel="me" href={p.url} />)}
+
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />
     {!noindex && <meta property="og:url" content={canonicalURL} />}
@@ -131,8 +134,8 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
     {!noindex && <meta name="twitter:url" content={canonicalURL} />}
     <meta name="twitter:image" content={fullOgImage} />
     <meta name="twitter:image:alt" content={resolvedAlt} />
-    <meta name="twitter:creator" content="@akarmi" />
-    <meta name="twitter:site" content="@akarmi" />
+    <meta name="twitter:creator" content={X_HANDLE} />
+    <meta name="twitter:site" content={X_HANDLE} />
 
     <!-- LinkedIn / general -->
     <meta name="linkedin:title" content={`${title} | Ahmad Al-Karmi`} />

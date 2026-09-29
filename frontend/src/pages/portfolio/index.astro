@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import WorkCard from '../../components/WorkCard.astro';
 import GridLayout from '../../components/GridLayout.astro';
 import { fetchWorks } from '../../lib/wordpress';
+import { graph, breadcrumbNode, personNode, PERSON_ID, SITE_URL } from '../../lib/schema';
+import { absoluteUrl } from '../../lib/urls';
 
 const works = await fetchWorks();
 
@@ -14,11 +16,43 @@ if (works.length === 0) {
     'fetchWorks() returned no works. Refusing to build an empty /portfolio page. Check PUBLIC_WP_URL and WP credentials.'
   );
 }
+
+// JSON-LD: a CollectionPage whose mainEntity is an ItemList of every case
+// study in page order, plus a breadcrumb. Mirrors the Blog node on /insights
+// so both hubs hand engines a structured map of their detail pages.
+const schema = graph(
+  {
+    '@type': 'CollectionPage',
+    '@id': `${SITE_URL}/portfolio#collection`,
+    url: absoluteUrl('/portfolio'),
+    name: 'Portfolio of Ahmad Al-Karmi',
+    description:
+      'Product management, digital transformation and creative technology case studies by Ahmad Al-Karmi.',
+    inLanguage: 'en',
+    author: { '@id': PERSON_ID },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: works.length,
+      itemListElement: works.map((work, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: absoluteUrl(`/portfolio/${work.slug}`),
+        name: work.name,
+      })),
+    },
+  },
+  personNode(),
+  breadcrumbNode([
+    { name: 'Home', url: '/' },
+    { name: 'Portfolio', url: '/portfolio' },
+  ])
+);
 ---
 
-<BaseLayout 
-  title="Portfolio" 
+<BaseLayout
+  title="Portfolio"
   description="Explore my portfolio of product management, digital transformation, and creative technology projects."
+  schema={schema}
 >
   <!-- Header -->
   <section class="section pt-32 pb-16">

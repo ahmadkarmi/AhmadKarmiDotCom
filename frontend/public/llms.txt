@@ -71,17 +71,16 @@ This site documents Ahmad's product thinking through long-form articles, a worki
 - [Pareto’s Principle And Becoming A More Effective Product Manager](https://www.ahmadkarmi.com/insights/paretos-principle-and-becoming-a-more-effective-product-manager): 2020-12-01
 - [Empowering your Digital Transformation Teams](https://www.ahmadkarmi.com/insights/empowering-your-digital-transformation-teams): 2020-09-01
 
-## Portfolio (13 projects)
+## Portfolio (12 projects)
 
+- [Trakr: Multi-site Audit & Compliance Platform](https://www.ahmadkarmi.com/portfolio/trakr-multi-site-audit-compliance-platform) — Trakr
+- [Case Study: Talabat Group Order Feature](https://www.ahmadkarmi.com/portfolio/case-study-talabat-group-order-feature) — Talabat
 - [World Cup 2026](https://www.ahmadkarmi.com/portfolio/world-cup-2026) — Al Jazeera Media Network
 - [Ekko Health: A Health App That Listens Before It Speaks](https://www.ahmadkarmi.com/portfolio/ekko-health-a-health-app-that-listens-before-it-speaks) — Ekko Health
 - [ZAIN eSports](https://www.ahmadkarmi.com/portfolio/zain-esport) — Zain Group / Zain eSport
-- [Wilson & Bass](https://www.ahmadkarmi.com/portfolio/wilson-bass) — Wilson & Bass
 - [The Story Point Calculator](https://www.ahmadkarmi.com/portfolio/story-point-calculator) — Personal Project
 - [Talabat UI/UX Concept](https://www.ahmadkarmi.com/portfolio/talabat-ui-ux-concept) — Talabat (Delivery Hero)
-- [Sultan Telecom Corporate Profile](https://www.ahmadkarmi.com/portfolio/sultan-telecom-corporate-profile) — Sultan Telecom
 - [NBK Automated Audit](https://www.ahmadkarmi.com/portfolio/nbk-automated-audit) — National Bank of Kuwait
-- [Kuwait SC Rebrand](https://www.ahmadkarmi.com/portfolio/kuwait-sc-rebrand) — Kuwait SC
 - [KFAS Labs (Proposed Concept)](https://www.ahmadkarmi.com/portfolio/kfas-labs-studio-concept)
 - [Items Details Page Design (Bleems)](https://www.ahmadkarmi.com/portfolio/bleems-items-details-page-design) — Bleems S.P.C.
 - [Checkout & Purchase Flow Optimization](https://www.ahmadkarmi.com/portfolio/checkout-purchase-flow-optimization) — Bleems S.P.C.
@@ -96,4 +95,7 @@ This site documents Ahmad's product thinking through long-form articles, a worki
 - [Trakr](https://trakr-mobile.vercel.app/): compliance audit SAAS Ahmad shipped solo
 - [Story Point Calculator](https://www.storypointcalculator.com/): agile sprint planning tool Ahmad shipped solo
 - [LinkedIn](https://www.linkedin.com/in/akarmi)
+- [GitHub](https://github.com/ahmadkarmi)
+- [X](https://x.com/ahmad_alkarmi)
+- [Threads](https://www.threads.com/@karmi.csd)
 - [Email](mailto:alkarmi.ahmad@gmail.com)

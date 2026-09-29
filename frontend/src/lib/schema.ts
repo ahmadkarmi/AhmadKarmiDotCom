@@ -8,6 +8,8 @@
 // Pages pass the result of `graph(...)` to BaseLayout's `schema` prop, which
 // renders it as a single <script type="application/ld+json"> block.
 
+import { PROFILES } from './profiles';
+
 export const SITE_URL = import.meta.env.PUBLIC_SITE_URL || 'https://www.ahmadkarmi.com';
 export const PERSON_ID = `${SITE_URL}#person`;
 export const WEBSITE_ID = `${SITE_URL}#website`;
@@ -58,10 +60,9 @@ export function personNode(opts: { linkedinUrl?: string } = {}): SchemaNode {
     description:
       'Senior Product Manager for Loyalty and Growth Products at Al Jazeera Media Network. AI-focused. Over 16 years shipping digital products from enterprise through consumer.',
     email: 'alkarmi.ahmad@gmail.com',
-    sameAs: [
-      opts.linkedinUrl || 'https://www.linkedin.com/in/akarmi',
-      'https://www.threads.com/@karmi.csd',
-    ].filter(Boolean),
+    sameAs: PROFILES.map((p) =>
+      p.key === 'linkedin' && opts.linkedinUrl ? opts.linkedinUrl : p.url
+    ),
   };
 }
 

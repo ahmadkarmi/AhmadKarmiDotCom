@@ -4,8 +4,8 @@
 
 Site: https://www.ahmadkarmi.com
 Articles: 38
-Portfolio entries: 13
-Generated: 2026-08-28T01:54:14Z
+Portfolio entries: 12
+Generated: 2026-09-29T15:46:38Z
 
 ---
 
@@ -3196,6 +3196,280 @@ These are not the only ways to empower your digital transformation teams, but th
 
 # Portfolio
 
+## Trakr: Multi-site Audit & Compliance Platform
+*Client: Trakr*
+URL: https://www.ahmadkarmi.com/portfolio/trakr-multi-site-audit-compliance-platform
+
+Trakr is my own product. It is a multi-tenant SaaS platform that I developed, and launched into a private beta with a select group of design partner clients.
+
+Audit. Prove. Resolve. Trakr is an enterprise-grade multi-site audit and compliance platform designed to standardise operations. Administrators define a single operational standard, field auditors verify compliance on-site using mobile devices, and branch managers formally sign off on every result. Designed and engineered entirely from the ground up, Trakr is currently live in private beta.
+
+The problem
+
+Consider an operations lead managing forty distinct branches, ostensibly operating under a single checklist, though usually relying on half a dozen fragmented paper versions. Auditors tick boxes on clipboards, capture hazards like blocked fire exits on personal smartphones, and frequently neglect to submit documentation. Spreadsheets report a 92% compliance rate, yet the underlying metric remains opaque. Formal sign-offs are reduced to informal WhatsApp approvals. When a branch inevitably fails an official inspection, teams cannot produce audit trails, verify approvals, or confirm whether corrective actions were ever implemented.
+
+How teams audit today:
+
+They all collect answers. None of them proves the answers and gets them signed.
+
+The product
+
+Trakr establishes a single, accountable workflow across every physical location. Administrators publish versioned checklists that auditors execute on-site with mandatory photographic evidence. Every location is evaluated against identical criteria, and branch managers must formally approve results or return them with documented rationale.
+
+One standard, versioned
+
+Publishing a revised template automatically generates a new version. Audits currently in progress remain locked to the specific version they initiated with, preserving historical integrity.
+
+Evidence travels with the answer
+
+Photographs and operational notes attach directly to relevant sections—functioning seamlessly even offline—and upload reliably the moment network connectivity is restored.
+
+Scores you can compare
+
+Every branch is measured through a uniform scoring model, ensuring locations across different regions operate on a truly equitable scale.
+
+A signature closes the loop
+
+Managers validate results with a verified signature, or reject them with a mandatory written justification that immediately generates a follow-up task for the auditor.
+
+The product in five steps
+
+Configure templates
+
+Construct comprehensive checklists featuring distinct pages, custom question types, and flexible schedules ranging from daily to quarterly intervals. Publishing creates an immutable new version, allowing operational standards to evolve without altering the history of past audits.
+
+Run audits on site
+
+Optimised for single-thumb navigation while walking the floor, featuring large Yes/No/N/A targets, mandatory validation flags, and section-level photography. Data saves dynamically, and media files queue safely on the device until a connection is available.
+
+Score and report
+
+Every audit concludes with a definitive completion status, an accurate compliance score, and a print-ready approval block. Submissions are strictly restricted until all required parameters are fulfilled.
+
+Approve reviews
+
+Managers can thoroughly examine all responses, comments, and media before signing using a saved signature image, typed name, or direct drawing. Rejections require a documented explanation and route instantly back to the assigned auditor.
+
+Track history
+
+Filter historical audit data effortlessly by template, branch, status, and date. Analytics aggregate seamlessly by branch, regional zone, and auditor, complete with professional PDF and CSV export capabilities.
+
+Three roles, one loop
+
+StepAdminAuditorBranch manager
+
+ConfigureBuilds a template and publishes a new version.Invited by email, with a saved signature.Assigned to one or more branches.
+
+ScheduleGroups branches into zones and assigns auditors in bulk.Gets New Audit Assigned. The Cycle Snapshot shows what is ready.Branch Health shows active audits.
+
+AuditWatches weekly zone coverage fill in.Answers section by section, adds photos, keeps going offline.Sees audits in progress without touching them.
+
+SubmitSees the Need Approval count rise.Submits at 100% completion.Gets an Action Required alert.
+
+ReviewSteps in as fallback approver when a branch has no manager.If rejected, gets the reason and a Reopen & Fix task.Reviews everything, then signs to approve or rejects with a reason.
+
+TrackReads branch and auditor rankings. Exports PDF or CSV.Personal analytics: completion, quality, overdue.Full timeline for every audit at the branch.
+
+Design decisions
+
+Auditors operate on their feet, frequently working one-handed in storage areas with zero cellular connectivity. Every architectural decision was built around these constraints.
+
+Evidence belongs to the section, not the question
+
+A single photograph of a stockroom can successfully satisfy multiple criteria, enabling auditors to maintain momentum. Strict validation checks prevent redundant per-question photo requirements from re-emerging.
+
+N/A is an answer, not a loophole
+
+Selecting Not Applicable requires a mandatory operational justification, and administrators retain full visibility into how this option is utilised.
+
+Finished and good are different things
+
+Completion metrics and compliance scores are displayed side by side, ensuring a thoroughly executed audit cannot inadvertently mask a failing location.
+
+Work survives a bad signal
+
+Media files are compressed directly on the device, queued securely during offline operation, and synchronised precisely once network connectivity returns.
+
+Explain the no
+
+Branches unable to complete an audit cycle must document the reason rather than simply disappearing from the system. Every empty state actively guides users toward their next required action.
+
+A shipped product, not a concept
+
+Trakr was architected as a multi-tenant platform from its very first database schema. Every data row explicitly carries its organisation ID, and database-level security policies enforce strict read and write boundaries independently of application code.
+
+Private evidence. Photos and signatures are housed in isolated private storage containers, segregated strictly by organisation and accessed exclusively via short-lived, cryptographically signed URLs.
+
+Watched around the clock. Protected by automated nightly backups with continuous replication, health checks every five minutes, and advanced error tracking with real-time Slack alerting.
+
+The stack. Built on a modern, high-performance foundation utilising React, TypeScript, Vite, Tailwind CSS, and TanStack Query. Powered by Supabase for PostgreSQL management, authentication, secure storage, edge functions, and scheduled automation, deployed via Vercel and GitHub Actions.
+
+Where it is now
+
+Trakr is live in private beta.
+
+What’s next
+
+Role: Product, design and engineering. Solo.
+
+Platform: Installable web app for desktop, tablet and phone
+
+Stack: React, TypeScript, Supabase, Vercel
+
+Status: Live in private beta
+
+
+---
+
+## Case Study: Talabat Group Order Feature
+*Client: Talabat*
+URL: https://www.ahmadkarmi.com/portfolio/case-study-talabat-group-order-feature
+
+Product design case study · talabat concept
+
+One cart for the whole table. Everyone pays their own share.
+
+DISCLAIMER: Independent concept by Ahmad Karmi, based on a feature I would personally use. Not affiliated with or endorsed by talabat. Restaurant, people and images are fictional.
+
+The Problem
+
+Twelve people, one phone, one card. Whoever places the order becomes the group’s bank for the night. Then the collecting starts. One friend left his wallet in the car. Another only has a 20 KD note. Two say they will transfer it later and the host spends the week reminding them.
+
+Often the order never happens at all. The table is still arguing about who pays while the cart sits open, and someone ends up calling the restaurant directly.
+
+What Group Ordering Looks Like Today
+
+I went through the group ordering flows in Wolt, Uber Eats, Swiggy and Shopee on Mobbin, then through talabat’s own checkout. They all solve the shared cart. None of them split the payment. Swiggy’s copy says it plainly to the host: “You call the shots.” Uber Eats adds a per person spending cap, which is built for an office lunch the company pays for, not for friends on a Thursday night.
+
+Every one of them shares the cart. None of them splits the bill.
+
+The Idea
+
+A group order is a live room around one restaurant. Each person builds a plate on their own phone and pays for it to lock in. The host never fronts a single fils, and the order goes to the kitchen the moment every plate is paid.
+
+01 – Nobody is the bank.
+
+Each plate is paid by its owner. The host carries the same risk as everyone else, which is none.
+
+02 – Joining is one scan.
+
+A QR code for the room and a link for the group chat. Paying for a plate needs no app.
+
+03 – The board does the chasing.
+
+Everyone sees who has paid. Quiet social pressure replaces the host’s reminders.
+
+04 – Generosity still wins.
+
+Someone often wants to pay for others. Anyone can cover another member’s share, or the whole order, in one tap.
+
+The journey across the host, the guests and what talabat runs underneath.
+
+The Host Flow
+
+1. Start from the restaurant
+
+A Group order button sits next to favourite and share. A card on the page explains the idea in one sentence.
+
+2. One scan to join
+
+The QR code fills the screen for the people in the room. The link goes to the WhatsApp group for everyone else.
+
+3. The board
+
+Every person is a tile. Choosing, paid, covered. Shared plates show what each person owes as people join.
+
+4. Lock in
+
+You pay for your plate and your share of the fees. Nothing is charged until the host sends the order.
+
+5. Time’s up
+
+The host resolves each unpaid share: cover it, remove it or extend the deadline by five minutes.
+
+Who Pays for What?
+
+The rules had to be simple enough to explain at the table. Your items are yours. Shared plates split evenly across whoever joins them. Delivery and service fees split across paid plates, and delivery disappears for everyone when the host has pro. Tips are personal and pooled for the rider.
+
+Cash on delivery is switched off inside a group order, because one rider cannot collect from twelve people at a door. A friend who only has notes hands them to someone at the table, who covers the plate from their own card. talabat never touches the cash.
+
+One Kuwaiti detail shaped the payments design. KNET charges immediately and cannot place a hold, so a KNET plate that leaves the room becomes a refund rather than a released hold.
+
+The Guest Without The App
+
+1. Join from the browser
+
+No app, no account. A name for the board is all it asks for.
+
+2. Build a Plate
+
+The same menu with a personal total and a one tap way into the shared grill.
+
+3. Covered
+
+The host paid for this guest’s share. The guest is notified and can save the order to a new account.
+
+The Member Who Orders Late
+
+Most groups have one member who orders late. The deadline protects everyone else, but the better answer is to make that member not late. A reminder three minutes before the deadline, with their usual items one tap away, turns the most common delay into a quick decision.
+
+1. Reminder
+
+Three minutes before the deadline, members who have not ordered receive a reminder from talabat and from the host.
+
+2. Reorder usual
+
+The member can reorder their usual items in one tap or skip this order, and the host is notified either way.
+
+Why Talabat Would Ship This Feature
+
+The whole table in one basket
+
+Groups that cannot settle the bill into solo orders or a phone call to the restaurant tend to slip away. Some order seperately, some call the restaurant and some just don’t order anymore. Take away the payment argument and the biggest basket of the week stays on Talabat.
+
+A door for non users
+
+Every room puts a one minute web checkout in front of people without the app, with a reason to install afterwards. Acting as a growth lever.
+
+Talabat pay earns its tab
+
+Covering a friend and paying them back are wallet moves. Balances stay inside Talabat.
+
+tPro sells itself at the table
+
+A host with Talabat Pro waives delivery for everyone. Guests see exactly what they saved. Which acts as incentive for non tPro users to sign up later.
+
+Less cash on the road
+
+Big group orders lean on cash changing hands outside of Talabat. Prepaid plates end the hunt for change.
+
+A weekly ritual
+
+Groups meet on the same night with the same faces. A saved room reopens with last week’s plates waiting. Makes regular social gatherings like Diwaniya or Game Night an easy conversion after the first group order.
+
+How I would measure it
+
+North star: group orders sent to the kitchen each week
+
+Rooms opened that reach the kitchen, and how long it takes
+
+Group basket size against the same users’ solo baskets
+
+Web guests who create an account within 30 days
+
+Saved rooms reopened within 14 days
+
+What I would test first
+
+Whether “gift by default” on covers holds up once real money moves, or whether hosts want repay requests
+
+The right default timer. Twenty minutes felt right on paper; the board data will say otherwise
+
+How web guest checkout changes fraud and chargeback rates
+
+
+---
+
 ## World Cup 2026
 *Client: Al Jazeera Media Network*
 URL: https://www.ahmadkarmi.com/portfolio/world-cup-2026
@@ -3593,70 +3867,6 @@ In fact, one could argue that the pandemic, while making operations more difficu
 
 ---
 
-## Wilson & Bass
-*Client: Wilson & Bass*
-URL: https://www.ahmadkarmi.com/portfolio/wilson-bass
-
-### Brief
-The task at hand was to fully brand a new Human Capital Solutions company. The desired brand was to be very neutral, with blacks, whites and greys. The client needed the brand to speak to large enterprises as they were their target market. Yet, they wanted a modern edge to their brand that spoke to C-Levels as well as entry level employees. The task at hand was difficult, but the client was very satisfied.
-
-### Scope
-1. Build a simple logo using negative space that works on all collateral
-2. Using a specific color palette (black, white and shades of grey)
-3. Complete a corporate website with dynamic contact forms and application forms
-4. Provide start-up collateral with creative geometric branding
-5. Provide back end panel for sorting applications
-6. Client requested wordpress to power the website for familiarity
-7. Used custom fields and gravity forms to power the application process and customizations
-
-### Details
-Wilson & Bass is a human capital solutions company that focuses on many aspects of HR Consulting & Advisory. One of their key strengths is an AI platform that is fed with high quality data that the firm constantly updates throughout their business activities. This results in a system that is always learning and outputting the best automated insights possible. To develop a brand that echos such a feat, the client wanted to go for a neutral yet modern look. I recommended that we work with blacks, whites & grays and throughout the logo development we felt that using negative space would provide a very edgy yet professional look. The colour scheme created for branding this company has been detailed below:
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074a0b23652cea7ce5c0_6305b99b96183ea13c1eacbb_WB_Logo_Colors_f07ddbf7e4.jpeg)
-
-#### Moving Forward
-
-Once this logo has been created and our colour scheme was set, the task at hand was very difficult to create something that would satisfy the client's needs. At first the client wanted straight lines and very rigid approach. We began with this business card that can be seen in the following image:
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074a0b23652cea7ce5c3_6305b9c2ab6b977717979966_BusinessCards_WB.jpeg)
-
-#### Branding the Collateral
-
-However, both myself and the client found this to be too boring of a style. We decided it was time to change it up. With this new vision, the client wanted to avoid straight lines in their branding collateral and use curves inspired from the "&" part of the logo seen in the negative space. My idea was that the best way to go around this is to use a circle to signify the curve, but in order not to brand it as a single geometric shape; we thought to think outside of the box. Thinking outside of the box put us on a journey to literally change the concept to "think outside of the circle". You can see the overall branding approach in the image.
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074b0b23652cea7ce5fd_6305b9f9db6178fb970e915b_K_V2_stationary_branding_mockup_items_sideview_V1_3.jpeg)
-
-The client was extremely happy with the work provided. This concept followed them everywhere; from print, to web properties and even into their social media.
-
-The branding for this company was scored independently and ranked 14th place out of 121 SMEs, for brand value. Obviously the designs are not the only factor in this measure but it had definitely helped the company score high and achieve their goals.
-
-**Please view the gallery below to see some more implementation of the branding collateral:**
-
-Wilson & Bass is a human capital solutions company that focuses on many aspects of HR Consulting & Advisory. One of their key strengths is an AI platform that is fed with high quality data that the firm constantly updates throughout their business activities. This results in a system that is always learning and outputting the best automated insights possible. To develop a brand that echos such a feat, the client wanted to go for a neutral yet modern look. I recommended that we work with blacks, whites & grays and throughout the logo development we felt that using negative space would provide a very edgy yet professional look. The colour scheme created for branding this company has been detailed below:
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074a0b23652cea7ce5c0_6305b99b96183ea13c1eacbb_WB_Logo_Colors_f07ddbf7e4.jpeg)
-
-#### Moving Forward
-
-Once this logo has been created and our colour scheme was set, the task at hand was very difficult to create something that would satisfy the client’s needs. At first the client wanted straight lines and very rigid approach. We began with this business card that can be seen in the following image:
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074a0b23652cea7ce5c3_6305b9c2ab6b977717979966_BusinessCards_WB.jpeg)
-
-#### Branding the Collateral
-
-However, both myself and the client found this to be too boring of a style. We decided it was time to change it up. With this new vision, the client wanted to avoid straight lines in their branding collateral and use curves inspired from the “&” part of the logo seen in the negative space. My idea was that the best way to go around this is to use a circle to signify the curve, but in order not to brand it as a single geometric shape; we thought to think outside of the box. Thinking outside of the box put us on a journey to literally change the concept to “think outside of the circle”. You can see the overall branding approach in the image.
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074b0b23652cea7ce5fd_6305b9f9db6178fb970e915b_K_V2_stationary_branding_mockup_items_sideview_V1_3.jpeg)
-
-The client was extremely happy with the work provided. This concept followed them everywhere; from print, to web properties and even into their social media.
-
-The branding for this company was scored independently and ranked 14th place out of 121 SMEs, for brand value. Obviously the designs are not the only factor in this measure but it had definitely helped the company score high and achieve their goals.
-
-**Please view the gallery below to see some more implementation of the branding collateral:**
-
-
----
-
 ## The Story Point Calculator
 *Client: Personal Project*
 URL: https://www.ahmadkarmi.com/portfolio/story-point-calculator
@@ -3998,51 +4208,6 @@ The following screens attempt to solve all of the above issues:
 
 ---
 
-## Sultan Telecom Corporate Profile
-*Client: Sultan Telecom*
-URL: https://www.ahmadkarmi.com/portfolio/sultan-telecom-corporate-profile
-
-### Brief
-This project was to create a modern looking corporate profile that spoke to the cutting edge technology solutions & services that the company provides, but to also keep true to its heritage and what their loyal customer base have come to expect. It's not always easy bringing a more modern style into a company's branding collateral but I do rest easy in believing that this end result has not only satisfied the client but their loyal customer base who have already come to know the brand for what it is.
-
-### Scope
-1. To provide two versions of the corporate profile (1 with financial pitch for investors/banks and 1 for informational and sales purposes)
-2. To provide a corporate profile that resonates and translates the mission, vision and branding into an aesthetically pleasing document
-3. Using modern design trends and media
-4. Custom designing financial charts and graphs to accompany the financial workbook
-
-### Details
-The difficulty in this project was to create something more modern without changing their historic logo. This logo has been with the company for quite some time and the stakeholders involved were adamant that right now was not the time to update their logo as that would require a complete overhaul of the branding. The corporate profile however, was the introduction to this to ease their clients into the more modern and future-tech style of branding that the client had in mind.
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074aa8b87a4a63fbe98e_6305bc95716b0a017d899ec2_STCD_001.jpeg)
-
-As you can tell, the logo itself presented a unique choice of colours of Orange & Dark blue. I believe that any colours can work together to provide the right message as long as they are blended together properly and combined with different shades of the colours. This is not a rule of thumb, but generalization I  always like to begin my work with.
-
-Playing with each one and their shades (of course in an absence of a branding guideline) to achieve a cutting edge feel. As you will notice that there is a heavy reliance on using white backgrounds to keep the content looking fresh, whilst I used faded black colours for more straight edge items such as the text. I used the orange colours to accent and break monotony as the blacks and navy blues can seemingly blend into looking like the same colour over extended time viewing such a document.
-
-The typography presented us with an interesting problem. As the logo used two different styles of fonts. Which left me less room for creativity under the time pressure available to complete this project in time.
-
-So we opted for a Lato Bold and Lato Light combination for the headings. Similar enough to the logo in style but different when it comes to the way it displays. I used Lato for it's straight forward characteristics but also for a clean edge look. The body also used Lato, as per the client's request. However, I originally used Roboto Regular as my font of choice.
-
-At the end, the client loved the final piece as feedback from new and loyal clients has been excellent.
-
-The difficulty in this project was to create something more modern without changing their historic logo. This logo has been with the company for quite some time and the stakeholders involved were adamant that right now was not the time to update their logo as that would require a complete overhaul of the branding. The corporate profile however, was the introduction to this to ease their clients into the more modern and future-tech style of branding that the client had in mind.
-
-![](https://admin.ahmadkarmi.com/wp-content/uploads/2026/01/66cb074aa8b87a4a63fbe98e_6305bc95716b0a017d899ec2_STCD_001.jpeg)
-
-As you can tell, the logo itself presented a unique choice of colours of Orange & Dark blue. I believe that any colours can work together to provide the right message as long as they are blended together properly and combined with different shades of the colours. This is not a rule of thumb, but generalization I  always like to begin my work with.
-
-Playing with each one and their shades (of course in an absence of a branding guideline) to achieve a cutting edge feel. As you will notice that there is a heavy reliance on using white backgrounds to keep the content looking fresh, whilst I used faded black colours for more straight edge items such as the text. I used the orange colours to accent and break monotony as the blacks and navy blues can seemingly blend into looking like the same colour over extended time viewing such a document.
-
-The typography presented us with an interesting problem. As the logo used two different styles of fonts. Which left me less room for creativity under the time pressure available to complete this project in time.
-
-So we opted for a Lato Bold and Lato Light combination for the headings. Similar enough to the logo in style but different when it comes to the way it displays. I used Lato for it’s straight forward characteristics but also for a clean edge look. The body also used Lato, as per the client’s request. However, I originally used Roboto Regular as my font of choice.
-
-At the end, the client loved the final piece as feedback from new and loyal clients has been excellent.
-
-
----
-
 ## NBK Automated Audit
 *Client: National Bank of Kuwait*
 URL: https://www.ahmadkarmi.com/portfolio/nbk-automated-audit
@@ -4108,45 +4273,6 @@ Due to the sensitivity of the data bring pushed into the system, we did not want
 4. Improved staff efficiency, as they now have more time to work on other tasks when back to the office
 
 5. Flexibility of data types (web based dashboards, excel sheets, PDF reports etc… can all be generated from the click of one button, in predetermined templates to match the brand of the bank)
-
-
----
-
-## Kuwait SC Rebrand
-*Client: Kuwait SC*
-URL: https://www.ahmadkarmi.com/portfolio/kuwait-sc-rebrand
-
-### Brief
-The purpose of this project was to present the club with a modern logo redesign without sacrificing the history and culture of the club. The logo was more of a refresh, the approach was to present to the club a brand new fresh approach to merchandising and jersey design using this newly refreshed logo.
-
-### Scope
-1. Develop a more modern logo inspired by the club and Kuwaiti culture
-2. Visualize the new brand with collateral and merchadise
-3. Monetize the new brand through partnerships and merchandising
-
-### Details
-**Kuwait Sporting Club** (Arabic: **نادي الكويت الرياضي‎**) is a Kuwaiti professional football and basketball[1] club based in Kuwait City. The football team has won the Kuwaiti Premier League 15 times, with the most recent one coming in 2018–19. Kuwait SC also have 47 trophies to their name in Kuwaiti Club Football history. Kuwait SC plays in the Al Kuwait Sports Club Stadium, in Kaifan, which is the 5th largest stadium in Kuwait. Kuwait SC is the first Kuwaiti club to ever win an Asian title that is, the AFC Cup in 2009, 2012, 2013. Kuwait SC is also one of the first sports club to have been established in Kuwait.
-
-- Wikipedia
-
-#### The Idea
-
-I believed that the current logo was an aspect of the club's history from its inception. Therefore, the logo redesign approach that I wanted to use was more of a refresh. Taking elements from the current logo, and twisting and turning them into a more modern rendition. Incorporating elements of the three rings, the sun and the inception of the club was the main target. All whilst keeping the club colours, culture and identity intact. This was the approach I wanted to present.
-The club, especially under its new resurgence to winning ways has been looked at as a force to be reckoned with in the Kuwaiti Premier League. With a club growing at such a successful rate, it only made sense that the new presented branding be applied in a way to benefit the club. Such as advertising, merchandising and new jerseys. With its resurgence in popularity, merchandising can prove to be a very profitable Endeavour, especially with an updated look and feel to meet modern tastes. Below are the mockups of the jerseys, F&B, advertisement (in this case a bus advertisement example) and merchandise incorporating this new style, taste and brand.
-
-‍
-
-**Kuwait Sporting Club** (Arabic: **نادي الكويت الرياضي‎**) is a Kuwaiti professional football and basketball\[1\] club based in Kuwait City. The football team has won the Kuwaiti Premier League 15 times, with the most recent one coming in 2018–19. Kuwait SC also have 47 trophies to their name in Kuwaiti Club Football history. Kuwait SC plays in the Al Kuwait Sports Club Stadium, in Kaifan, which is the 5th largest stadium in Kuwait. Kuwait SC is the first Kuwaiti club to ever win an Asian title that is, the AFC Cup in 2009, 2012, 2013. Kuwait SC is also one of the first sports club to have been established in Kuwait.
-
-\- Wikipedia
-
-#### The Idea
-
-I believed that the current logo was an aspect of the club’s history from its inception. Therefore, the logo redesign approach that I wanted to use was more of a refresh. Taking elements from the current logo, and twisting and turning them into a more modern rendition. Incorporating elements of the three rings, the sun and the inception of the club was the main target. All whilst keeping the club colours, culture and identity intact. This was the approach I wanted to present.
-
-The club, especially under its new resurgence to winning ways has been looked at as a force to be reckoned with in the Kuwaiti Premier League. With a club growing at such a successful rate, it only made sense that the new presented branding be applied in a way to benefit the club. Such as advertising, merchandising and new jerseys. With its resurgence in popularity, merchandising can prove to be a very profitable Endeavour, especially with an updated look and feel to meet modern tastes. Below are the mockups of the jerseys, F&B, advertisement (in this case a bus advertisement example) and merchandise incorporating this new style, taste and brand.
-
-‍
 
 
 ---
