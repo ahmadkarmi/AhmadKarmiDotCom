@@ -99,16 +99,35 @@ export default function MetricBento() {
         },
     ];
 
+    // The reveal is driven by the row, not by each card. On phones the row is
+    // a horizontal swiper, and per-card whileInView made cards 3 and 4 wait
+    // (at opacity 0) for an IntersectionObserver to fire inside the nested
+    // horizontal scroller. On iPhone that did not happen reliably, so a swipe
+    // moved into blank space and the row looked frozen. The row itself enters
+    // the viewport vertically, which fires dependably, and the cards stagger in.
+    const row = {
+        hidden: {},
+        shown: { transition: { staggerChildren: 0.1 } },
+    };
+    const card = {
+        hidden: { opacity: 0, y: 20 },
+        shown: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    };
+
     return (
-        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6 md:pb-0 md:mx-0 md:px-0 no-scrollbar" data-drag-scroll="true">
+        <motion.div
+            variants={row}
+            initial="hidden"
+            whileInView="shown"
+            viewport={{ once: true, amount: 0.2 }}
+            className="flex overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-px-4 gap-4 pb-8 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6 md:pb-0 md:mx-0 md:px-0 no-scrollbar"
+            data-drag-scroll="true"
+        >
             {metrics.map((metric, index) => (
                 <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className="relative group overflow-hidden rounded-2xl bg-white border border-border p-6 hover:shadow-xl hover:shadow-accent/5 transition-all duration-500 min-w-[70vw] md:min-w-0 snap-center flex flex-col justify-between h-[280px]"
+                    variants={card}
+                    className="relative group overflow-hidden rounded-2xl bg-white border border-border p-6 hover:shadow-xl hover:shadow-accent/5 transition-all duration-500 min-w-[70vw] md:min-w-0 snap-start flex flex-col justify-between h-[280px]"
                 >
                     <div className="relative z-10">
                         <div className="text-4xl lg:text-5xl font-display font-bold text-accent mb-2 tracking-tight">
@@ -131,6 +150,6 @@ export default function MetricBento() {
                     <div className="absolute inset-0 bg-gradient-to-t from-background-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </motion.div>
             ))}
-        </div>
+        </motion.div>
     );
 }
