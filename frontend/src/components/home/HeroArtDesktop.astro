@@ -1,0 +1,474 @@
+---
+// Desktop (xl+) hero artwork: a three-column delivery board.
+//
+// Everything lives on a fixed 5:4 stage and is sized in container units
+// (1cqw = 1% of the stage width), so the whole composition scales as one
+// piece with its grid column and is never cropped. The stage is also capped
+// by viewport height so short screens (1280x720) shrink it instead of
+// letting it spill.
+//
+// Motion (see scripts/heroMotion.ts):
+// - the board tilts toward the pointer via --rx / --ry (fine pointers only)
+// - a ticket ships from In Progress to Done on a 9s CSS loop
+// Only transform and opacity animate, so nothing here triggers layout or paint.
+---
+
+<div class="hero-art" aria-hidden="true">
+  <div class="stage">
+    <div class="board" data-hero-board>
+      <svg class="connectors" viewBox="0 0 100 80" preserveAspectRatio="none">
+        <path d="M27 36 C 29.5 36, 29.5 30, 32 30" />
+        <path d="M66 34 C 68.5 34, 68.5 38.5, 71 38.5" />
+      </svg>
+
+      <!-- Backlog -->
+      <div class="col col--backlog">
+        <div class="chip chip--muted"><span class="dot"></span>Backlog</div>
+        <div class="card card--ghost card--h16">
+          <div class="bar bar--strong bw-40"></div>
+          <div class="bar bw-100"></div>
+          <div class="bar bw-66"></div>
+        </div>
+        <div class="card card--ghost card--h10">
+          <div class="bar bar--strong bw-50"></div>
+          <div class="bar bw-80"></div>
+        </div>
+      </div>
+
+      <!-- In Progress -->
+      <div class="col col--progress">
+        <div class="chip chip--accent"><span class="dot"></span>In Progress</div>
+        <div class="card card--active">
+          <div class="row">
+            <div class="bar bar--accent bw-40"></div>
+            <div class="tag">AI Strategy</div>
+          </div>
+          <div class="bar bar--ink bw-75"></div>
+          <div class="bar bw-100"></div>
+          <div class="bar bw-50"></div>
+          <div class="card-foot">
+            <div class="avatars">
+              <span class="avatar">AK</span>
+              <span class="avatar avatar--accent">AI</span>
+            </div>
+            <div class="bar bar--accent-soft bw-30"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The ticket that ships from In Progress to Done -->
+      <div class="ticket">
+        <div class="ticket-ring ticket-ring--accent"></div>
+        <div class="ticket-ring ticket-ring--done"></div>
+        <div class="row">
+          <div class="bar bar--purple bw-30"></div>
+          <svg class="ticket-check" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M7.5 12.5l3 3 6-6.5" />
+          </svg>
+        </div>
+        <div class="bar bar--ink-soft bw-66"></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+      </div>
+
+      <!-- Done -->
+      <div class="col col--done">
+        <div class="chip chip--done"><span class="dot"></span>Done</div>
+        <div class="done-stack">
+          <div class="card card--done card--h13">
+            <div class="row row--start">
+              <span class="check-dot">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" /></svg>
+              </span>
+              <div class="bar bar--green bw-50"></div>
+            </div>
+            <div class="bar bar--green-soft bw-100"></div>
+          </div>
+          <div class="card card--done card--h9"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hero-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* The stage: 5:4, fills the column, capped by viewport height, centred. */
+  .stage {
+    container-type: inline-size;
+    position: relative;
+    width: 100%;
+    max-width: calc((100svh - var(--header-h, 80px) - 12rem) * 1.25);
+    aspect-ratio: 5 / 4;
+    margin-inline: auto;
+    perspective: 180cqw;
+  }
+
+  .board {
+    --rx: 4deg;
+    --ry: -8deg;
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx)) rotateY(var(--ry));
+  }
+
+  /* ---- Columns (positions in stage units, cqw) ---- */
+  .col {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 3cqw;
+  }
+
+  .col--backlog {
+    left: 3cqw;
+    top: 18cqw;
+    width: 24cqw;
+    opacity: 0.75;
+    transform: translateZ(-5cqw);
+  }
+
+  .col--progress {
+    left: 32cqw;
+    top: 6cqw;
+    width: 34cqw;
+    transform: translateZ(3cqw);
+    z-index: 2;
+  }
+
+  .col--done {
+    left: 71cqw;
+    top: 22cqw;
+    width: 26cqw;
+  }
+
+  .connectors {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    transform: translateZ(-2cqw);
+  }
+
+  .connectors path {
+    fill: none;
+    stroke: hsl(var(--foreground) / 0.2);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* ---- Chips ---- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 1.6cqw;
+    height: 6cqw;
+    padding: 0 2.4cqw;
+    border-radius: 1.2cqw;
+    font-size: 2.1cqw;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .chip .dot {
+    width: 1.6cqw;
+    height: 1.6cqw;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  .chip--muted {
+    color: hsl(var(--foreground-muted));
+    background: hsl(var(--foreground) / 0.05);
+  }
+
+  .chip--accent {
+    color: hsl(var(--accent));
+    background: hsl(var(--accent) / 0.14);
+  }
+
+  .chip--done {
+    color: rgb(22 163 74);
+    background: rgb(34 197 94 / 0.1);
+  }
+
+  /* ---- Cards ---- */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8cqw;
+    padding: 3.2cqw;
+    border-radius: 2.8cqw;
+    border: 1px solid hsl(var(--foreground) / 0.12);
+    background: hsl(var(--background));
+  }
+
+  .card--h16 { height: 16cqw; }
+  .card--h13 { height: 13cqw; }
+  .card--h10 { height: 10cqw; }
+  .card--h9 { height: 9cqw; }
+
+  .card--ghost {
+    background: hsl(var(--foreground) / 0.025);
+    border-color: hsl(var(--foreground) / 0.1);
+  }
+
+  .card--active {
+    height: 34cqw;
+    padding: 4cqw;
+    gap: 2.2cqw;
+    border-color: hsl(var(--accent) / 0.4);
+    box-shadow:
+      0 0 0 1px hsl(var(--accent) / 0.15),
+      0 5cqw 10cqw -3cqw hsl(var(--accent) / 0.22);
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card--active:hover {
+    transform: translateY(-2cqw);
+  }
+
+  .card--done {
+    border-color: rgb(34 197 94 / 0.22);
+    background: hsl(var(--background) / 0.85);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2cqw;
+  }
+
+  .row--start {
+    justify-content: flex-start;
+  }
+
+  .tag {
+    padding: 0.8cqw 1.4cqw;
+    border-radius: 0.9cqw;
+    background: hsl(var(--accent) / 0.1);
+    color: hsl(var(--accent));
+    font-size: 1.7cqw;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .card-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2.8cqw;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .avatars {
+    display: flex;
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 5.6cqw;
+    height: 5.6cqw;
+    border-radius: 999px;
+    border: 0.4cqw solid hsl(var(--background));
+    background: hsl(var(--background-secondary));
+    color: hsl(var(--foreground));
+    font-size: 1.8cqw;
+    font-weight: 700;
+  }
+
+  .avatar + .avatar {
+    margin-left: -1.6cqw;
+  }
+
+  .avatar--accent {
+    background: hsl(var(--accent) / 0.18);
+    color: hsl(var(--accent));
+  }
+
+  .check-dot {
+    display: grid;
+    place-items: center;
+    width: 3.6cqw;
+    height: 3.6cqw;
+    border-radius: 999px;
+    background: rgb(34 197 94 / 0.18);
+  }
+
+  .check-dot svg {
+    width: 2.2cqw;
+    height: 2.2cqw;
+    stroke: rgb(22 163 74);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ---- Bars (skeleton text) ---- */
+  .bar {
+    flex-shrink: 0;
+    height: 1.7cqw;
+    border-radius: 999px;
+    background: hsl(var(--foreground) / 0.1);
+  }
+
+  .bar--strong { background: hsl(var(--foreground) / 0.22); height: 2cqw; }
+  .bar--ink { background: hsl(var(--foreground) / 0.8); height: 2.8cqw; }
+  .bar--ink-soft { background: hsl(var(--foreground) / 0.55); height: 2.2cqw; }
+  .bar--accent { background: hsl(var(--accent) / 0.4); }
+  .bar--accent-soft { background: hsl(var(--accent) / 0.08); height: 4cqw; border-radius: 0.8cqw; }
+  .bar--purple { background: rgb(192 132 252 / 0.45); }
+  .bar--green { background: rgb(20 83 45 / 0.14); }
+  .bar--green-soft { background: rgb(20 83 45 / 0.07); }
+
+  .bw-30 { width: 30%; }
+  .bw-40 { width: 40%; }
+  .bw-50 { width: 50%; }
+  .bw-66 { width: 66%; }
+  .bw-75 { width: 75%; }
+  .bw-80 { width: 80%; }
+  .bw-100 { width: 100%; }
+
+  /* ---- The shipping ticket ---- */
+  .ticket {
+    position: absolute;
+    left: 32cqw;
+    top: 53cqw;
+    width: 34cqw;
+    height: 17cqw;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8cqw;
+    padding: 3.2cqw;
+    border-radius: 2.8cqw;
+    background: hsl(var(--background));
+    box-shadow: 0 3cqw 6cqw -2cqw hsl(var(--foreground) / 0.12);
+    transform-origin: 0 0;
+    z-index: 3;
+  }
+
+  .ticket-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .ticket-ring--accent {
+    border: 1px solid hsl(var(--accent) / 0.35);
+  }
+
+  .ticket-ring--done {
+    border: 1px solid rgb(34 197 94 / 0.4);
+    opacity: 0;
+  }
+
+  .ticket-check {
+    width: 3.6cqw;
+    height: 3.6cqw;
+    opacity: 0;
+    stroke: rgb(22 163 74);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ticket-check circle {
+    fill: rgb(34 197 94 / 0.15);
+    stroke: none;
+  }
+
+  .progress {
+    flex-shrink: 0;
+    height: 1.2cqw;
+    border-radius: 999px;
+    background: hsl(var(--foreground) / 0.08);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: hsl(var(--accent) / 0.55);
+    transform-origin: 0 50%;
+    transform: scaleX(0.15);
+  }
+
+  .done-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 3cqw;
+  }
+
+  /*
+   * One 9s cycle: the ticket fills its progress bar in In Progress, flies to
+   * the top of Done (shrinking to Done's column width, 26/34), swaps its
+   * accent ring for a green one, shows its check, then fades while the Done
+   * stack slides back up to absorb it.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .ticket { animation: ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .ticket-ring--accent { animation: ring-out 9s linear 1.2s infinite both; }
+    .ticket-ring--done { animation: ring-in 9s linear 1.2s infinite both; }
+    .ticket-check { animation: check-in 9s ease-out 1.2s infinite both; }
+    .progress-fill { animation: progress-fill 9s ease-in-out 1.2s infinite both; }
+    .done-stack { animation: stack-make-room 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+
+    :global([data-hero-paused]) .hero-art * {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes ticket-ship {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    6% { opacity: 1; }
+    32% { transform: translate(0, 0) scale(1); }
+    41% { transform: translate(19cqw, -14cqw) scale(0.88); }
+    50% { transform: translate(39cqw, -21cqw) scale(0.7647); }
+    86% { transform: translate(39cqw, -21cqw) scale(0.7647); opacity: 1; }
+    94% { transform: translate(39cqw, -21cqw) scale(0.7647); opacity: 0; }
+    100% { transform: translate(0, 0) scale(1); opacity: 0; }
+  }
+
+  @keyframes ring-out {
+    0%, 44% { opacity: 1; }
+    52%, 100% { opacity: 0; }
+  }
+
+  @keyframes ring-in {
+    0%, 44% { opacity: 0; }
+    52%, 100% { opacity: 1; }
+  }
+
+  @keyframes check-in {
+    0%, 50% { opacity: 0; transform: scale(0.4); }
+    56%, 100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes progress-fill {
+    0%, 6% { transform: scaleX(0.15); }
+    30%, 100% { transform: scaleX(1); }
+  }
+
+  @keyframes stack-make-room {
+    0%, 42% { transform: translateY(0); }
+    50%, 88% { transform: translateY(16cqw); }
+    100% { transform: translateY(0); }
+  }
+</style>

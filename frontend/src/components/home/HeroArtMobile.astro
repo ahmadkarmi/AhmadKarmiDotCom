@@ -1,0 +1,264 @@
+---
+// Below-xl hero background: the kanban board behind the headline.
+//
+// The board is drawn in a 400x900 coordinate space that covers the hero like
+// `preserveAspectRatio="xMidYMid slice"`. Each column is its own small <svg>
+// layer, placed with container units so it lines up exactly with that space:
+// --u is the px size of one board unit, and a layer at board box (x, y, w, h)
+// sits at the matching screen position. Moving a whole layer is then a pure
+// compositor transform; moving groups inside one big SVG would repaint it
+// every frame.
+//
+// Motion (see scripts/heroMotion.ts):
+// - default "loop" mode: columns drift slowly, a ticket ships to Done
+// - "gyro" mode (Android etc.): columns shift with device tilt at different
+//   depths; the ticket keeps shipping
+---
+
+<div
+  id="mobile-roadmap"
+  class="absolute inset-0 xl:hidden opacity-[0.30] md:opacity-[0.26] lg:opacity-[0.22]"
+  data-hero-mobile
+  aria-hidden="true"
+>
+  <!-- Static: column dividers -->
+  <svg class="board-static" viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice">
+    <line x1="137" y1="25" x2="137" y2="880" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.15"/>
+    <line x1="265" y1="25" x2="265" y2="880" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.15"/>
+  </svg>
+
+  <!-- TO DO -->
+  <div class="mcol mcol--todo" data-depth="0.45" style="--x:14;--y:29;--w:117;--h:493">
+    <svg class="fill" viewBox="14 29 117 493" fill="none">
+      <rect x="15" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-foreground" opacity="0.3"/>
+      <rect x="20" y="75" width="105" height="85" rx="8" fill="currentColor" class="text-foreground" opacity="0.12"/>
+      <rect x="20" y="75" width="105" height="85" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.3"/>
+      <rect x="28" y="85" width="50" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.4"/>
+      <rect x="28" y="100" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+      <rect x="28" y="110" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+      <circle cx="35" cy="145" r="8" fill="currentColor" class="text-foreground" opacity="0.25"/>
+      <rect x="20" y="175" width="105" height="70" rx="8" fill="currentColor" class="text-foreground" opacity="0.1"/>
+      <rect x="20" y="175" width="105" height="70" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.25"/>
+      <rect x="28" y="185" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.35"/>
+      <rect x="28" y="200" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>
+      <rect x="28" y="210" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>
+      <rect x="20" y="260" width="105" height="95" rx="8" fill="currentColor" class="text-foreground" opacity="0.08"/>
+      <rect x="20" y="260" width="105" height="95" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.2"/>
+      <rect x="28" y="270" width="45" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
+      <rect x="28" y="285" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="28" y="295" width="65" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="28" y="305" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="20" y="370" width="105" height="65" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.2"/>
+      <rect x="28" y="380" width="55" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
+      <rect x="28" y="395" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="20" y="450" width="105" height="70" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.15"/>
+      <rect x="28" y="460" width="55" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.25"/>
+    </svg>
+  </div>
+
+  <!-- IN PROGRESS (the ticket starts here, so it rides this column's motion) -->
+  <div class="mcol mcol--progress" data-depth="1" style="--x:141;--y:29;--w:118;--h:543">
+    <svg class="fill" viewBox="141 29 118 543" fill="none">
+      <rect x="142" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-accent" opacity="0.4"/>
+      <rect x="147" y="75" width="105" height="100" rx="8" fill="currentColor" class="text-accent" opacity="0.15"/>
+      <rect x="147" y="75" width="105" height="100" rx="8" stroke="currentColor" stroke-width="2" class="text-accent" opacity="0.5"/>
+      <rect x="155" y="85" width="55" height="10" rx="2" fill="currentColor" class="text-accent" opacity="0.6"/>
+      <rect x="155" y="102" width="88" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.25"/>
+      <rect x="155" y="112" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.25"/>
+      <rect x="155" y="122" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+      <circle cx="162" cy="160" r="10" fill="currentColor" class="text-accent" opacity="0.4"/>
+      <rect x="180" y="155" width="40" height="10" rx="3" fill="currentColor" class="text-accent" opacity="0.3"/>
+      <rect x="147" y="195" width="105" height="80" rx="8" fill="currentColor" class="text-accent" opacity="0.1"/>
+      <rect x="147" y="195" width="105" height="80" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.35"/>
+      <rect x="155" y="205" width="48" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.5"/>
+      <rect x="155" y="220" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+      <rect x="155" y="230" width="65" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+      <circle cx="162" cy="258" r="8" fill="currentColor" class="text-foreground" opacity="0.25"/>
+      <rect x="147" y="385" width="105" height="90" rx="8" fill="currentColor" class="text-accent" opacity="0.08"/>
+      <rect x="147" y="385" width="105" height="90" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.25"/>
+      <rect x="155" y="395" width="52" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.4"/>
+      <rect x="155" y="410" width="78" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="155" y="420" width="88" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="155" y="430" width="60" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="147" y="490" width="105" height="80" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.22"/>
+      <rect x="155" y="500" width="50" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.35"/>
+      <rect x="155" y="515" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.12"/>
+    </svg>
+
+    <!-- Ticket: an In Progress card that ships to the Done slot at y=265 -->
+    <div class="sub mticket" style="--x:146;--y:294;--w:107;--h:77">
+      <svg class="fill mticket-base" viewBox="146 294 107 77" fill="none">
+        <rect x="147" y="295" width="105" height="75" rx="8" fill="currentColor" class="text-accent" opacity="0.1"/>
+        <rect x="147" y="295" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.5"/>
+        <rect x="155" y="305" width="60" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.5"/>
+        <rect x="155" y="320" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <rect x="155" y="330" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
+      </svg>
+      <svg class="fill mticket-done" viewBox="146 294 107 77" fill="none">
+        <rect x="147" y="295" width="105" height="75" rx="8" fill="currentColor" class="text-foreground" opacity="0.06"/>
+        <rect x="147" y="295" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.25"/>
+        <rect x="155" y="305" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
+        <rect x="155" y="320" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+        <circle cx="237" cy="355" r="8" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.35"/>
+        <path d="M232 355 L236 359 L244 351" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.45"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="mcol mcol--done" data-depth="0.7" style="--x:269;--y:29;--w:118;--h:478">
+    <svg class="sub" viewBox="269 29 118 222" fill="none" style="--x:269;--y:29;--w:118;--h:222">
+      <rect x="270" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-foreground" opacity="0.3"/>
+      <rect x="275" y="75" width="105" height="75" rx="8" fill="currentColor" class="text-foreground" opacity="0.08"/>
+      <rect x="275" y="75" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.2"/>
+      <rect x="283" y="85" width="55" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
+      <rect x="283" y="100" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <rect x="283" y="110" width="60" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
+      <circle cx="365" cy="135" r="8" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.3"/>
+      <path d="M360 135 L364 139 L372 131" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.4"/>
+      <rect x="275" y="165" width="105" height="85" rx="8" fill="currentColor" class="text-foreground" opacity="0.06"/>
+      <rect x="275" y="165" width="105" height="85" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.18"/>
+      <rect x="283" y="175" width="48" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.25"/>
+      <rect x="283" y="190" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.12"/>
+      <rect x="283" y="200" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.12"/>
+      <circle cx="365" cy="235" r="8" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.25"/>
+      <path d="M360 235 L364 239 L372 231" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.35"/>
+    </svg>
+
+    <!-- Lower Done cards: slide down to make room when the ticket lands -->
+    <div class="sub mstack" style="--x:269;--y:263;--w:118;--h:245">
+      <svg class="fill" viewBox="269 263 118 245" fill="none">
+        <rect x="275" y="265" width="105" height="70" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.15"/>
+        <rect x="283" y="275" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.22"/>
+        <rect x="283" y="290" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.1"/>
+        <rect x="283" y="300" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.1"/>
+        <rect x="275" y="350" width="105" height="65" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.12"/>
+        <rect x="283" y="360" width="50" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.2"/>
+        <rect x="283" y="375" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.08"/>
+        <rect x="275" y="430" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.1"/>
+        <rect x="283" y="440" width="45" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.18"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<style>
+  #mobile-roadmap {
+    container-type: size;
+    /* px per board unit, matching preserveAspectRatio="xMidYMid slice" */
+    --u: max(calc(100cqw / 400), calc(100cqh / 900));
+  }
+
+  .board-static {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* A layer at board box (--x, --y, --w, --h), centred like the slice. */
+  .mcol {
+    --ox: var(--x);
+    --oy: var(--y);
+    position: absolute;
+    left: calc(50cqw + (var(--x) - 200) * var(--u));
+    top: calc(50cqh + (var(--y) - 450) * var(--u));
+    width: calc(var(--w) * var(--u));
+    height: calc(var(--h) * var(--u));
+  }
+
+  /* A child layer, positioned in board units relative to its column. */
+  .sub {
+    position: absolute;
+    left: calc((var(--x) - var(--ox)) * var(--u));
+    top: calc((var(--y) - var(--oy)) * var(--u));
+    width: calc(var(--w) * var(--u));
+    height: calc(var(--h) * var(--u));
+    overflow: visible;
+  }
+
+  .fill {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .mticket-done {
+    opacity: 0;
+  }
+
+  /* Gyro mode: JS writes each column's transform every frame. */
+  :global([data-hero-mode='gyro']) .mcol {
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Loop mode (default): slow alternating drift. Starts after the headline
+       has settled, and from rest, so there is no jump. */
+    .mcol--todo { animation: drift-up 20s ease-in-out 1.2s infinite; }
+    .mcol--progress { animation: drift-down 20s ease-in-out 1.2s infinite; }
+    .mcol--done { animation: drift-up-small 20s ease-in-out 1.2s infinite; }
+
+    :global([data-hero-mode='gyro']) .mcol {
+      animation: none;
+    }
+
+    /* Ticket ships in both modes. */
+    .mticket { animation: m-ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .mticket-base { animation: m-ticket-base 9s linear 1.2s infinite both; }
+    .mticket-done { animation: m-ticket-done 9s linear 1.2s infinite both; }
+    .mstack { animation: m-stack-make-room 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+
+    :global([data-hero-paused]) #mobile-roadmap * {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes drift-up {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    25% { transform: translate3d(0, -6px, 0); }
+    75% { transform: translate3d(0, 6px, 0); }
+  }
+
+  @keyframes drift-down {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    25% { transform: translate3d(0, 6px, 0); }
+    75% { transform: translate3d(0, -6px, 0); }
+  }
+
+  @keyframes drift-up-small {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    25% { transform: translate3d(0, -4px, 0); }
+    75% { transform: translate3d(0, 4px, 0); }
+  }
+
+  /* In Progress card at y=295 moves 128 units right, 30 up, to Done's slot at y=265. */
+  @keyframes m-ticket-ship {
+    0% { transform: translate3d(0, 0, 0); opacity: 0; }
+    6% { opacity: 1; }
+    32% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(calc(128 * var(--u)), calc(-30 * var(--u)), 0); }
+    86% { transform: translate3d(calc(128 * var(--u)), calc(-30 * var(--u)), 0); opacity: 1; }
+    94% { transform: translate3d(calc(128 * var(--u)), calc(-30 * var(--u)), 0); opacity: 0; }
+    100% { transform: translate3d(0, 0, 0); opacity: 0; }
+  }
+
+  @keyframes m-ticket-base {
+    0%, 44% { opacity: 1; }
+    54%, 100% { opacity: 0; }
+  }
+
+  @keyframes m-ticket-done {
+    0%, 44% { opacity: 0; }
+    54%, 100% { opacity: 1; }
+  }
+
+  /* Ticket is 75 tall + 15 gap. */
+  @keyframes m-stack-make-room {
+    0%, 42% { transform: translate3d(0, 0, 0); }
+    50%, 88% { transform: translate3d(0, calc(90 * var(--u)), 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+</style>

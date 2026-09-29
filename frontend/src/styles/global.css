@@ -203,10 +203,6 @@
     scrollbar-width: none;
   }
 
-  #mobile-roadmap {
-    transform: none !important;
-  }
-
   @keyframes ak-page-fade-out {
     from {
       opacity: 1;
