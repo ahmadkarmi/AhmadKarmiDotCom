@@ -677,45 +677,6 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
       initAutoTracking();
     </script>
 
-    <!-- TEMPORARY touch diagnostics, only active with ?touchdebug=1. Used to
-         debug the Results That Speak row not swiping on iPhone. Remove once
-         the cause is known. -->
-    <script is:inline>
-      (function () {
-        if (!/[?&]touchdebug=1/.test(location.search) || window.__touchDebug) return;
-        window.__touchDebug = true;
-        var panel = document.createElement('pre');
-        panel.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;margin:0;padding:6px 8px;max-height:55vh;overflow:auto;background:rgba(0,0,0,.85);color:#7CFC00;font:10px/1.35 ui-monospace,Menlo,monospace;white-space:pre-wrap;pointer-events:none';
-        document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(panel); });
-        function desc(el) {
-          if (!el || !el.tagName) return String(el);
-          var c = typeof el.className === 'string' ? el.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
-          var attrs = ['data-metrics-row', 'data-drag-scroll', 'data-hero'].filter(function (a) { return el.hasAttribute && el.hasAttribute(a); }).join(',');
-          return el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (c ? '.' + c : '') + (attrs ? '[' + attrs + ']' : '');
-        }
-        function chain(el, n) { var out = []; while (el && out.length < n) { out.push(desc(el) + ' ta=' + getComputedStyle(el).touchAction + ' pe=' + getComputedStyle(el).pointerEvents); el = el.parentElement; } return out.join('\n   '); }
-        function scroller(el) { while (el && el !== document.body) { var cs = getComputedStyle(el); if (/(auto|scroll)/.test(cs.overflowX) && el.scrollWidth > el.clientWidth) return el; el = el.parentElement; } return null; }
-        var s = null;
-        window.addEventListener('touchstart', function (e) {
-          var t = e.touches[0]; var top = document.elementFromPoint(t.clientX, t.clientY); var sc = scroller(e.target);
-          s = { x: t.clientX, y: t.clientY, sc: sc, left0: sc ? sc.scrollLeft : null, moves: 0, prevented: 0, scrolls: 0, last: null };
-          if (sc) sc.addEventListener('scroll', s.onScroll = function () { s.scrolls++; }, { passive: true });
-          panel.textContent = 'UA ' + navigator.userAgent.replace(/.*(iPhone OS [\d_]+|Version\/[\d.]+).*/, '$1') + ' | vw ' + innerWidth + '\n' +
-            'touch @' + Math.round(t.clientX) + ',' + Math.round(t.clientY) + '\nTARGET\n   ' + chain(e.target, 7) + '\nTOP ELEMENT AT POINT\n   ' + chain(top, 3) +
-            '\nSCROLLER ' + (sc ? desc(sc) + ' sw=' + sc.scrollWidth + ' cw=' + sc.clientWidth + ' ox=' + getComputedStyle(sc).overflowX + ' snap=' + getComputedStyle(sc).scrollSnapType : 'none found');
-        }, { capture: true, passive: true });
-        window.addEventListener('touchmove', function (e) { if (!s) return; s.moves++; s.last = e; }, { capture: true, passive: true });
-        window.addEventListener('touchend', function () {
-          if (!s) return;
-          if (s.last && s.last.defaultPrevented) s.prevented++;
-          if (s.sc && s.onScroll) s.sc.removeEventListener('scroll', s.onScroll);
-          panel.textContent += '\nRESULT moves=' + s.moves + ' lastMovePrevented=' + (s.last ? s.last.defaultPrevented : 'n/a') + ' cancelable=' + (s.last ? s.last.cancelable : 'n/a') +
-            ' scrollEvents=' + s.scrolls + ' scrollLeft ' + s.left0 + ' -> ' + (s.sc ? s.sc.scrollLeft : 'n/a');
-          setTimeout(function () { if (s && s.sc) panel.textContent += ' (after 600ms: ' + s.sc.scrollLeft + ')'; }, 600);
-        }, { capture: true, passive: true });
-      })();
-    </script>
-
     <!-- Scroll fades + swipe hint for WordPress content tables (lib/contentTables.ts) -->
     <script>
       import '../lib/tableScroll';

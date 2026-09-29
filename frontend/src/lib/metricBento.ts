@@ -1,10 +1,11 @@
 // Reveal + count-up for the "Results That Speak" row (components/MetricBento.astro).
 //
-// Progressive enhancement only: the server-rendered cards and figures are
-// complete without this. One IntersectionObserver watches the row as it
-// enters the viewport vertically. Nothing observes individual cards, because
-// on phones they sit inside a horizontal scroller where per-card visibility
-// is unreliable on iPhone.
+// Progressive enhancement, desktop grid only (md+). The server-rendered cards
+// and figures are complete without this. On phones the row is a horizontal
+// swiper, and testing on a real iPhone showed iOS stopped treating it as a
+// scroller while its cards carried the reveal transform, the infinite pulse,
+// the hover overlay and partial opacity. Phones therefore get the row fully
+// static, and one IntersectionObserver on the row drives the desktop reveal.
 
 function countUp(el: HTMLElement) {
   const target = el.dataset.countTo || '';
@@ -26,42 +27,12 @@ function countUp(el: HTMLElement) {
   requestAnimationFrame(frame);
 }
 
-// TEMPORARY iPhone diagnosis: ?mbtest=<a,b,...> strips one suspect at a time
-// so a real device can show which one stops iOS treating the row as a
-// horizontal scroller. Remove together with the ?touchdebug panel.
-function applyTestToggles(row: HTMLElement): Set<string> {
-  const raw = new URLSearchParams(location.search).get('mbtest') || '';
-  const t = new Set(raw.split(',').filter(Boolean));
-  if (t.has('all')) ['nopulse', 'noreveal', 'nooverlay', 'noopacity', 'wrap'].forEach((k) => t.add(k));
-  if (t.has('nopulse')) row.querySelectorAll('.animate-pulse').forEach((el) => el.classList.remove('animate-pulse'));
-  if (t.has('nooverlay')) row.querySelectorAll('.metric-card > .pointer-events-none').forEach((el) => el.remove());
-  if (t.has('noopacity')) row.querySelectorAll('.opacity-60').forEach((el) => el.classList.remove('opacity-60'));
-  if (t.has('wrap')) {
-    row.querySelectorAll<HTMLElement>(':scope > .metric-card').forEach((card) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'min-w-[70vw] md:min-w-0 snap-center';
-      card.classList.remove('min-w-[70vw]', 'md:min-w-0', 'snap-center');
-      card.parentNode!.insertBefore(wrap, card);
-      wrap.appendChild(card);
-    });
-  }
-  if (t.size) {
-    const tag = document.createElement('p');
-    tag.textContent = 'mbtest: ' + [...t].join(', ');
-    tag.style.cssText = 'font:12px ui-monospace,monospace;color:#d00;margin:0 0 8px';
-    row.parentElement!.insertBefore(tag, row);
-  }
-  return t;
-}
-
 function init() {
   const row = document.querySelector<HTMLElement>('[data-metrics-row]');
   if (!row || row.dataset.metricsBound) return;
   row.dataset.metricsBound = 'true';
 
-  const tests = applyTestToggles(row);
-  if (tests.has('noreveal')) return;
-
+  if (!matchMedia('(min-width: 768px)').matches) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!('IntersectionObserver' in window)) return;
 
