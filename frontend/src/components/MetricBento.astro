@@ -31,13 +31,14 @@ const bars = [
 ---
 
 <!-- Snapping: each card rests against the left gutter (snap-start with a
-     matching scroll-pl-4), one card per swipe (snap-always), and the row
+     matching scroll-pl-4), App Store style (a strong flick can travel several
+     cards; snap-always was tried and felt sticky), and the row
      never hands a sideways overscroll to the page. Centre snapping left the
      first and last cards unable to reach their snap point, so iOS settled
      inconsistently near the ends. -->
 <div class="flex overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-pl-4 gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-4 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll data-mb-row>
   {metrics.map((metric, index) => (
-    <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-start snap-always">
+    <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-start">
       <!-- Whole card is a swipe surface: pans are always scroll gestures, no
            text selection, and the hover lift/shadow only applies on devices
            that really hover (iOS otherwise applies :hover on touch, moving
