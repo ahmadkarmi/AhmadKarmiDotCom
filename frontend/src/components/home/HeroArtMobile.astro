@@ -222,14 +222,18 @@ const doneCard = (y: number, dx = 0) => `
     }
 
     /* Conveyor: every piece shares one 9s timeline, and all of them snap
-       back in the same frame at the end of the cycle. */
-    .mticket { animation: m-ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
-    .mticket-base { animation: m-fade-out 9s linear 1.2s infinite both; }
-    .mticket-done { animation: m-fade-in 9s linear 1.2s infinite both; }
-    .mstack { animation: m-stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
-    .mstack-old { animation: m-stack-old-out 9s linear 1.2s infinite both; }
-    .mqueue { animation: m-queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
-    .mqueue-new { animation: m-queue-new-in 9s linear 1.2s infinite both; }
+       back in the same frame at the end of the cycle. The negative delay
+       starts the first cycle 22% in, where everything is still at rest, so
+       the first ticket moves at ~0.9s (as the headline settles) instead of
+       ~4s, when most people have already looked away. */
+    #mobile-roadmap { --conveyor-start: -2s; }
+    .mticket { animation: m-ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .mticket-base { animation: m-fade-out 9s linear var(--conveyor-start) infinite both; }
+    .mticket-done { animation: m-fade-in 9s linear var(--conveyor-start) infinite both; }
+    .mstack { animation: m-stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .mstack-old { animation: m-stack-old-out 9s linear var(--conveyor-start) infinite both; }
+    .mqueue { animation: m-queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .mqueue-new { animation: m-queue-new-in 9s linear var(--conveyor-start) infinite both; }
 
     :global([data-hero-paused]) #mobile-roadmap * {
       animation-play-state: paused;
