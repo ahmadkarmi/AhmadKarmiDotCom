@@ -1,0 +1,165 @@
+---
+// Client half of lib/contentVideo.ts: styles and behaviour for the
+// click-to-play videos it renders into WordPress rich text. Include once on
+// any page that renders enhanced body HTML.
+---
+
+<style is:global>
+  .content-video {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: #000;
+  }
+
+  .content-video > video {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 !important;
+  }
+
+  .content-video-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .content-video-play__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 9999px;
+    color: #fff;
+    background: rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.35), inset 0 0 0 1px rgb(255 255 255 / 0.2);
+    transition: transform 200ms ease, background-color 200ms ease;
+  }
+
+  .content-video-play__icon svg {
+    width: 2rem;
+    height: 2rem;
+    margin-left: 0.2rem;
+  }
+
+  .content-video-play:hover .content-video-play__icon {
+    transform: scale(1.06);
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  .content-video-play:focus-visible {
+    outline: none;
+  }
+
+  .content-video-play:focus-visible .content-video-play__icon {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+  }
+
+  /* Waiting for the first frame after a click: swap the glyph for a ring. */
+  .content-video.is-loading .content-video-play {
+    cursor: progress;
+  }
+
+  .content-video.is-loading .content-video-play__icon svg {
+    display: none;
+  }
+
+  .content-video.is-loading .content-video-play__icon::after {
+    content: '';
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    border: 3px solid rgb(255 255 255 / 0.3);
+    border-top-color: #fff;
+    animation: content-video-spin 0.8s linear infinite;
+  }
+
+  @keyframes content-video-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .content-video-play__icon { transition: none; }
+    .content-video.is-loading .content-video-play__icon::after { animation-duration: 2.4s; }
+  }
+
+  @media (min-width: 768px) {
+    .content-video-play__icon { width: 5.5rem; height: 5.5rem; }
+    .content-video-play__icon svg { width: 2.5rem; height: 2.5rem; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    if (window.__contentVideoBound) return;
+    window.__contentVideoBound = true;
+
+    function videoFor(button) {
+      var frame = button.closest('.content-video');
+      return frame ? { frame: frame, video: frame.querySelector('video') } : null;
+    }
+
+    // No video bytes load with the page. Hover, focus or touch on the button
+    // fetches just the header (a few KB on faststart files) and opens the
+    // connection, so the click that follows starts quickly without anyone
+    // downloading the file by merely passing the pointer over it.
+    function warm(e) {
+      var button = e.target && e.target.closest ? e.target.closest('[data-content-video-play]') : null;
+      if (!button) return;
+      var found = videoFor(button);
+      if (found && found.video && found.video.preload === 'none') found.video.preload = 'metadata';
+    }
+
+    function reveal(frame, video, button) {
+      var hadFocus = document.activeElement === button;
+      frame.classList.remove('is-loading');
+      video.controls = true;
+      button.remove();
+      if (hadFocus) video.focus({ preventScroll: true });
+    }
+
+    function play(button) {
+      var found = videoFor(button);
+      if (!found || !found.video) return;
+      var frame = found.frame;
+      var video = found.video;
+
+      // A media element that failed source selection (e.g. parsed off-document
+      // during a view transition) never recovers on its own.
+      if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE || video.error) video.load();
+
+      frame.classList.add('is-loading');
+      video.addEventListener('playing', function () { reveal(frame, video, button); }, { once: true });
+
+      var attempt = video.play();
+      if (attempt && typeof attempt.catch === 'function') {
+        // Hand over to the native controls so the visitor can retry or see
+        // the browser's own error state instead of a dead button.
+        attempt.catch(function () { reveal(frame, video, button); });
+      }
+    }
+
+    document.addEventListener('click', function (e) {
+      var button = e.target && e.target.closest ? e.target.closest('[data-content-video-play]') : null;
+      if (!button) return;
+      e.preventDefault();
+      play(button);
+    });
+    document.addEventListener('pointerover', warm, { passive: true });
+    document.addEventListener('focusin', warm);
+    document.addEventListener('touchstart', warm, { passive: true });
+  })();
+</script>

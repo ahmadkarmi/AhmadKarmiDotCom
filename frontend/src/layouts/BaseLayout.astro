@@ -645,6 +645,27 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
       })();
     </script>
 
+    <script is:inline>
+      // ClientRouter parses the next page with DOMParser before swapping it in.
+      // A <video src> runs source selection inside that inert document, fails
+      // (MEDIA_ERR_SRC_NOT_SUPPORTED) and is swapped into the live page dead:
+      // no request is ever made and play does nothing. Hard loads are fine,
+      // which is why WordPress videos only broke when navigated to in-site.
+      // Re-run source selection for any media that arrived without a source.
+      (function () {
+        if (window.__mediaRevivalBound) return;
+        window.__mediaRevivalBound = true;
+
+        document.addEventListener('astro:after-swap', function () {
+          document.querySelectorAll('video, audio').forEach(function (el) {
+            if (el.networkState === HTMLMediaElement.NETWORK_NO_SOURCE || el.error) {
+              el.load();
+            }
+          });
+        });
+      })();
+    </script>
+
     <!-- Automatic Event Tracking — taxonomy + listeners in src/lib/analytics.ts -->
     <script>
       import { initAutoTracking } from '../lib/analytics';

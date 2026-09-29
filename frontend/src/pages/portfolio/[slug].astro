@@ -7,9 +7,11 @@ import ShareButtons from '../../components/ShareButtons.astro';
 import GalleryCarousel from '../../components/GalleryCarousel';
 import BodyImageLightbox from '../../components/BodyImageLightbox';
 import AuthorCard from '../../components/AuthorCard.astro';
+import ContentVideo from '../../components/ContentVideo.astro';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
 import { OG_CARD_SIZE, ogCardPath, resolveWorkHeroUrl } from '../../lib/og/urls';
+import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const works = await fetchWorks();
@@ -53,17 +55,27 @@ const briefContent = normalizeWpRichText(workData.brief) || '';
 const scopeContent = normalizeWpRichText(workData.scope) || '';
 const detailsContent = normalizeWpRichText(workData.details) || '';
 
-const briefHtml = /<\s*[a-z][\s\S]*>/i.test(briefContent)
+const briefRaw = /<\s*[a-z][\s\S]*>/i.test(briefContent)
   ? briefContent
   : await marked.parse(briefContent);
 
-const scopeHtml = /<\s*[a-z][\s\S]*>/i.test(scopeContent)
+const scopeRaw = /<\s*[a-z][\s\S]*>/i.test(scopeContent)
   ? scopeContent
   : await marked.parse(scopeContent);
 
-const detailsHtml = /<\s*[a-z][\s\S]*>/i.test(detailsContent)
+const detailsRaw = /<\s*[a-z][\s\S]*>/i.test(detailsContent)
   ? detailsContent
   : await marked.parse(detailsContent);
+
+// Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
+const [brief, scope, details] = await Promise.all(
+  [briefRaw, scopeRaw, detailsRaw].map((html) => enhanceContentVideos(html))
+);
+const briefHtml = brief.html;
+const scopeHtml = scope.html;
+const detailsHtml = details.html;
+const bodyVideos = [...brief.videos, ...scope.videos, ...details.videos];
+const hasBodyVideo = [briefHtml, scopeHtml, detailsHtml].some((html) => html.includes('data-content-video'));
 
 const metaDescription = (briefContent || detailsContent || '')
   .replace(/<[^>]*>/g, ' ')
@@ -113,6 +125,16 @@ const creativeWork: Record<string, any> = {
   }
 };
 
+const videoNodes = videoObjectNodes(bodyVideos, {
+  url: shareUrl,
+  name: workData.name,
+  description: metaDescription,
+  uploadDate: workData.publishDate,
+});
+if (videoNodes.length) {
+  creativeWork.video = videoNodes.map((node) => ({ "@id": node["@id"] }));
+}
+
 if (workData.client) {
   creativeWork.about = {
     "@type": "Organization",
@@ -122,6 +144,7 @@ if (workData.client) {
 
 const schema = graph(
   creativeWork,
+  ...videoNodes,
   personNode(),
   breadcrumbNode([
     { name: 'Home', url: '/' },
@@ -335,6 +358,7 @@ const schema = graph(
               <div class="aspect-video rounded-xl overflow-hidden bg-background-secondary">
                 <iframe 
                   src={workData.videoUrl.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
+                  title={`${workData.name} video`}
                   class="w-full h-full"
                   allowfullscreen
                   loading="lazy"
@@ -346,6 +370,7 @@ const schema = graph(
       </div>
 
       {(workData.brief || workData.scope || workData.details) && <BodyImageLightbox client:idle />}
+      {hasBodyVideo && <ContentVideo />}
 
       <!-- Gallery -->
       {galleryImages.length > 0 && (

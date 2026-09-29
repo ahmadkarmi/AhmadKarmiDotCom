@@ -10,6 +10,8 @@ import RelatedInsights from '../../components/RelatedInsights.astro';
 import ListenButton from '../../components/insights/ListenButton';
 import AuthorCard from '../../components/AuthorCard.astro';
 import BodyImageLightbox from '../../components/BodyImageLightbox';
+import ContentVideo from '../../components/ContentVideo.astro';
+import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
 import { OG_CARD_SIZE, ogCardPath, resolveInsightHeroUrl } from '../../lib/og/urls';
@@ -179,7 +181,9 @@ const bodyCandidate = containsHtml && (hasTable || hasSignals) ? unwrapHtmlWrapp
 const bodyHtmlRaw = !containsHtml || hasTable || hasSignals
   ? await marked.parse(bodyCandidate)
   : rawBody;
-const bodyHtml = wrapTablesInOverflow(bodyHtmlRaw);
+// Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
+const { html: bodyHtml, videos: bodyVideos } = await enhanceContentVideos(wrapTablesInOverflow(bodyHtmlRaw));
+const hasBodyVideo = bodyHtml.includes('data-content-video');
 
 // JSON-LD: BlogPosting + breadcrumb. The author/publisher reference the
 // canonical Person entity by @id so engines and AI tie every article back to
@@ -203,8 +207,19 @@ const blogPosting = {
   "keywords": insightData.tags?.join(', ') || undefined
 };
 
+const videoNodes = videoObjectNodes(bodyVideos, {
+  url: shareUrl,
+  name: insightData.name,
+  description: blogPosting.description,
+  uploadDate: insightData.publishDate,
+});
+if (videoNodes.length) {
+  (blogPosting as Record<string, any>).video = videoNodes.map((node) => ({ "@id": node["@id"] }));
+}
+
 const schema = graph(
   blogPosting,
+  ...videoNodes,
   personNode(),
   breadcrumbNode([
     { name: 'Home', url: '/' },
@@ -360,6 +375,7 @@ const schema = graph(
           />
         )}
         {insightData.body && <BodyImageLightbox client:idle />}
+        {hasBodyVideo && <ContentVideo />}
         
         <!-- Author Card -->
         <div class="mt-16">
