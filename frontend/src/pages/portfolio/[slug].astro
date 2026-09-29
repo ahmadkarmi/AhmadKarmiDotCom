@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { fetchWorks, fetchWorkBySlug, getMediaUrl, normalizeWpRichText } from '../../lib/wordpress';
+import { fetchWorks, fetchWorkBySlug, getMediaUrl, normalizeWpRichText, type Work } from '../../lib/wordpress';
 import { marked } from 'marked';
 import type { GetStaticPaths } from 'astro';
 import ShareButtons from '../../components/ShareButtons.astro';
@@ -13,6 +13,7 @@ import { absoluteUrl } from '../../lib/urls';
 import { wrapContentTables } from '../../lib/contentTables';
 import { OG_CARD_SIZE, ogCardPath, resolveWorkHeroUrl } from '../../lib/og/urls';
 import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
+import { clampDescription, demoteBodyH1 } from '../../lib/seo';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const works = await fetchWorks();
@@ -24,7 +25,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 const { slug } = Astro.params;
-const { work } = Astro.props;
+const { work } = Astro.props as { work?: Work };
 
 const needsFetch = !work || !work.gallery || work.gallery.length === 0;
 const fetched = needsFetch ? await fetchWorkBySlug(slug as string) : null;
@@ -70,7 +71,7 @@ const detailsRaw = /<\s*[a-z][\s\S]*>/i.test(detailsContent)
 
 // Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
 const [brief, scope, details] = await Promise.all(
-  [briefRaw, scopeRaw, detailsRaw].map((html) => enhanceContentVideos(html))
+  [briefRaw, scopeRaw, detailsRaw].map((html) => enhanceContentVideos(demoteBodyH1(html)))
 );
 const briefHtml = brief.html;
 const scopeHtml = scope.html;
@@ -78,11 +79,11 @@ const detailsHtml = details.html;
 const bodyVideos = [...brief.videos, ...scope.videos, ...details.videos];
 const hasBodyVideo = [briefHtml, scopeHtml, detailsHtml].some((html) => html.includes('data-content-video'));
 
-const metaDescription = (briefContent || detailsContent || '')
-  .replace(/<[^>]*>/g, ' ')
-  .replace(/\s+/g, ' ')
-  .trim()
-  .slice(0, 180);
+const metaDescription = clampDescription(briefContent || detailsContent);
+
+// WordPress `modified` is the honest freshness signal. The old fallback to the
+// build time made every deploy claim the project had just changed.
+const modifiedDate = workData.modified || workData.publishDate;
 
 const workSectionHeadingClass = 'font-display text-2xl md:text-[2rem] font-bold leading-tight tracking-tight text-foreground mb-5';
 
@@ -118,8 +119,8 @@ const creativeWork: Record<string, any> = {
   ].filter(Boolean),
   "author": { "@id": PERSON_ID },
   "creator": { "@id": PERSON_ID },
-  "datePublished": workData.publishDate || new Date().toISOString(),
-  "dateModified": workData.publishDate || new Date().toISOString(),
+  "datePublished": workData.publishDate,
+  "dateModified": modifiedDate,
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": shareUrl
@@ -165,6 +166,8 @@ const schema = graph(
   ogImageHeight={OG_CARD_SIZE.height}
   ogImageAlt={workData.name}
   searchImage={heroImageUrl || undefined}
+  publishDate={workData.publishDate}
+  modifiedDate={modifiedDate}
   schema={schema}
 >
   <!-- Hero -->
@@ -215,9 +218,10 @@ const schema = graph(
     
     <!-- Project Title Overlay - Top Right (mobile only) -->
     <div class="absolute top-24 right-0 left-0 px-4 z-10 lg:hidden text-right">
-      <h1 class="font-display text-2xl text-white font-bold leading-tight drop-shadow-lg">
+      <!-- Not an h1: the sidebar card below holds the page's only h1 on every viewport. -->
+      <p class="font-display text-2xl text-white font-bold leading-tight drop-shadow-lg" aria-hidden="true">
         {workData.name}
-      </h1>
+      </p>
       {workData.client && (
         <p class="text-white/80 text-sm mt-2">{workData.client}</p>
       )}

@@ -47,7 +47,7 @@ Allow: /
 User-agent: Bytespider
 Allow: /
 
-# Indexes for crawlers and AI agents
+# Only XML sitemaps belong on Sitemap lines: Search Console rejects the
+# Markdown llms.txt files as invalid sitemaps. AI agents find those at their
+# standard locations: https://www.ahmadkarmi.com/llms.txt and /llms-full.txt
 Sitemap: https://www.ahmadkarmi.com/sitemap.xml
-Sitemap: https://www.ahmadkarmi.com/llms.txt
-Sitemap: https://www.ahmadkarmi.com/llms-full.txt

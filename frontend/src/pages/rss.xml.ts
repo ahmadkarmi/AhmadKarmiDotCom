@@ -5,19 +5,21 @@
 // same WordPress source the site uses, so it stays in sync automatically.
 
 import rss from '@astrojs/rss';
-import type { APIContext } from 'astro';
 import { fetchInsights } from '../lib/wordpress';
 import { absoluteUrl } from '../lib/urls';
 
-export async function GET(context: APIContext) {
+export async function GET() {
   const insights = await fetchInsights();
-  const site = context.site?.toString() || 'https://www.ahmadkarmi.com';
+  // The channel <link> is the blog, not the homepage. Item links below are
+  // already absolute, so this base is only used for the channel itself.
+  const site = absoluteUrl('/insights');
 
   return rss({
     title: 'Insights by Ahmad Al-Karmi',
     description:
       'Articles on AI product management, digital transformation, and building products that matter.',
     site,
+    trailingSlash: false,
     items: insights.map((insight) => ({
       title: insight.name,
       // Absolute, already canonical. A relative link here gets resolved by

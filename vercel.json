@@ -4,16 +4,35 @@
   "installCommand": "npm install",
   "trailingSlash": false,
   "redirects": [
+    { "source": "/my-work/:slug(kuwait-sc-rebrand|sultan-telecom-corporate-profile|wilson-bass)", "destination": "/portfolio", "permanent": true },
+    { "source": "/portfolio/:slug(kuwait-sc-rebrand|sultan-telecom-corporate-profile|wilson-bass|my-work)", "destination": "/portfolio", "permanent": true },
     { "source": "/articles-insights/:slug", "destination": "/insights/:slug", "permanent": true },
     { "source": "/articles-insights", "destination": "/insights", "permanent": true },
+    { "source": "/news-insights/articles/:slug", "destination": "/insights/:slug", "permanent": true },
+    { "source": "/news-insights/:path*", "destination": "/insights", "permanent": true },
+    { "source": "/publishing/articles-insights/:slug", "destination": "/insights/:slug", "permanent": true },
+    { "source": "/publishing/:path*", "destination": "/insights", "permanent": true },
+    { "source": "/paretos-principle-and-becoming-a-more-effective-product-manager", "destination": "/insights/paretos-principle-and-becoming-a-more-effective-product-manager", "permanent": true },
     { "source": "/my-work/:slug", "destination": "/portfolio/:slug", "permanent": true },
     { "source": "/my-work", "destination": "/portfolio", "permanent": true },
     { "source": "/projects/portfolio", "destination": "/portfolio", "permanent": true },
     { "source": "/projects/:slug", "destination": "/portfolio/:slug", "permanent": true },
     { "source": "/projects", "destination": "/portfolio", "permanent": true },
+    { "source": "/project/:slug", "destination": "/portfolio/:slug", "permanent": true },
+    { "source": "/project", "destination": "/portfolio", "permanent": true },
+    { "source": "/newsletter", "destination": "/#newsletter", "permanent": true },
+    { "source": "/marketing/newsletter", "destination": "/#newsletter", "permanent": true },
+    { "source": "/feed", "destination": "/rss.xml", "permanent": true },
     { "source": "/about-me", "destination": "/about", "permanent": true }
   ],
   "headers": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": ".*\\.vercel\\.app" }],
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
     {
       "source": "/sitemap(.*).xml",
       "headers": [

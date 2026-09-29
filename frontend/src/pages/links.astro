@@ -2,7 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Links" showHeader={false} showFooter={false}>
+<!-- Link-in-bio page for social profiles: too thin to earn a place in search, so
+     noindex (and excluded from the sitemap in astro.config.mjs). -->
+<BaseLayout title="Links" showHeader={false} showFooter={false} noindex>
   <section class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-background">
     
     <!-- Animated Mesh Gradient Background (CSS Implementation) -->
@@ -10,7 +12,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
       <div class="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
       <div class="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-orange-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-      <div class="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
     </div>
 
     <div class="w-full max-w-lg mx-auto relative z-10">
