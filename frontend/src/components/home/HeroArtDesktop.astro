@@ -1,0 +1,520 @@
+---
+// Desktop (xl+) hero artwork: a three-column delivery board.
+//
+// Everything lives on a fixed 5:4 stage and is sized in container units
+// (1cqw = 1% of the stage width), so the whole composition scales as one
+// piece with its grid column and is never cropped. The stage is also capped
+// by viewport height so short screens (1280x720) shrink it instead of
+// letting it spill.
+//
+// Motion (see lib/heroMotion.ts):
+// - the board tilts toward the pointer (fine pointers only); the script
+//   overrides the resting transform below inline
+// - a Jira-style conveyor on a 9s CSS loop: the ticket under the active card
+//   ships to Done, the queued card below slides up into its slot and a new
+//   one fades in behind it; Done's stack is pushed down and its oldest card
+//   fades out. Queue cards and Done cards each share one template (Done
+//   cards are the same 34x14 card scaled to Done's column width, 26/34, just
+//   like the landed ticket), so at the end of a cycle every piece snaps back
+//   in the same frame and the loop has no visible seam.
+// Only transform and opacity animate, so nothing here triggers layout or paint.
+---
+
+<div class="hero-art" aria-hidden="true">
+  <div class="stage">
+    <div class="board" data-hero-board>
+      <svg class="connectors" viewBox="0 0 100 80" preserveAspectRatio="none">
+        <path d="M27 36 C 29.5 36, 29.5 30, 32 30" />
+        <path d="M66 30 C 68.5 30, 68.5 37, 71 37" />
+      </svg>
+
+      <!-- Backlog -->
+      <div class="col col--backlog">
+        <div class="chip chip--muted"><span class="dot"></span>Backlog</div>
+        <div class="card card--ghost card--h16">
+          <div class="bar bar--strong bw-40"></div>
+          <div class="bar bw-100"></div>
+          <div class="bar bw-66"></div>
+        </div>
+        <div class="card card--ghost card--h10">
+          <div class="bar bar--strong bw-50"></div>
+          <div class="bar bw-80"></div>
+        </div>
+      </div>
+
+      <!-- In Progress -->
+      <div class="col col--progress">
+        <div class="chip chip--accent"><span class="dot"></span>In Progress</div>
+        <div class="card card--active">
+          <div class="row">
+            <div class="bar bar--accent bw-40"></div>
+            <div class="tag">AI Strategy</div>
+          </div>
+          <div class="bar bar--ink bw-75"></div>
+          <div class="bar bw-100"></div>
+          <div class="card-foot">
+            <div class="avatars">
+              <span class="avatar">AK</span>
+              <span class="avatar avatar--accent">AI</span>
+            </div>
+            <div class="bar bar--accent-soft bw-30"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Done -->
+      <div class="col col--done">
+        <div class="chip chip--done"><span class="dot"></span>Done</div>
+      </div>
+
+      <!-- Conveyor: In Progress queue -->
+      <div class="tcard queue-next">
+        <div class="tface tface--queue">
+          <div class="row"><div class="bar bar--purple bw-30"></div></div>
+          <div class="bar bar--ink-soft bw-66"></div>
+          <div class="progress"><div class="progress-fill"></div></div>
+        </div>
+      </div>
+      <div class="tcard queue-new">
+        <div class="tface tface--queue">
+          <div class="row"><div class="bar bar--purple bw-30"></div></div>
+          <div class="bar bar--ink-soft bw-66"></div>
+          <div class="progress"><div class="progress-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- Conveyor: Done stack (34x14 cards scaled to Done's width) -->
+      <div class="done-stack">
+        <div class="done-stack-move">
+          <div class="tcard tcard--done-1">
+            <div class="tface tface--done">
+              <div class="row row--start">
+                <span class="check-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" /></svg></span>
+                <div class="bar bar--green bw-50"></div>
+              </div>
+              <div class="bar bar--green-soft bw-100"></div>
+            </div>
+          </div>
+          <div class="tcard tcard--done-2 done-oldest">
+            <div class="tface tface--done">
+              <div class="row row--start">
+                <span class="check-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" /></svg></span>
+                <div class="bar bar--green bw-50"></div>
+              </div>
+              <div class="bar bar--green-soft bw-100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conveyor: the ticket that ships (queue face, then Done face) -->
+      <div class="tcard ticket">
+        <div class="tface tface--queue">
+          <div class="row"><div class="bar bar--purple bw-30"></div></div>
+          <div class="bar bar--ink-soft bw-66"></div>
+          <div class="progress"><div class="progress-fill"></div></div>
+        </div>
+        <div class="tface tface--done">
+          <div class="row row--start">
+            <span class="check-dot ticket-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" /></svg></span>
+            <div class="bar bar--green bw-50"></div>
+          </div>
+          <div class="bar bar--green-soft bw-100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hero-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* The stage: 5:4, fills the column, capped by viewport height, centred. */
+  .stage {
+    container-type: inline-size;
+    position: relative;
+    width: 100%;
+    max-width: calc((100svh - var(--header-h, 80px) - 12rem) * 1.25);
+    aspect-ratio: 5 / 4;
+    margin-inline: auto;
+    perspective: 180cqw;
+  }
+
+  /* Resting tilt; keep in sync with REST_RX / REST_RY in heroMotion.ts. */
+  .board {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(4deg) rotateY(-8deg);
+  }
+
+  /* ---- Columns (positions in stage units, cqw) ---- */
+  .col {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 3cqw;
+  }
+
+  .col--backlog {
+    left: 3cqw;
+    top: 18cqw;
+    width: 24cqw;
+    opacity: 0.75;
+    transform: translateZ(-5cqw);
+  }
+
+  .col--progress {
+    left: 32cqw;
+    top: 6cqw;
+    width: 34cqw;
+    transform: translateZ(3cqw);
+    z-index: 2;
+  }
+
+  .col--done {
+    left: 71cqw;
+    top: 22cqw;
+    width: 26cqw;
+  }
+
+  .connectors {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    transform: translateZ(-2cqw);
+  }
+
+  .connectors path {
+    fill: none;
+    stroke: hsl(var(--foreground) / 0.2);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* ---- Chips ---- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 1.6cqw;
+    height: 6cqw;
+    padding: 0 2.4cqw;
+    border-radius: 1.2cqw;
+    font-size: 2.1cqw;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .chip .dot {
+    width: 1.6cqw;
+    height: 1.6cqw;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  .chip--muted {
+    color: hsl(var(--foreground-muted));
+    background: hsl(var(--foreground) / 0.05);
+  }
+
+  .chip--accent {
+    color: hsl(var(--accent));
+    background: hsl(var(--accent) / 0.14);
+  }
+
+  .chip--done {
+    color: rgb(22 163 74);
+    background: rgb(34 197 94 / 0.1);
+  }
+
+  /* ---- Static cards ---- */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8cqw;
+    padding: 3.2cqw;
+    border-radius: 2.8cqw;
+    border: 1px solid hsl(var(--foreground) / 0.12);
+    background: hsl(var(--background));
+  }
+
+  .card--h16 { height: 16cqw; }
+  .card--h10 { height: 10cqw; }
+
+  .card--ghost {
+    background: hsl(var(--foreground) / 0.025);
+    border-color: hsl(var(--foreground) / 0.1);
+  }
+
+  .card--active {
+    height: 30cqw;
+    padding: 3.6cqw;
+    gap: 2cqw;
+    border-color: hsl(var(--accent) / 0.4);
+    box-shadow:
+      0 0 0 1px hsl(var(--accent) / 0.15),
+      0 5cqw 10cqw -3cqw hsl(var(--accent) / 0.22);
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card--active:hover {
+    transform: translateY(-2cqw);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2cqw;
+  }
+
+  .row--start {
+    justify-content: flex-start;
+  }
+
+  .tag {
+    padding: 0.8cqw 1.4cqw;
+    border-radius: 0.9cqw;
+    background: hsl(var(--accent) / 0.1);
+    color: hsl(var(--accent));
+    font-size: 1.7cqw;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .card-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2.4cqw;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .avatars {
+    display: flex;
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 5.6cqw;
+    height: 5.6cqw;
+    border-radius: 999px;
+    border: 0.4cqw solid hsl(var(--background));
+    background: hsl(var(--background-secondary));
+    color: hsl(var(--foreground));
+    font-size: 1.8cqw;
+    font-weight: 700;
+  }
+
+  .avatar + .avatar {
+    margin-left: -1.6cqw;
+  }
+
+  .avatar--accent {
+    background: hsl(var(--accent) / 0.18);
+    color: hsl(var(--accent));
+  }
+
+  .check-dot {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.8cqw;
+    height: 2.8cqw;
+    border-radius: 999px;
+    background: rgb(34 197 94 / 0.18);
+  }
+
+  .check-dot svg {
+    width: 1.8cqw;
+    height: 1.8cqw;
+    stroke: rgb(22 163 74);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ---- Bars (skeleton text) ---- */
+  .bar {
+    flex-shrink: 0;
+    height: 1.7cqw;
+    border-radius: 999px;
+    background: hsl(var(--foreground) / 0.1);
+  }
+
+  .bar--strong { background: hsl(var(--foreground) / 0.22); height: 2cqw; }
+  .bar--ink { background: hsl(var(--foreground) / 0.8); height: 2.8cqw; }
+  .bar--ink-soft { background: hsl(var(--foreground) / 0.55); height: 2.2cqw; }
+  .bar--accent { background: hsl(var(--accent) / 0.4); }
+  .bar--accent-soft { background: hsl(var(--accent) / 0.08); height: 4cqw; border-radius: 0.8cqw; }
+  .bar--purple { background: rgb(192 132 252 / 0.45); }
+  .bar--green { background: rgb(20 83 45 / 0.14); }
+  .bar--green-soft { background: rgb(20 83 45 / 0.07); }
+
+  .bw-30 { width: 30%; }
+  .bw-40 { width: 40%; }
+  .bw-50 { width: 50%; }
+  .bw-66 { width: 66%; }
+  .bw-75 { width: 75%; }
+  .bw-80 { width: 80%; }
+  .bw-100 { width: 100%; }
+
+  /* ---- Conveyor cards: one 34x14 template, two faces ---- */
+  .tcard {
+    position: absolute;
+    width: 34cqw;
+    height: 14cqw;
+    transform-origin: 0 0;
+  }
+
+  .tface {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4cqw;
+    padding: 2.4cqw 3cqw;
+    border-radius: 2.8cqw;
+  }
+
+  .tface--queue {
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--accent) / 0.35);
+    box-shadow: 0 3cqw 6cqw -2cqw hsl(var(--foreground) / 0.12);
+  }
+
+  .tface--done {
+    background: hsl(var(--background));
+    border: 1px solid rgb(34 197 94 / 0.3);
+  }
+
+  .progress {
+    flex-shrink: 0;
+    height: 1.2cqw;
+    border-radius: 999px;
+    background: hsl(var(--foreground) / 0.08);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: hsl(var(--accent) / 0.55);
+    transform-origin: 0 50%;
+    transform: scaleX(0.15);
+  }
+
+  /* Ticket sits in the slot under the active card; the next card waits below. */
+  .ticket { left: 32cqw; top: 48cqw; z-index: 3; }
+  .queue-next,
+  .queue-new { left: 32cqw; top: 65cqw; }
+  .queue-new { opacity: 0; }
+  .ticket .tface--done { opacity: 0; }
+
+  /* Done: 34x14 cards scaled to 26cqw wide, 3cqw apart once scaled. */
+  .done-stack {
+    position: absolute;
+    left: 71cqw;
+    top: 32cqw;
+    width: 34cqw;
+    transform-origin: 0 0;
+    transform: scale(0.7647);
+  }
+
+  .done-stack-move {
+    position: relative;
+  }
+
+  .tcard--done-1 { left: 0; top: 0; }
+  .tcard--done-2 { left: 0; top: 17.9cqw; }
+
+  /*
+   * One 9s cycle, shared by every conveyor piece:
+   *  6-30%  the ticket's progress bar fills
+   * 34-44%  Done's stack slides down to open the top slot
+   * 32-50%  the ticket flies there, shrinking to Done's width (26/34)
+   * 44-56%  it swaps its queue face for a Done face; the check pops in
+   * 42-56%  the queued card slides up into the ticket's old slot
+   * 50-66%  a new card fades in behind it
+   * 78-96%  Done's oldest card fades out
+   * At 100% everything snaps back in the same frame; the result looks
+   * identical, so the loop has no seam.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .ticket { animation: ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .ticket .tface--queue { animation: face-out 9s linear 1.2s infinite both; }
+    .ticket .tface--done { animation: face-in 9s linear 1.2s infinite both; }
+    .ticket .ticket-check { animation: check-in 9s ease-out 1.2s infinite both; }
+    .ticket .progress-fill { animation: progress-fill 9s ease-in-out 1.2s infinite both; }
+    .queue-next { animation: queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .queue-new { animation: face-in-late 9s linear 1.2s infinite both; }
+    .done-stack-move { animation: stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .done-oldest { animation: oldest-out 9s linear 1.2s infinite both; }
+
+    :global([data-hero-paused]) .hero-art * {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes ticket-ship {
+    0%, 32% { transform: translate(0, 0) scale(1); }
+    41% { transform: translate(19cqw, -10cqw) scale(0.88); }
+    50%, 100% { transform: translate(39cqw, -16cqw) scale(0.7647); }
+  }
+
+  @keyframes face-out {
+    0%, 44% { opacity: 1; }
+    54%, 100% { opacity: 0; }
+  }
+
+  @keyframes face-in {
+    0%, 44% { opacity: 0; }
+    54%, 100% { opacity: 1; }
+  }
+
+  @keyframes check-in {
+    0%, 50% { transform: scale(0.4); }
+    56%, 100% { transform: scale(1); }
+  }
+
+  @keyframes progress-fill {
+    0%, 6% { transform: scaleX(0.15); }
+    30%, 100% { transform: scaleX(1); }
+  }
+
+  /* 14 card + 3 gap */
+  @keyframes queue-up {
+    0%, 42% { transform: translateY(0); }
+    56%, 100% { transform: translateY(-17cqw); }
+  }
+
+  @keyframes face-in-late {
+    0%, 50% { opacity: 0; }
+    66%, 100% { opacity: 1; }
+  }
+
+  /* One scaled slot: 17.9 * 0.7647 = 13.7cqw on screen */
+  @keyframes stack-push {
+    0%, 34% { transform: translateY(0); }
+    44%, 100% { transform: translateY(17.9cqw); }
+  }
+
+  @keyframes oldest-out {
+    0%, 78% { opacity: 1; }
+    96%, 100% { opacity: 0; }
+  }
+</style>
