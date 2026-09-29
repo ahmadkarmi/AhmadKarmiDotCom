@@ -171,20 +171,40 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
 
-      // Consent Mode v2: default everything to denied so GA sends only
-      // cookieless, anonymized pings until the visitor accepts. A returning
-      // visitor who already accepted is upgraded immediately. The cookie
-      // banner (CookieConsent.astro) calls gtag('consent', 'update', ...).
+      // Consent Mode v2, region-scoped. In the EEA, UK and Switzerland
+      // (opt-in regimes) analytics is denied until the visitor accepts, so GA
+      // sends only cookieless pings. Everywhere else analytics defaults to
+      // granted and the banner works as an opt-out. Denying globally had GA
+      // undercounting the Gulf audience, who are most of the traffic. Google
+      // resolves the region from the visitor's IP and the region-specific
+      // default wins over the global one. Ad signals stay denied everywhere:
+      // the site runs no ads.
       gtag('consent', 'default', {
         ad_storage: 'denied',
         ad_user_data: 'denied',
         ad_personalization: 'denied',
         analytics_storage: 'denied',
+        region: [
+          'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR',
+          'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK',
+          'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'GB', 'CH'
+        ],
         wait_for_update: 500
       });
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'granted'
+      });
+      // A returning visitor's stored choice overrides either default. The
+      // cookie banner (CookieConsent.astro) calls the same update on click.
       try {
-        if (localStorage.getItem('cookie-consent') === 'accepted') {
+        var storedConsent = localStorage.getItem('cookie-consent');
+        if (storedConsent === 'accepted') {
           gtag('consent', 'update', { analytics_storage: 'granted' });
+        } else if (storedConsent === 'declined') {
+          gtag('consent', 'update', { analytics_storage: 'denied' });
         }
       } catch (e) {}
 
