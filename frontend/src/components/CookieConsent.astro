@@ -5,7 +5,7 @@
 
 <div 
   id="cookie-consent" 
-  class="fixed bottom-0 left-0 right-0 z-[90] transform translate-y-full transition-transform duration-500 md:bottom-4 md:left-4 md:right-auto md:max-w-md"
+  class="fixed bottom-0 left-0 right-0 z-[90] transform translate-y-[calc(100%+2rem)] transition-transform duration-500 md:bottom-4 md:left-4 md:right-auto md:max-w-md"
 >
   <div class="bg-foreground text-background p-4 md:p-6 md:rounded-2xl shadow-2xl border-t md:border border-white/10">
     <div class="flex items-start gap-4">
@@ -47,7 +47,7 @@
     if (!consent && banner) {
       // Show banner after a short delay
       setTimeout(function() {
-        banner.classList.remove('translate-y-full');
+        banner.classList.remove('translate-y-[calc(100%+2rem)]');
         banner.classList.add('translate-y-0');
       }, 1500);
     }
@@ -84,7 +84,7 @@
     
     function hideBanner() {
       if (banner) {
-        banner.classList.add('translate-y-full');
+        banner.classList.add('translate-y-[calc(100%+2rem)]');
         banner.classList.remove('translate-y-0');
       }
     }
