@@ -30,14 +30,19 @@ const bars = [
 ];
 ---
 
-<div class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-4 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll data-mb-row>
+<!-- Snapping: each card rests against the left gutter (snap-start with a
+     matching scroll-pl-4), one card per swipe (snap-always), and the row
+     never hands a sideways overscroll to the page. Centre snapping left the
+     first and last cards unable to reach their snap point, so iOS settled
+     inconsistently near the ends. -->
+<div class="flex overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-pl-4 gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-4 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll data-mb-row>
   {metrics.map((metric, index) => (
-    <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-center">
+    <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-start snap-always">
       <!-- Whole card is a swipe surface: pans are always scroll gestures, no
            text selection, and the hover lift/shadow only applies on devices
            that really hover (iOS otherwise applies :hover on touch, moving
            the card mid-swipe). -->
-      <article class="group relative flex flex-col h-full min-h-[340px] bg-white border border-border rounded-lg shadow-sm transition-all duration-300 overflow-hidden select-none touch-pan-x touch-pan-y [@media(hover:hover)]:hover:shadow-md [@media(hover:hover)]:hover:-translate-y-1">
+      <article class="group relative flex flex-col w-full aspect-square bg-white border border-border rounded-lg shadow-sm transition-all duration-300 overflow-hidden select-none touch-pan-x touch-pan-y [@media(hover:hover)]:hover:shadow-md [@media(hover:hover)]:hover:-translate-y-1">
         <!-- Card Header: key and context, matching WorkCard -->
         <div class="px-4 py-3 flex items-center justify-between border-b border-border/40 bg-background-secondary/5">
           <div class="flex items-center gap-2">
@@ -48,7 +53,7 @@ const bars = [
         </div>
 
         <!-- Card Body -->
-        <div class="p-4 flex flex-col h-full">
+        <div class="p-4 flex flex-col flex-1 min-h-0">
           <div class="text-4xl lg:text-5xl font-display font-bold text-accent mb-2 tracking-tight tabular-nums">
             {metric.value}
           </div>
@@ -57,7 +62,7 @@ const bars = [
           </h3>
 
           <!-- Data viz graphic -->
-          <div class="mt-auto h-32 w-full text-accent pointer-events-none">
+          <div class="flex-1 min-h-[64px] w-full mt-2 text-accent pointer-events-none">
             {metric.chart === 'area' && (
               <svg viewBox="0 0 200 90" class="w-full h-full overflow-visible" preserveAspectRatio="none" aria-hidden="true">
                 <defs>
