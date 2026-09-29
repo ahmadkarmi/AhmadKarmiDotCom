@@ -7,7 +7,7 @@ import NewsletterForm from '../components/NewsletterForm.astro';
 import { fetchWorks, fetchInsights, fetchSiteSettings, fetchHomePage, getMediaUrl } from '../lib/wordpress';
 import { graph, personNode, websiteNode } from '../lib/schema';
 
-import MetricBento from '../components/MetricBento';
+import MetricBento from '../components/MetricBento.astro';
 import HeroArtDesktop from '../components/home/HeroArtDesktop.astro';
 import HeroArtMobile from '../components/home/HeroArtMobile.astro';
 
@@ -160,7 +160,7 @@ const schema = graph(
         )}
       </div>
       
-      <MetricBento client:visible />
+      <MetricBento />
     </div>
   </section>
 
