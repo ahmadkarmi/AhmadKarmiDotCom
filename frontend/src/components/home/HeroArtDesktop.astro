@@ -455,15 +455,19 @@
    * identical, so the loop has no seam.
    */
   @media (prefers-reduced-motion: no-preference) {
-    .ticket { animation: ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
-    .ticket .tface--queue { animation: face-out 9s linear 1.2s infinite both; }
-    .ticket .tface--done { animation: face-in 9s linear 1.2s infinite both; }
-    .ticket .ticket-check { animation: check-in 9s ease-out 1.2s infinite both; }
-    .ticket .progress-fill { animation: progress-fill 9s ease-in-out 1.2s infinite both; }
-    .queue-next { animation: queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
-    .queue-new { animation: face-in-late 9s linear 1.2s infinite both; }
-    .done-stack-move { animation: stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
-    .done-oldest { animation: oldest-out 9s linear 1.2s infinite both; }
+    /* Start the first cycle ~16% in (the progress bar is already filling)
+       so the first ticket flies at ~1.5s, just after the board has faded
+       in, rather than ~4s. Every piece is still at rest at that point. */
+    .hero-art { --conveyor-start: -1.4s; }
+    .ticket { animation: ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .ticket .tface--queue { animation: face-out 9s linear var(--conveyor-start) infinite both; }
+    .ticket .tface--done { animation: face-in 9s linear var(--conveyor-start) infinite both; }
+    .ticket .ticket-check { animation: check-in 9s ease-out var(--conveyor-start) infinite both; }
+    .ticket .progress-fill { animation: progress-fill 9s ease-in-out var(--conveyor-start) infinite both; }
+    .queue-next { animation: queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .queue-new { animation: face-in-late 9s linear var(--conveyor-start) infinite both; }
+    .done-stack-move { animation: stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .done-oldest { animation: oldest-out 9s linear var(--conveyor-start) infinite both; }
 
     :global([data-hero-paused]) .hero-art * {
       animation-play-state: paused;
