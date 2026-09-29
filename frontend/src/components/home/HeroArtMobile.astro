@@ -9,10 +9,33 @@
 // compositor transform; moving groups inside one big SVG would repaint it
 // every frame.
 //
-// Motion (see scripts/heroMotion.ts):
-// - default "loop" mode: columns drift slowly, a ticket ships to Done
-// - "gyro" mode (Android etc.): columns shift with device tilt at different
-//   depths; the ticket keeps shipping
+// Motion (see lib/heroMotion.ts):
+// - default "loop" mode: columns drift slowly
+// - "gyro" mode (Android etc.): columns shift with device tilt by depth
+// - both modes: a Jira-style conveyor. Every 9s the top In Progress ticket
+//   moves to Done, the queue below it slides up and a new card fades in at
+//   the bottom; Done's stack is pushed down and its oldest card fades out.
+//   Queue cards are identical, and so are Done cards, so at the end of each
+//   cycle everything snaps back to its start in a single frame and the loop
+//   has no visible seam.
+
+// One 105x75 queued (In Progress) card with its top edge at y.
+const queueCard = (y: number) => `
+  <rect x="147" y="${y}" width="105" height="75" rx="8" fill="currentColor" class="text-accent" opacity="0.08"/>
+  <rect x="147" y="${y}" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.35"/>
+  <rect x="155" y="${y + 10}" width="60" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.45"/>
+  <rect x="155" y="${y + 25}" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>
+  <rect x="155" y="${y + 35}" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.18"/>`;
+
+// One 105x75 Done card at y; dx shifts it left (the ticket draws its Done
+// face at the In Progress x, then travels +128 to Done).
+const doneCard = (y: number, dx = 0) => `
+  <rect x="${275 - dx}" y="${y}" width="105" height="75" rx="8" fill="currentColor" class="text-foreground" opacity="0.06"/>
+  <rect x="${275 - dx}" y="${y}" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.22"/>
+  <rect x="${283 - dx}" y="${y + 10}" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.28"/>
+  <rect x="${283 - dx}" y="${y + 25}" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.13"/>
+  <circle cx="${365 - dx}" cy="${y + 60}" r="7" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.3"/>
+  <path d="M${361 - dx} ${y + 60} L${364 - dx} ${y + 63} L${370 - dx} ${y + 57}" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.4"/>`;
 ---
 
 <div
@@ -56,9 +79,9 @@
     </svg>
   </div>
 
-  <!-- IN PROGRESS (the ticket starts here, so it rides this column's motion) -->
-  <div class="mcol mcol--progress" data-depth="1" style="--x:141;--y:29;--w:118;--h:543">
-    <svg class="fill" viewBox="141 29 118 543" fill="none">
+  <!-- IN PROGRESS: moves with Done, so the ticket always lines up with its slot -->
+  <div class="mcol mcol--progress" data-depth="1" style="--x:141;--y:29;--w:118;--h:613">
+    <svg class="fill" viewBox="141 29 118 613" fill="none">
       <rect x="142" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-accent" opacity="0.4"/>
       <rect x="147" y="75" width="105" height="100" rx="8" fill="currentColor" class="text-accent" opacity="0.15"/>
       <rect x="147" y="75" width="105" height="100" rx="8" stroke="currentColor" stroke-width="2" class="text-accent" opacity="0.5"/>
@@ -74,39 +97,25 @@
       <rect x="155" y="220" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
       <rect x="155" y="230" width="65" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
       <circle cx="162" cy="258" r="8" fill="currentColor" class="text-foreground" opacity="0.25"/>
-      <rect x="147" y="385" width="105" height="90" rx="8" fill="currentColor" class="text-accent" opacity="0.08"/>
-      <rect x="147" y="385" width="105" height="90" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.25"/>
-      <rect x="155" y="395" width="52" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.4"/>
-      <rect x="155" y="410" width="78" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
-      <rect x="155" y="420" width="88" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
-      <rect x="155" y="430" width="60" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
-      <rect x="147" y="490" width="105" height="80" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.22"/>
-      <rect x="155" y="500" width="50" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.35"/>
-      <rect x="155" y="515" width="80" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.12"/>
     </svg>
 
-    <!-- Ticket: an In Progress card that ships to the Done slot at y=265 -->
+    <!-- Queue: slides up 90 once the ticket leaves; the last card fades in -->
+    <div class="sub mqueue" style="--x:146;--y:384;--w:107;--h:167">
+      <svg class="fill" viewBox="146 384 107 167" fill="none"><Fragment set:html={queueCard(385) + queueCard(475)} /></svg>
+      <div class="sub2 mqueue-new" style="--x:146;--y:564;--w:107;--h:77">
+        <svg class="fill" viewBox="146 564 107 77" fill="none"><Fragment set:html={queueCard(565)} /></svg>
+      </div>
+    </div>
+
+    <!-- Ticket: top of the queue, travels +128 / -30 to Done's slot at y=265 -->
     <div class="sub mticket" style="--x:146;--y:294;--w:107;--h:77">
-      <svg class="fill mticket-base" viewBox="146 294 107 77" fill="none">
-        <rect x="147" y="295" width="105" height="75" rx="8" fill="currentColor" class="text-accent" opacity="0.1"/>
-        <rect x="147" y="295" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-accent" opacity="0.5"/>
-        <rect x="155" y="305" width="60" height="8" rx="2" fill="currentColor" class="text-accent" opacity="0.5"/>
-        <rect x="155" y="320" width="85" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
-        <rect x="155" y="330" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.2"/>
-      </svg>
-      <svg class="fill mticket-done" viewBox="146 294 107 77" fill="none">
-        <rect x="147" y="295" width="105" height="75" rx="8" fill="currentColor" class="text-foreground" opacity="0.06"/>
-        <rect x="147" y="295" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.25"/>
-        <rect x="155" y="305" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.3"/>
-        <rect x="155" y="320" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.15"/>
-        <circle cx="237" cy="355" r="8" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.35"/>
-        <path d="M232 355 L236 359 L244 351" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.45"/>
-      </svg>
+      <svg class="fill mticket-base" viewBox="146 294 107 77" fill="none"><Fragment set:html={queueCard(295)} /></svg>
+      <svg class="fill mticket-done" viewBox="146 294 107 77" fill="none"><Fragment set:html={doneCard(295, 128)} /></svg>
     </div>
   </div>
 
   <!-- DONE -->
-  <div class="mcol mcol--done" data-depth="0.7" style="--x:269;--y:29;--w:118;--h:478">
+  <div class="mcol mcol--done" data-depth="0.85" style="--x:269;--y:29;--w:118;--h:583">
     <svg class="sub" viewBox="269 29 118 222" fill="none" style="--x:269;--y:29;--w:118;--h:222">
       <rect x="270" y="30" width="115" height="28" rx="6" fill="currentColor" class="text-foreground" opacity="0.3"/>
       <rect x="275" y="75" width="105" height="75" rx="8" fill="currentColor" class="text-foreground" opacity="0.08"/>
@@ -125,19 +134,12 @@
       <path d="M360 235 L364 239 L372 231" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.35"/>
     </svg>
 
-    <!-- Lower Done cards: slide down to make room when the ticket lands -->
-    <div class="sub mstack" style="--x:269;--y:263;--w:118;--h:245">
-      <svg class="fill" viewBox="269 263 118 245" fill="none">
-        <rect x="275" y="265" width="105" height="70" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.15"/>
-        <rect x="283" y="275" width="60" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.22"/>
-        <rect x="283" y="290" width="75" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.1"/>
-        <rect x="283" y="300" width="55" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.1"/>
-        <rect x="275" y="350" width="105" height="65" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.12"/>
-        <rect x="283" y="360" width="50" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.2"/>
-        <rect x="283" y="375" width="70" height="5" rx="1.5" fill="currentColor" class="text-foreground" opacity="0.08"/>
-        <rect x="275" y="430" width="105" height="75" rx="8" stroke="currentColor" stroke-width="1.5" class="text-foreground" opacity="0.1"/>
-        <rect x="283" y="440" width="45" height="8" rx="2" fill="currentColor" class="text-foreground" opacity="0.18"/>
-      </svg>
+    <!-- Stack: pushed down 90 when the ticket lands; the oldest card fades out -->
+    <div class="sub mstack" style="--x:269;--y:264;--w:118;--h:167">
+      <svg class="fill" viewBox="269 264 118 167" fill="none"><Fragment set:html={doneCard(265) + doneCard(355)} /></svg>
+      <div class="sub2 mstack-old" style="--x:269;--y:444;--w:118;--h:77">
+        <svg class="fill" viewBox="269 444 118 77" fill="none"><Fragment set:html={doneCard(445)} /></svg>
+      </div>
     </div>
   </div>
 </div>
@@ -169,12 +171,23 @@
 
   /* A child layer, positioned in board units relative to its column. */
   .sub {
+    --px: var(--x);
+    --py: var(--y);
     position: absolute;
     left: calc((var(--x) - var(--ox)) * var(--u));
     top: calc((var(--y) - var(--oy)) * var(--u));
     width: calc(var(--w) * var(--u));
     height: calc(var(--h) * var(--u));
     overflow: visible;
+  }
+
+  /* A grandchild layer, positioned relative to its .sub parent. */
+  .sub2 {
+    position: absolute;
+    left: calc((var(--x) - var(--px)) * var(--u));
+    top: calc((var(--y) - var(--py)) * var(--u));
+    width: calc(var(--w) * var(--u));
+    height: calc(var(--h) * var(--u));
   }
 
   .fill {
@@ -185,7 +198,9 @@
     overflow: visible;
   }
 
-  .mticket-done {
+  /* Conveyor pieces that start hidden. */
+  .mticket-done,
+  .mqueue-new {
     opacity: 0;
   }
 
@@ -195,21 +210,26 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    /* Loop mode (default): slow alternating drift. Starts after the headline
-       has settled, and from rest, so there is no jump. */
+    /* Loop mode (default): slow drift. In Progress and Done drift together so
+       the ticket stays aligned with its Done slot; To Do moves against them.
+       Starts after the headline settles, and from rest, so there is no jump. */
     .mcol--todo { animation: drift-up 20s ease-in-out 1.2s infinite; }
-    .mcol--progress { animation: drift-down 20s ease-in-out 1.2s infinite; }
-    .mcol--done { animation: drift-up-small 20s ease-in-out 1.2s infinite; }
+    .mcol--progress,
+    .mcol--done { animation: drift-down 20s ease-in-out 1.2s infinite; }
 
     :global([data-hero-mode='gyro']) .mcol {
       animation: none;
     }
 
-    /* Ticket ships in both modes. */
+    /* Conveyor: every piece shares one 9s timeline, and all of them snap
+       back in the same frame at the end of the cycle. */
     .mticket { animation: m-ticket-ship 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
-    .mticket-base { animation: m-ticket-base 9s linear 1.2s infinite both; }
-    .mticket-done { animation: m-ticket-done 9s linear 1.2s infinite both; }
-    .mstack { animation: m-stack-make-room 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .mticket-base { animation: m-fade-out 9s linear 1.2s infinite both; }
+    .mticket-done { animation: m-fade-in 9s linear 1.2s infinite both; }
+    .mstack { animation: m-stack-push 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .mstack-old { animation: m-stack-old-out 9s linear 1.2s infinite both; }
+    .mqueue { animation: m-queue-up 9s cubic-bezier(0.65, 0, 0.35, 1) 1.2s infinite both; }
+    .mqueue-new { animation: m-queue-new-in 9s linear 1.2s infinite both; }
 
     :global([data-hero-paused]) #mobile-roadmap * {
       animation-play-state: paused;
@@ -228,37 +248,44 @@
     75% { transform: translate3d(0, -6px, 0); }
   }
 
-  @keyframes drift-up-small {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    25% { transform: translate3d(0, -4px, 0); }
-    75% { transform: translate3d(0, 4px, 0); }
-  }
-
-  /* In Progress card at y=295 moves 128 units right, 30 up, to Done's slot at y=265. */
+  /* Top In Progress card (y=295) moves 128 right, 30 up, to Done's slot (y=265). */
   @keyframes m-ticket-ship {
-    0% { transform: translate3d(0, 0, 0); opacity: 0; }
-    6% { opacity: 1; }
-    32% { transform: translate3d(0, 0, 0); }
-    50% { transform: translate3d(calc(128 * var(--u)), calc(-30 * var(--u)), 0); }
-    86% { transform: translate3d(calc(128 * var(--u)), calc(-30 * var(--u)), 0); opacity: 1; }
-    94% { transform: translate3d(calc(128 * var(--u)), calc(-30 * var(--u)), 0); opacity: 0; }
-    100% { transform: translate3d(0, 0, 0); opacity: 0; }
+    0%, 32% { transform: translate3d(0, 0, 0); }
+    50%, 100% { transform: translate3d(calc(128 * var(--u)), calc(-30 * var(--u)), 0); }
   }
 
-  @keyframes m-ticket-base {
+  /* The ticket turns from a queue card into a Done card as it lands. */
+  @keyframes m-fade-out {
     0%, 44% { opacity: 1; }
     54%, 100% { opacity: 0; }
   }
 
-  @keyframes m-ticket-done {
+  @keyframes m-fade-in {
     0%, 44% { opacity: 0; }
     54%, 100% { opacity: 1; }
   }
 
-  /* Ticket is 75 tall + 15 gap. */
-  @keyframes m-stack-make-room {
+  /* Done makes room: one card (75) plus gap (15)... */
+  @keyframes m-stack-push {
+    0%, 34% { transform: translate3d(0, 0, 0); }
+    44%, 100% { transform: translate3d(0, calc(90 * var(--u)), 0); }
+  }
+
+  /* ...and its oldest card leaves. */
+  @keyframes m-stack-old-out {
+    0%, 78% { opacity: 1; }
+    96%, 100% { opacity: 0; }
+  }
+
+  /* In Progress closes the gap the ticket left... */
+  @keyframes m-queue-up {
     0%, 42% { transform: translate3d(0, 0, 0); }
-    50%, 88% { transform: translate3d(0, calc(90 * var(--u)), 0); }
-    100% { transform: translate3d(0, 0, 0); }
+    56%, 100% { transform: translate3d(0, calc(-90 * var(--u)), 0); }
+  }
+
+  /* ...and a new card arrives at the bottom. */
+  @keyframes m-queue-new-in {
+    0%, 50% { opacity: 0; }
+    66%, 100% { opacity: 1; }
   }
 </style>
