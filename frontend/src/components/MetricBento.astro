@@ -32,18 +32,19 @@ const bars = [
 
 <!-- Snapping: each card rests against the left gutter (snap-start with a
      matching scroll-pl-4), App Store style (a strong flick can travel several
-     cards; snap-always was tried and felt sticky), and the row
-     never hands a sideways overscroll to the page. Centre snapping left the
-     first and last cards unable to reach their snap point, so iOS settled
-     inconsistently near the ends. -->
-<div class="flex overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-pl-4 gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-4 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll data-mb-row>
+     cards; snap-always was tried and felt sticky). Centre snapping left the
+     first and last cards unable to reach their snap point. overscroll-x-contain
+     and touch-action were tried too and removed: with them iOS left slow drags
+     resting half way between cards. The script below adds a settle-to-nearest
+     safety net for any rest point the native snap misses. -->
+<div class="flex overflow-x-auto snap-x snap-mandatory scroll-pl-4 gap-6 pb-8 -mx-4 px-4 xl:grid xl:grid-cols-4 xl:gap-8 xl:pb-0 xl:mx-0 xl:px-0 no-scrollbar" data-drag-scroll data-mb-row>
   {metrics.map((metric, index) => (
     <div class="min-w-[85vw] sm:min-w-[70vw] md:min-w-[55vw] lg:min-w-[45vw] xl:min-w-0 snap-start">
-      <!-- Whole card is a swipe surface: pans are always scroll gestures, no
-           text selection, and the hover lift/shadow only applies on devices
-           that really hover (iOS otherwise applies :hover on touch, moving
-           the card mid-swipe). -->
-      <article class="group relative flex flex-col w-full aspect-square bg-white border border-border rounded-lg shadow-sm transition-all duration-300 overflow-hidden select-none touch-pan-x touch-pan-y [@media(hover:hover)]:hover:shadow-md [@media(hover:hover)]:hover:-translate-y-1">
+      <!-- Whole card is a swipe surface: no text selection, charts ignore
+           touch, and the hover lift/shadow only applies on devices that
+           really hover (iOS otherwise applies :hover on touch, moving the
+           card mid-swipe). -->
+      <article class="group relative flex flex-col w-full aspect-square bg-white border border-border rounded-lg shadow-sm transition-all duration-300 overflow-hidden select-none [@media(hover:hover)]:hover:shadow-md [@media(hover:hover)]:hover:-translate-y-1">
         <!-- Card Header: key and context, matching WorkCard -->
         <div class="px-4 py-3 flex items-center justify-between border-b border-border/40 bg-background-secondary/5">
           <div class="flex items-center gap-2">
@@ -180,12 +181,51 @@ const bars = [
 </style>
 
 <script>
+  // Snap safety net. iOS sometimes leaves a slow drag resting between cards
+  // even with scroll-snap-type: x mandatory. Once the finger is up and the
+  // row has stopped moving, glide to the nearest card's snap position. Never
+  // runs mid-touch, and is a no-op whenever the native snap already landed.
+  function initSnapAssist(row: HTMLElement) {
+    let touching = false;
+    let timer = 0;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const settle = () => {
+      if (touching || getComputedStyle(row).display !== 'flex') return;
+      const max = row.scrollWidth - row.clientWidth;
+      const pad = parseFloat(getComputedStyle(row).scrollPaddingLeft) || 0;
+      const rowLeft = row.getBoundingClientRect().left;
+      const current = row.scrollLeft;
+      let nearest = current;
+      let best = Infinity;
+      for (const child of Array.from(row.children) as HTMLElement[]) {
+        const target = Math.min(max, Math.max(0, current + child.getBoundingClientRect().left - rowLeft - pad));
+        const dist = Math.abs(target - current);
+        if (dist < best) { best = dist; nearest = target; }
+      }
+      if (best > 2) row.scrollTo({ left: nearest, behavior: reduced ? 'auto' : 'smooth' });
+    };
+    const schedule = (delay: number) => {
+      clearTimeout(timer);
+      timer = window.setTimeout(settle, delay);
+    };
+
+    row.addEventListener('touchstart', () => { touching = true; clearTimeout(timer); }, { passive: true });
+    const release = () => { touching = false; schedule(180); };
+    row.addEventListener('touchend', release, { passive: true });
+    row.addEventListener('touchcancel', release, { passive: true });
+    // Momentum keeps firing scroll events after the finger lifts; settle only
+    // once they have stopped.
+    row.addEventListener('scroll', () => { if (!touching) schedule(180); }, { passive: true });
+  }
+
   // One-shot chart reveal. Arms the start state only while the row is below
   // the viewport and releases it once when the row scrolls into view.
   function initMetricCharts() {
     const row = document.querySelector<HTMLElement>('[data-mb-row]');
     if (!row || row.dataset.mbBound) return;
     row.dataset.mbBound = 'true';
+    initSnapAssist(row);
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (!('IntersectionObserver' in window)) return;
     if (row.getBoundingClientRect().top < window.innerHeight * 0.9) return;
