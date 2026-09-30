@@ -100,7 +100,7 @@ const {
 
         form.addEventListener('submit', (e) => {
           loadKitScript();
-          const honeyInput = form.querySelector('input[name="website_url"]');
+          const honeyInput = form.querySelector<HTMLInputElement>('input[name="website_url"]');
           if (honeyInput && honeyInput.value) {
             e.preventDefault();
             console.log('Bot detected');

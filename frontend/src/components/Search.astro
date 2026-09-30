@@ -172,31 +172,36 @@
 </style>
 
 <script>
+  import type { IndexedSearchItem, SearchIndexItem, SearchModalState } from '../lib/searchTypes';
+
+  type ContentTypeData = { key: 'insight' | 'portfolio' | 'page'; label: string; badgeClass: string };
+
   // Search Modal Logic
   const win = window;
-  const state = win.__searchModalState || (win.__searchModalState = {
+  const state: SearchModalState = win.__searchModalState || (win.__searchModalState = {
     indexLoaded: false,
     items: [],
     queryTokens: [],
     activeIndex: -1,
     results: [],
-    searchTimeout: null,
+    searchTimeout: undefined,
   });
 
   function getEls() {
     const trigger = document.getElementById('search-trigger');
     const backdrop = document.getElementById('search-backdrop');
     const closeBtn = document.getElementById('search-close');
-    const input = document.getElementById('search-input');
+    const input = document.getElementById('search-input') as HTMLInputElement | null;
     const resultsContainer = document.getElementById('search-results');
 
     // Find the modal - prefer one in component tree, clean up orphaned ones in body
     const allModals = document.querySelectorAll('#search-modal');
-    let modal = null;
+    let modal: HTMLElement | null = null;
 
     if (allModals.length > 1) {
       // Multiple modals exist (orphaned from previous navigation) - keep only the fresh one
       allModals.forEach((m) => {
+        if (!(m instanceof HTMLElement)) return;
         if (m.parentElement === document.body) {
           m.remove(); // Remove orphaned modal from body
         } else {
@@ -252,8 +257,8 @@
         return;
       }
       const json = await response.json();
-      const items = Array.isArray(json?.items) ? json.items : [];
-      state.items = items.map((item) => {
+      const items: SearchIndexItem[] = Array.isArray(json?.items) ? json.items : [];
+      state.items = items.map((item): IndexedSearchItem => {
         const title = normalizeForSearch(item?.title || '');
         const description = normalizeForSearch(item?.description || '');
         const tags = normalizeForSearch(Array.isArray(item?.tags) ? item.tags.join(' ') : '');
@@ -275,7 +280,7 @@
     }
   }
 
-  function normalizeForSearch(value) {
+  function normalizeForSearch(value: unknown): string {
     return String(value || '')
       .toLowerCase()
       .normalize('NFKD')
@@ -284,14 +289,14 @@
       .trim();
   }
 
-  function tokenizeQuery(query) {
+  function tokenizeQuery(query: string): string[] {
     return normalizeForSearch(query)
       .split(/[^a-z0-9]+/)
       .map((t) => t.trim())
       .filter((t) => t.length >= 2);
   }
 
-  function scoreItem(item, tokens) {
+  function scoreItem(item: IndexedSearchItem, tokens: string[]): number {
     if (!tokens.length) return 0;
     const title = item?.__title || '';
     const description = item?.__description || '';
@@ -312,7 +317,7 @@
   }
 
   // Perform search
-  async function performSearch(query) {
+  async function performSearch(query: string) {
     const { resultsContainer } = getEls();
     if (!query.trim()) {
       if (resultsContainer) {
@@ -347,7 +352,7 @@
   }
 
   // Render search results
-  function renderResults(results, query) {
+  function renderResults(results: IndexedSearchItem[], query: string) {
     const { resultsContainer } = getEls();
     if (!resultsContainer) return;
     
@@ -370,7 +375,7 @@
     `;
   }
 
-  function escapeHtml(value) {
+  function escapeHtml(value: unknown): string {
     return String(value || '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -379,13 +384,13 @@
       .replace(/'/g, '&#39;');
   }
 
-  function formatUrlLabel(url) {
+  function formatUrlLabel(url: string): string {
     const value = String(url || '').replace(/^[a-z]+:\/\//i, '');
 
     return value.length > 48 ? `${value.slice(0, 45)}…` : value;
   }
 
-  function getContentTypeData(value) {
+  function getContentTypeData(value: string): ContentTypeData {
     const u = String(value || '');
 
     if (u === 'insight' || u.includes('/insights/')) {
@@ -411,7 +416,7 @@
     };
   }
 
-  function getContentTypeIcon(typeKey) {
+  function getContentTypeIcon(typeKey: ContentTypeData['key']): string {
     if (typeKey === 'insight') {
       return '<svg class="w-3.5 h-3.5 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
     }
@@ -421,23 +426,23 @@
     return '<svg class="w-3.5 h-3.5 text-foreground-muted" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6z"/></svg>';
   }
 
-  function getResultCode(typeKey, index) {
+  function getResultCode(typeKey: ContentTypeData['key'], index: number): string {
     if (typeKey === 'insight') return `INSIGHT-${index + 1}`;
     if (typeKey === 'portfolio') return `PROJ-${index + 1}`;
     return `PAGE-${index + 1}`;
   }
 
-  function getSearchResultImage(result, typeKey) {
+  function getSearchResultImage(result: IndexedSearchItem, typeKey: ContentTypeData['key']) {
     const src = result?.image || (typeKey === 'page' ? '/brand/logo-mark.png' : '/brand/logo-mark.png');
     const alt = result?.imageAlt || result?.title || 'Image';
     return { src, alt };
   }
 
-  function escapeRegExp(value) {
+  function escapeRegExp(value: string): string {
     return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  function highlightText(text, tokens) {
+  function highlightText(text: string, tokens: string[]): string {
     let html = escapeHtml(text);
     for (const token of tokens || []) {
       if (!token || token.length < 2) continue;
@@ -447,7 +452,7 @@
     return html;
   }
 
-  function buildExcerpt(text, tokens) {
+  function buildExcerpt(text: string, tokens: string[]): string {
     const raw = String(text || '').replace(/\s+/g, ' ').trim();
     if (!raw) return '';
 
@@ -469,11 +474,11 @@
     return `${prefix}${slice}${suffix}`;
   }
 
-  function humanizeStatus(status) {
+  function humanizeStatus(status: string): string {
     return String(status || '').replace(/_/g, ' ').trim();
   }
 
-  function getStatusBadgeClass(status) {
+  function getStatusBadgeClass(status: string): string {
     const s = String(status || '');
     if (s === 'completed') return 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20';
     if (s === 'proposal') return 'bg-amber-500/10 text-amber-400 ring-amber-500/20';
@@ -482,7 +487,7 @@
     return 'bg-slate-500/10 text-slate-400 ring-slate-500/20';
   }
 
-  function renderRightHeaderPill(result, typeData) {
+  function renderRightHeaderPill(result: IndexedSearchItem, typeData: ContentTypeData): string {
     if (typeData.key === 'portfolio') {
       const status = result?.status;
       if (status) {
@@ -500,7 +505,7 @@
     return `<span class="search-result-badge ${typeData.badgeClass}">${typeData.label}</span>`;
   }
 
-  function renderMetaRow(result, typeData) {
+  function renderMetaRow(result: IndexedSearchItem, typeData: ContentTypeData): string {
     if (typeData.key === 'portfolio') {
       if (result?.clientLogo) {
         return `
@@ -537,7 +542,7 @@
     return '';
   }
 
-  function renderSearchResultCard(result, index, activeIndex) {
+  function renderSearchResultCard(result: IndexedSearchItem, index: number, activeIndex: number): string {
     const typeData = getContentTypeData(result.type || result.url);
     const isActive = index === activeIndex;
     const title = highlightText(result.title || 'Untitled', state.queryTokens);
@@ -598,7 +603,7 @@
   }
 
   // Navigate results with keyboard
-  function navigateResults(direction) {
+  function navigateResults(direction: 'up' | 'down') {
     const { resultsContainer } = getEls();
     if (!resultsContainer) return;
     if (state.results.length === 0) return;

@@ -8,26 +8,7 @@ import {
     getMediaUrl,
     normalizeWpRichText,
 } from '../lib/wordpress';
-
-type SearchIndexItemType = 'insight' | 'portfolio' | 'page';
-
-type SearchIndexItem = {
-    id: string;
-    type: SearchIndexItemType;
-    title: string;
-    url: string;
-    description?: string;
-    image?: string;
-    imageAlt?: string;
-    tags?: string[];
-    publishDate?: string;
-    readTime?: number;
-    client?: string;
-    clientLogo?: string;
-    status?: string;
-    featured?: boolean;
-    text: string;
-};
+import type { SearchIndexItem } from '../lib/searchTypes';
 
 export const prerender = true;
 

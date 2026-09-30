@@ -82,6 +82,8 @@ const skills = {
 
 // Fetch About Page Data
 const aboutPage = await fetchAboutPage();
+const bioImageUrl = getMediaUrl(aboutPage?.bioImage);
+const bioName = aboutPage?.bioName || 'Ahmad Al-Karmi';
 
 // JSON-LD: a ProfilePage whose mainEntity is the canonical Person entity
 // (referenced by @id), plus a breadcrumb. This is the strongest signal for
@@ -133,13 +135,12 @@ const schema = graph(
         <div class="xl:col-span-4 xl:sticky xl:top-32">
           <div class="glass-card p-8">
             <div class="w-24 h-24 rounded-full overflow-hidden mb-6 ring-4 ring-accent/20">
-              <Image 
-                src={getMediaUrl(aboutPage?.bioImage) || avatarImage} 
-                alt={aboutPage?.bioName || "Ahmad Al-Karmi"} 
-                width={192}
-                height={192}
-                class="w-full h-full object-cover"
-              />
+              {/* Two branches because <Image> types a remote URL and a local import differently. */}
+              {bioImageUrl ? (
+                <Image src={bioImageUrl} alt={bioName} width={192} height={192} class="w-full h-full object-cover" />
+              ) : (
+                <Image src={avatarImage} alt={bioName} width={192} height={192} class="w-full h-full object-cover" />
+              )}
             </div>
             <h2 class="font-display text-2xl text-foreground mb-2">{aboutPage?.bioName || "Ahmad Al-Karmi"}</h2>
             <p class="text-accent font-medium mb-6">{aboutPage?.bioRole || "Senior Product & Innovation Leader"}</p>
