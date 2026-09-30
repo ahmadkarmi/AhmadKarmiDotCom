@@ -1,0 +1,136 @@
+---
+// Topic hub: every article on one of the site's fixed topics (lib/topics.ts).
+// These pages are what tell search engines the site covers a few subjects in
+// depth. A topic gets a page only once it has MIN_ARTICLES_FOR_TOPIC_PAGE
+// articles; below that it would be a thin page.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import InsightCard from '../../../components/InsightCard.astro';
+import { fetchInsights, type Insight } from '../../../lib/wordpress';
+import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../../lib/schema';
+import { absoluteUrl } from '../../../lib/urls';
+import { articlesInTopic, topicPath, topicsWithPages, type Topic } from '../../../lib/topics';
+
+export async function getStaticPaths() {
+  const insights = await fetchInsights();
+  const hubs = topicsWithPages(insights);
+  return hubs.map((topic) => ({
+    params: { slug: topic.slug },
+    props: { topic, articles: articlesInTopic(insights, topic), hubs },
+  }));
+}
+
+interface Props {
+  topic: Topic;
+  articles: Insight[];
+  hubs: Topic[];
+}
+
+const { topic, articles, hubs } = Astro.props;
+const path = topicPath(topic);
+const title = `${topic.name} Articles`;
+
+// The hub changes when any of its articles does.
+const modified = articles
+  .map((a) => a.modified || a.publishDate || '')
+  .reduce((latest, d) => (d > latest ? d : latest), '');
+
+const schema = graph(
+  {
+    '@type': 'CollectionPage',
+    '@id': `${absoluteUrl(path)}#collection`,
+    url: absoluteUrl(path),
+    name: `${topic.name}: articles by Ahmad Al-Karmi`,
+    description: topic.description,
+    inLanguage: 'en',
+    about: { '@type': 'Thing', name: topic.name },
+    author: { '@id': PERSON_ID },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: articles.length,
+      itemListElement: articles.map((a, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: absoluteUrl(`/insights/${a.slug}`),
+        name: a.name,
+      })),
+    },
+  },
+  personNode(),
+  breadcrumbNode([
+    { name: 'Home', url: '/' },
+    { name: 'Insights', url: '/insights' },
+    { name: topic.name, url: path },
+  ])
+);
+
+const otherTopics = hubs.filter((t) => t.slug !== topic.slug);
+---
+
+<BaseLayout
+  title={title}
+  description={topic.description}
+  modifiedDate={modified || undefined}
+  schema={schema}
+>
+  <!-- Header -->
+  <section class="section pt-32 pb-8">
+    <div class="container-custom">
+      <div class="max-w-3xl">
+        <nav aria-label="Breadcrumb" class="mb-4 animate-fade-in">
+          <ol class="flex items-center gap-2 text-sm font-medium">
+            <li><a href="/insights" class="text-accent hover:underline">Insights</a></li>
+            <li aria-hidden="true" class="text-foreground-muted">/</li>
+            <li aria-current="page" class="text-foreground-secondary">Topic</li>
+          </ol>
+        </nav>
+        <h1 class="font-display text-display-lg text-foreground mb-6 animate-slide-up">
+          {topic.name}
+        </h1>
+        <p class="text-foreground-secondary text-lg animate-slide-up animation-delay-200">
+          {topic.description}
+        </p>
+        <p class="text-sm text-foreground-muted mt-4">
+          {articles.length} {articles.length === 1 ? 'article' : 'articles'}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Articles -->
+  <section class="section pt-8">
+    <div class="container-custom">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {articles.map((insight, index) => (
+          <InsightCard insight={insight} index={index} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Other topics -->
+  <section class="section pt-0">
+    <div class="container-custom">
+      <h2 class="font-display text-2xl text-foreground mb-6">More topics</h2>
+      <ul class="flex flex-wrap gap-2">
+        {otherTopics.map((t) => (
+          <li>
+            <a
+              href={topicPath(t)}
+              class="inline-block px-4 py-2 rounded-full text-sm font-medium bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground transition-colors"
+            >
+              {t.name}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a
+            href="/insights"
+            class="inline-block px-4 py-2 rounded-full text-sm font-medium text-accent hover:bg-accent/10 transition-colors"
+          >
+            All insights
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

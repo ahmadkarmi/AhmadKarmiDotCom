@@ -4,6 +4,7 @@ import InsightsFilter from '../../components/InsightsFilter';
 import { fetchInsights } from '../../lib/wordpress';
 import { toCardData } from '../../lib/insightCard';
 import { graph, breadcrumbNode, personNode, PERSON_ID, SITE_URL } from '../../lib/schema';
+import { TOPICS, assertTopicTags, articlesInTopic, topicPath, topicsWithPages } from '../../lib/topics';
 
 const insights = await fetchInsights();
 
@@ -16,12 +17,21 @@ if (insights.length === 0) {
   );
 }
 
+// Every article must carry 1 or 2 of the fixed topics (lib/topics.ts). A tag
+// added in WordPress outside that list fails the build instead of quietly
+// growing the taxonomy again.
+assertTopicTags(insights);
+
 // Strip everything the filter does not render, above all `body`.
 const cards = insights.map(toCardData);
 
-// Get unique tags for filtering
-const allTags = insights.flatMap(insight => insight.tags || []);
-const uniqueTags = [...new Set(allTags)].sort();
+// Filter options in topic rank order. Topics with their own page link to it,
+// so the pills double as crawlable links into each topic hub.
+const hubs = new Set(topicsWithPages(insights).map((t) => t.slug));
+const topics = TOPICS.filter((t) => articlesInTopic(insights, t).length > 0).map((t) => ({
+  name: t.name,
+  href: hubs.has(t.slug) ? topicPath(t) : undefined,
+}));
 
 // JSON-LD: a Blog listing every article, plus a breadcrumb. Gives engines and
 // AI crawlers a structured map of the writing rather than just a wall of links.
@@ -31,7 +41,7 @@ const schema = graph(
     '@id': `${SITE_URL}/insights#blog`,
     name: 'Insights by Ahmad Al-Karmi',
     description:
-      'Articles on AI product management, digital transformation, and building products that matter.',
+      'Articles on AI product management, product leadership, growth and go-to-market, agile delivery and digital transformation.',
     url: `${SITE_URL}/insights`,
     inLanguage: 'en',
     author: { '@id': PERSON_ID },
@@ -54,7 +64,7 @@ const schema = graph(
 
 <BaseLayout
   title="Insights"
-  description="Articles and insights on product management, digital transformation, innovation, and technology."
+  description="Articles by Ahmad Al-Karmi on AI product management, product leadership, growth and go-to-market, agile delivery and digital transformation."
   schema={schema}
 >
   <!-- Header -->
@@ -90,7 +100,7 @@ const schema = graph(
       <InsightsFilter 
         client:load 
         insights={cards} 
-        tags={uniqueTags} 
+        topics={topics}
       />
     </div>
   </section>

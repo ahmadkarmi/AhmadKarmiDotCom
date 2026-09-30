@@ -6,7 +6,10 @@ interface Props {
     // Slim card data, not full Insight objects. Passing full Insights here
     // serialised every article body into the island's props attribute.
     insights: InsightCardData[];
-    tags: string[];
+    // Topics in rank order (lib/topics.ts). `href` is the topic's own page,
+    // when it has one: the pill is then a real link crawlers can follow, and a
+    // plain click still filters in place.
+    topics: { name: string; href?: string }[];
 }
 
 // Format date
@@ -20,17 +23,17 @@ function formatDate(dateString?: string): string {
     });
 }
 
-export default function InsightsFilter({ insights, tags }: Props) {
+export default function InsightsFilter({ insights, topics }: Props) {
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
     // Initialize from URL query param
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const tagFromUrl = params.get('tag');
-        if (tagFromUrl && tags.includes(tagFromUrl)) {
+        if (tagFromUrl && topics.some(t => t.name === tagFromUrl)) {
             setSelectedTag(tagFromUrl);
         }
-    }, [tags]);
+    }, [topics]);
 
     // Update URL when tag changes
     const handleTagSelect = (tag: string | null) => {
@@ -65,18 +68,32 @@ export default function InsightsFilter({ insights, tags }: Props) {
                 >
                     All
                 </button>
-                {tags.map(tag => (
-                    <button
-                        key={tag}
-                        onClick={() => handleTagSelect(tag)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedTag === tag
-                            ? 'bg-accent text-white shadow-sm'
-                            : 'bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground'
-                            }`}
-                    >
-                        {tag}
-                    </button>
-                ))}
+                {topics.map(({ name, href }) => {
+                    const className = `px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedTag === name
+                        ? 'bg-accent text-white shadow-sm'
+                        : 'bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground'
+                        }`;
+                    return href ? (
+                        <a
+                            key={name}
+                            href={href}
+                            onClick={(e) => {
+                                // Modified clicks (new tab and so on) follow the link.
+                                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                                e.preventDefault();
+                                handleTagSelect(name);
+                            }}
+                           
+                            className={className}
+                        >
+                            {name}
+                        </a>
+                    ) : (
+                        <button key={name} onClick={() => handleTagSelect(name)} className={className}>
+                            {name}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Results Count */}

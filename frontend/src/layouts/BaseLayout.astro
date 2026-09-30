@@ -114,6 +114,8 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
     {ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)} />}
     <meta property="og:image:alt" content={resolvedAlt} data-pagefind-meta="image_alt[content]" />
     <meta property="og:site_name" content="Ahmad Al-Karmi" />
+    {/* Non-article pages with a CMS date (topic hubs) declare it here; the sitemap reads it back as <lastmod>. */}
+    {ogType !== 'article' && modifiedDate && <meta property="og:updated_time" content={modifiedDate} />}
 
     {/* Article Specific Metadata */}
     {ogType === 'article' && (

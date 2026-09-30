@@ -8,6 +8,7 @@
     { "source": "/portfolio/:slug(kuwait-sc-rebrand|sultan-telecom-corporate-profile|wilson-bass|my-work)", "destination": "/portfolio", "permanent": true },
     { "source": "/articles-insights/:slug", "destination": "/insights/:slug", "permanent": true },
     { "source": "/articles-insights", "destination": "/insights", "permanent": true },
+    { "source": "/insights/topic", "destination": "/insights", "permanent": false },
     { "source": "/news-insights/articles/:slug", "destination": "/insights/:slug", "permanent": true },
     { "source": "/news-insights/:path*", "destination": "/insights", "permanent": true },
     { "source": "/publishing/articles-insights/:slug", "destination": "/insights/:slug", "permanent": true },

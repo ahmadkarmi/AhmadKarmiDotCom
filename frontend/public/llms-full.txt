@@ -5,7 +5,7 @@
 Site: https://www.ahmadkarmi.com
 Articles: 38
 Portfolio entries: 12
-Generated: 2026-09-29T15:46:38Z
+Generated: 2026-09-30T18:32:27Z
 
 ---
 
@@ -14,7 +14,7 @@ Generated: 2026-09-29T15:46:38Z
 ## AI features compound. AI organizations don’t. A note on what I’ve learned about AI delivery frameworks.
 
 *Published: 2026-05-08*
-*Tags: Artificial Intelligence, Innovation, Product Management*
+*Topics: AI Product Management*
 
 URL: https://www.ahmadkarmi.com/insights/ai-features-compound-ai-organizations-dont-a-note-on-what-ive-learned-about-ai-delivery-frameworks
 
@@ -96,7 +96,7 @@ The discipline matters more than the features. If your AI mandate is going well 
 ## AI Will Not Fix a Broken GTM Strategy. Here Is What It Will Do.
 
 *Published: 2026-03-10*
-*Tags: Artificial Intelligence, B2B, GTM, Strategy*
+*Topics: AI Product Management, Growth & Go-to-Market*
 
 URL: https://www.ahmadkarmi.com/insights/ai-will-not-fix-a-broken-gtm-strategy-here-is-what-it-will-do
 
@@ -176,7 +176,7 @@ The competitive advantage AI offers in go-to-market is not that it makes you mov
 ## AI in Dealership Service: Where Fixed Operations Leak Profit and How to Stop It
 
 *Published: 2026-02-04*
-*Tags: Artificial Intelligence, Automotive, Operations*
+*Topics: AI Product Management, Digital Transformation*
 
 URL: https://www.ahmadkarmi.com/insights/ai-in-dealership-service-where-fixed-operations-leak-profit-and-how-to-stop-it
 
@@ -334,7 +334,7 @@ Charisma! Insights. “Service department AI now a ‘strategic imperative’ fo
 ## Beyond Persuasion: Is AI Engineering a Systematic Threat to Politics?
 
 *Published: 2026-01-14*
-*Tags: Artificial Intelligence*
+*Topics: AI & Society*
 
 URL: https://www.ahmadkarmi.com/insights/beyond-persuasion-is-ai-engineering-a-systematic-threat-to-politics
 
@@ -433,7 +433,7 @@ This shift represents the coming of a new network layer in democracy. It is a tr
 ## Product Management is Dead. Modern Business Killed It.
 
 *Published: 2025-08-26*
-*Tags: Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/product-management-is-dead-modern-business-killed-it
 
@@ -477,7 +477,7 @@ If you enjoyed this article, why not sign up to my newsletter using the form bel
 ## The New Divide: Who Gets to Shape the Digital World, and Who Gets Shaped by It?
 
 *Published: 2025-06-08*
-*Tags: Innovation, Product Management*
+*Topics: AI & Society*
 
 URL: https://www.ahmadkarmi.com/insights/the-new-divide-who-gets-to-shape-the-digital-world-and-who-gets-shaped-by-it
 
@@ -581,7 +581,7 @@ To achieve this, it is essential to prioritize justice in the design, governance
 ## Why Product Management in the Middle East Needs Its Own Playbook
 
 *Published: 2025-05-20*
-*Tags: Product Management*
+*Topics: Product Leadership, Middle East & GCC*
 
 URL: https://www.ahmadkarmi.com/insights/why-product-management-in-the-middle-east-needs-its-own-playbook
 
@@ -683,7 +683,7 @@ That’s the goal, right?
 ## When Machines Paint: The Unfolding Debate Over AI-Generated Art
 
 *Published: 2025-02-20*
-*Tags: Art, Artificial Intelligence, Legal*
+*Topics: AI & Society*
 
 URL: https://www.ahmadkarmi.com/insights/when-machines-paint-the-unfolding-debate-over-ai-generated-art
 
@@ -779,7 +779,7 @@ Ultimately, AI’s capacity to produce staggering quantities of imagery in mere 
 ## The Dark Side of Big Tech: Are Your Smart Devices Always Listening?
 
 *Published: 2025-02-19*
-*Tags: Big Tech, Privacy*
+*Topics: AI & Society*
 
 URL: https://www.ahmadkarmi.com/insights/the-dark-side-of-big-tech-are-your-smart-devices-always-listening
 
@@ -851,7 +851,7 @@ Moving forward, stricter regulatory frameworks, transparent corporate practices,
 ## The Energy Cost of Artificial Intelligence
 
 *Published: 2025-02-18*
-*Tags: Artificial Intelligence*
+*Topics: AI & Society*
 
 URL: https://www.ahmadkarmi.com/insights/the-energy-cost-of-artificial-intelligence
 
@@ -945,7 +945,7 @@ AI’s rapid expansion has sparked a necessary discussion about energy sustainab
 ## Quantum Computing and AI: The Next Frontier
 
 *Published: 2025-02-18*
-*Tags: Artificial Intelligence*
+*Topics: AI & Society*
 
 URL: https://www.ahmadkarmi.com/insights/quantum-computing-and-ai-the-next-frontier
 
@@ -1019,7 +1019,7 @@ Quantum computing and AI are driving a profound shift in computational capabilit
 ## The Art of Crafting Exceptional Product Experiences
 
 *Published: 2024-11-26*
-*Tags: Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/the-art-of-crafting-exceptional-product-experiences
 
@@ -1127,7 +1127,7 @@ After all, that’s the true art of product management. As one product leader I�
 ## How to Manage Product Scope and Feature Creep
 
 *Published: 2024-09-27*
-*Tags: Product Management*
+*Topics: Agile Delivery*
 
 URL: https://www.ahmadkarmi.com/insights/how-to-manage-product-scope-and-feature-creep
 
@@ -1233,7 +1233,7 @@ Feature creep will always be a challenge, but with the right mindset and process
 ## The RICE Framework: A Valuable Tool, But Not the Whole Picture
 
 *Published: 2024-09-09*
-*Tags: Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/the-rice-framework-a-valuable-tool-but-not-the-whole-picture
 
@@ -1303,7 +1303,7 @@ Frameworks like RICE can help navigate the complexities of product management, b
 ## Digital Banking and Product Management: Lessons from the Kuwaiti Market
 
 *Published: 2024-09-05*
-*Tags: Digital Banking, Product Management*
+*Topics: Digital Transformation, Middle East & GCC*
 
 URL: https://www.ahmadkarmi.com/insights/digital-banking-and-product-management-lessons-from-the-kuwaiti-market
 
@@ -1403,7 +1403,7 @@ By applying these lessons, banks in the GCC can navigate the challenges of digit
 ## Mastering Strategic Performance Indicators in Product Management
 
 *Published: 2024-07-05*
-*Tags: Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/mastering-strategic-performance-indicators-in-product-management
 
@@ -1747,7 +1747,7 @@ The framework for mastering SPIs can be summarized by the following:
 ## How to Integrate AI into Your GTM Strategy for Maximum Impact
 
 *Published: 2024-06-26*
-*Tags: Artificial Intelligence, Product Management*
+*Topics: AI Product Management, Growth & Go-to-Market*
 
 URL: https://www.ahmadkarmi.com/insights/how-to-integrate-ai-into-your-gtm-strategy-for-maximum-impact
 
@@ -1821,7 +1821,7 @@ Integrating AI into your GTM strategy can offer significant advantages, from per
 ## Real-Time Monitoring and Predictive Maintenance: The Backbone of Smart City Operations
 
 *Published: 2024-06-14*
-*Tags: Artificial Intelligence, Smart Cities*
+*Topics: Digital Transformation*
 
 URL: https://www.ahmadkarmi.com/insights/real-time-monitoring-and-predictive-maintenance-the-backbone-of-smart-city-operations
 
@@ -1895,7 +1895,7 @@ Real-time monitoring and predictive maintenance, powered by AI, are revolutioniz
 ## Leveraging the Fibonacci Sequence for Effective Project Estimation in Agile and Scrum
 
 *Published: 2024-05-07*
-*Tags: Agile, Product Management, Project Management, Scrum*
+*Topics: Agile Delivery*
 
 URL: https://www.ahmadkarmi.com/insights/leveraging-the-fibonacci-sequence-for-effective-project-estimation-in-agile-and-scrum
 
@@ -1979,7 +1979,7 @@ The Fibonacci sequence’s major role in managing project estimation complexitie
 ## Building Fair Tech: How PMs Can Mitigate AI Bias in Their Products
 
 *Published: 2024-04-29*
-*Tags: Artificial Intelligence, Compliance, Ethics, Product Management*
+*Topics: AI Product Management, AI & Society*
 
 URL: https://www.ahmadkarmi.com/insights/building-fair-tech-how-pms-can-mitigate-ai-bias-in-their-products
 
@@ -2073,7 +2073,7 @@ The strategies outlined are all critical steps towards achieving this goal. Thus
 ## What They Don’t Tell You About Product Launches
 
 *Published: 2024-04-25*
-*Tags: Entrepreneurship, Product Management*
+*Topics: Growth & Go-to-Market*
 
 URL: https://www.ahmadkarmi.com/insights/what-they-dont-tell-you-about-product-launches
 
@@ -2149,7 +2149,7 @@ It doesn’t have to be difficult: Subscribe to my newsletter for exclusive insi
 ## The Imperative of Data-Driven Decision Making in Product Management: An Analytical Perspective
 
 *Published: 2024-04-01*
-*Tags: Data Analytics, Data Driven Decision Making, Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/the-imperative-of-data-driven-decision-making-in-product-management-an-analytical-perspective
 
@@ -2227,7 +2227,7 @@ Organizations that embrace a data-centric approach will not only enhance their c
 ## The Unbalanced Scale: How Information Asymmetry Shapes Product Management
 
 *Published: 2023-12-16*
-*Tags: Economics, Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/the-unbalanced-scale-how-information-asymmetry-shapes-product-management
 
@@ -2281,7 +2281,7 @@ In conclusion, information asymmetry is not a hurdle to be overcome, but a force
 ## Network Effects: The Economic Engine of Product Growth
 
 *Published: 2023-12-10*
-*Tags: Economics, Product Management, The Network Effect*
+*Topics: Growth & Go-to-Market*
 
 URL: https://www.ahmadkarmi.com/insights/network-effects-the-economic-engine-of-product-growth
 
@@ -2341,7 +2341,7 @@ Network effects are a powerful economic force shaping the success of modern prod
 ## Best Practices for Effective Product Backlog Management
 
 *Published: 2023-11-09*
-*Tags: Agile, Backlog, Product Management*
+*Topics: Agile Delivery*
 
 URL: https://www.ahmadkarmi.com/insights/best-practices-for-effective-product-backlog-management
 
@@ -2395,7 +2395,7 @@ In conclusion, managing a product backlog requires a combination of technical sk
 ## 5 Ways To Transition Into Product Management
 
 *Published: 2023-04-18*
-*Tags: Career Advice, Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/5-ways-to-transition-into-product-management
 
@@ -2465,7 +2465,7 @@ Transitioning into a new career can be challenging, particularly in a fast-paced
 ## How to Build an Esports Team on a Shoestring Budget
 
 *Published: 2023-04-16*
-*Tags: esports*
+*Topics: Growth & Go-to-Market*
 
 URL: https://www.ahmadkarmi.com/insights/how-to-build-an-esports-team-on-a-shoestring-budget
 
@@ -2529,7 +2529,7 @@ Remember that building a successful esports team is a continual process, and you
 ## Why Gaming Influencers Are Key Players in the Future of Esports
 
 *Published: 2023-04-10*
-*Tags: esports, Gaming, Influencers, Media*
+*Topics: Growth & Go-to-Market*
 
 URL: https://www.ahmadkarmi.com/insights/why-gaming-influencers-are-key-players-in-the-future-of-esports
 
@@ -2599,7 +2599,7 @@ It’s clear that gaming influencers are crucial for the future of esports. They
 ## Navigating the Esports Industry: Tips for Professionals
 
 *Published: 2023-04-06*
-*Tags: esports*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/navigating-the-esports-industry-tips-for-professionals
 
@@ -2661,7 +2661,7 @@ In conclusion, the esports industry presents many opportunities for professional
 ## The Roadmap to Success: Essential Traits and Qualities for COOs in the Years Ahead
 
 *Published: 2023-03-29*
-*Tags: Business, Strategy*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/the-roadmap-to-success-essential-traits-and-qualities-for-coos-in-the-years-ahead
 
@@ -2743,7 +2743,7 @@ The challenges faced by COOs in the years ahead are significant. However, they c
 ## Mastering Product Management: Your Ultimate Beginner’s Guide
 
 *Published: 2023-03-29*
-*Tags: Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/mastering-product-management-your-ultimate-beginners-guide
 
@@ -2859,7 +2859,7 @@ If you’re interested in learning more about product management, I recommend ch
 ## Airlines, IATA, & The OpenAPI Hub
 
 *Published: 2023-03-28*
-*Tags: Digital Transformation, Innovation*
+*Topics: Digital Transformation*
 
 URL: https://www.ahmadkarmi.com/insights/airlines-iata-the-openapi-hub
 
@@ -2905,7 +2905,7 @@ It will be interesting to see how airlines use this hub and these open APIs to i
 ## Common product management mistakes to avoid
 
 *Published: 2023-03-13*
-*Tags: Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/common-product-management-mistakes-to-avoid
 
@@ -2953,7 +2953,7 @@ By avoiding these common product management mistakes, you can increase your chan
 ## The Significance of Product Documentation and Knowledge Sharing in Product Management
 
 *Published: 2023-03-12*
-*Tags: Product Management*
+*Topics: Agile Delivery*
 
 URL: https://www.ahmadkarmi.com/insights/the-significance-of-product-documentation
 
@@ -3001,7 +3001,7 @@ Product documentation and knowledge sharing are indispensable components of succ
 ## Kanban Framework Overview
 
 *Published: 2022-12-05*
-*Tags: Agile, Kanban, Product Management*
+*Topics: Agile Delivery*
 
 URL: https://www.ahmadkarmi.com/insights/kanban-framework-overview
 
@@ -3041,7 +3041,7 @@ Do you utilise Kanban at your organization or are you more inclined to more stri
 ## Customer Acquisition Cost (CAC) Explained
 
 *Published: 2022-11-03*
-*Tags: Customer Acquisition*
+*Topics: Growth & Go-to-Market*
 
 URL: https://www.ahmadkarmi.com/insights/customer-acquisition-cost-cac-explained
 
@@ -3071,7 +3071,7 @@ Customer acquisition costs can be a tricky metric to wrap your head around, but 
 ## Pareto’s Principle And Becoming A More Effective Product Manager
 
 *Published: 2020-12-01*
-*Tags: Product Management*
+*Topics: Product Leadership*
 
 URL: https://www.ahmadkarmi.com/insights/paretos-principle-and-becoming-a-more-effective-product-manager
 
@@ -3141,7 +3141,7 @@ You will surely know that roughly 80% of your income from 20% of your customer b
 ## Empowering your Digital Transformation Teams
 
 *Published: 2020-09-01*
-*Tags: Digital, Innovation, Transformation*
+*Topics: Digital Transformation*
 
 URL: https://www.ahmadkarmi.com/insights/empowering-your-digital-transformation-teams
 

@@ -63,7 +63,8 @@ async function fetchTagMap(): Promise<Map<number, string>> {
   const tags = await fetchAllPages<{ id: number; name: string }>(
     '/wp-json/wp/v2/tags?_fields=id,name'
   );
-  return new Map(tags.map((t) => [t.id, t.name]));
+  // WordPress stores "&" in tag names as "&amp;" (e.g. "AI &amp; Society").
+  return new Map(tags.map((t) => [t.id, decodeEntities(t.name)]));
 }
 
 function decodeEntities(s: string): string {

@@ -1,4 +1,5 @@
 // WordPress API client for fetching data (Headless CMS)
+import { sortByTopicRank } from './topics';
 
 const WP_URL = import.meta.env.PUBLIC_WP_URL || 'https://admin.ahmadkarmi.com';
 const WP_USER = import.meta.env.WP_USER || 'admin';
@@ -1453,9 +1454,9 @@ function transformWork(post: any): Work {
 function transformInsight(post: any): Insight {
     const acf = post.acf || {};
     const featuredMedia = post._embedded?.['wp:featuredmedia']?.[0];
-    const tags = Array.isArray(post.__tagNames)
-        ? post.__tagNames
-        : [];
+    // Ranked so tags[0] is always the article's main topic (lib/topics.ts);
+    // WordPress itself returns tags alphabetically.
+    const tags = sortByTopicRank(Array.isArray(post.__tagNames) ? post.__tagNames : []);
 
     const bodyFromAcf = typeof acf.body === 'string' ? acf.body.trim() : '';
     const bodyFromContent = typeof post.content?.rendered === 'string' ? post.content.rendered.trim() : '';

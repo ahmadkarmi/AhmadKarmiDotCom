@@ -11,12 +11,15 @@ interface Props {
 
 const { currentSlug, currentTags = [], allInsights, maxItems = 3 } = Astro.props;
 
-// Find related articles based on shared tags
+// Find related articles based on shared tags. Sharing the main topic (tags[0],
+// see lib/topics.ts) counts most, which keeps readers, and links, inside one
+// topic cluster. The sort is stable, so ties stay newest first.
 const relatedInsights = allInsights
   .filter(insight => insight.slug !== currentSlug)
   .map(insight => {
     const sharedTags = insight.tags?.filter(tag => currentTags.includes(tag)) || [];
-    return { insight, score: sharedTags.length };
+    const sameMainTopic = currentTags.length > 0 && insight.tags?.[0] === currentTags[0];
+    return { insight, score: sharedTags.length + (sameMainTopic ? 2 : 0) };
   })
   .sort((a, b) => b.score - a.score)
   .slice(0, maxItems)

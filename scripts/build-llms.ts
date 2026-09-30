@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { fetchWordPress, type NormalizedPost } from './lib/wp';
 import { stripHtml } from './lib/chunk';
 import { PROFILES } from '../frontend/src/lib/profiles';
+import { TOPICS, primaryTopic, sortByTopicRank, topicPath, topicsWithPages } from '../frontend/src/lib/topics';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -31,13 +32,24 @@ function fmtDate(d: string): string {
 
 function buildLlmsIndex(insights: NormalizedPost[], works: NormalizedPost[]): string {
   const sorted = [...insights].sort((a, b) => b.date.localeCompare(a.date));
-  const aiPicks = sorted.filter((p) => p.tags.some((t) => /ai|artificial/i.test(t))).slice(0, 6);
-  const pmPicks = sorted
-    .filter((p) => !p.tags.some((t) => /ai|artificial/i.test(t)))
-    .filter((p) => p.tags.some((t) => /product|pm|management/i.test(t)))
-    .slice(0, 6);
 
-  const insightLines = sorted.map((p) => `- [${p.title}](${p.url}): ${fmtDate(p.date)}`);
+  // The catalog is grouped by each article's main topic (lib/topics.ts), so
+  // every article appears once, under the subject it is mainly about.
+  const hubs = new Set(topicsWithPages(sorted).map((t) => t.slug));
+  const topicSections = TOPICS.map((topic) => {
+    const posts = sorted.filter((p) => primaryTopic(p.tags)?.slug === topic.slug);
+    if (!posts.length) return '';
+    const hub = hubs.has(topic.slug) ? `\n\nAll ${topic.name} articles: ${SITE}${topicPath(topic)}` : '';
+    return `### ${topic.name}
+
+${topic.description}${hub}
+
+${posts.map((p) => `- [${p.title}](${p.url}): ${fmtDate(p.date)}`).join('\n')}`;
+  }).filter(Boolean);
+  const untopical = sorted.filter((p) => !primaryTopic(p.tags));
+  if (untopical.length) {
+    topicSections.push(`### Other\n\n${untopical.map((p) => `- [${p.title}](${p.url}): ${fmtDate(p.date)}`).join('\n')}`);
+  }
   const workLines = works.map((p) => `- [${p.title}](${p.url})${p.workClient ? ` — ${p.workClient}` : ''}`);
 
   return `# Ahmad Al-Karmi
@@ -54,17 +66,9 @@ This site documents Ahmad's product thinking through long-form articles, a worki
 - [Portfolio](${SITE}/portfolio): project case studies (note: portfolio is partial because much current work is under NDA)
 - [Contact](${SITE}/contact): direct outreach
 
-## Recent AI writing
+## Insights by topic (${sorted.length} articles)
 
-${aiPicks.map((p) => `- [${p.title}](${p.url}): ${fmtDate(p.date)}`).join('\n')}
-
-## Recent product management writing
-
-${pmPicks.map((p) => `- [${p.title}](${p.url}): ${fmtDate(p.date)}`).join('\n')}
-
-## Full insight catalog (${sorted.length} articles)
-
-${insightLines.join('\n')}
+${topicSections.join('\n\n')}
 
 ## Portfolio (${works.length} projects)
 
@@ -86,7 +90,7 @@ ${PROFILES.map((p) => `- [${p.label}](${p.url})`).join('\n')}
 function postToMarkdown(p: NormalizedPost): string {
   const body = stripHtml(p.body).trim();
   const description = p.insightDescription ? stripHtml(p.insightDescription).trim() : '';
-  const tagLine = p.tags.length ? `\n*Tags: ${p.tags.join(', ')}*\n` : '';
+  const tagLine = p.tags.length ? `\n*Topics: ${sortByTopicRank(p.tags).join(', ')}*\n` : '';
   const dateLine = p.date ? `*Published: ${fmtDate(p.date)}*` : '';
   const lead = description && description !== body.slice(0, description.length) ? `\n> ${description}\n` : '';
   return `## ${p.title}

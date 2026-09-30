@@ -10,7 +10,7 @@ const DIST_DIR = fileURLToPath(new URL('./dist/', import.meta.url));
 
 // Map of canonical path -> YYYY-MM-DD content-modified date, read back from
 // the article:modified_time meta each built detail page declares (sourced
-// from WordPress `modified`). The sitemap runs at astro:build:done, after
+// from WordPress `modified`), or og:updated_time on topic hubs. The sitemap runs at astro:build:done, after
 // every page is written, so the pages are the single source of truth.
 // Date-only because WordPress `modified` carries no timezone and <lastmod>
 // requires one when a time is given.
@@ -25,7 +25,7 @@ function pageModifiedDates() {
                 walk(full);
             } else if (entry.name === 'index.html') {
                 const html = fs.readFileSync(full, 'utf8');
-                const match = html.match(/<meta property="article:modified_time" content="(\d{4}-\d{2}-\d{2})/);
+                const match = html.match(/<meta property="(?:article:modified_time|og:updated_time)" content="(\d{4}-\d{2}-\d{2})/);
                 if (match) {
                     const rel = nodePath.relative(DIST_DIR, nodePath.dirname(full)).split(nodePath.sep).join('/');
                     modifiedByPath.set(`/${rel}`, match[1]);
@@ -87,6 +87,9 @@ export default defineConfig({
                     item.changefreq = 'weekly';
                 } else if (['/insights', '/portfolio', '/about'].includes(path)) {
                     item.priority = 0.8;
+                    item.changefreq = 'weekly';
+                } else if (path.startsWith('/insights/topic/')) {
+                    item.priority = 0.7;
                     item.changefreq = 'weekly';
                 } else if (path.startsWith('/insights/') || path.startsWith('/portfolio/')) {
                     item.priority = 0.6;

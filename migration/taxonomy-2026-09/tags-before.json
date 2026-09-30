@@ -1,0 +1,310 @@
+{
+  "source": "www.ahmadkarmi.com/search-index.json captured before the retag (generatedAt 2026-09-30T10:01:39.857Z)",
+  "note": "Original tag names per article (duplicates carried the same tags). Old tag IDs were deleted; a rollback recreates tags by name.",
+  "articles": [
+    {
+      "slug": "ai-features-compound-ai-organizations-dont-a-note-on-what-ive-learned-about-ai-delivery-frameworks",
+      "title": "AI features compound. AI organizations don’t. A note on what I’ve learned about AI delivery frameworks.",
+      "tags": [
+        "Artificial Intelligence",
+        "Innovation",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "ai-will-not-fix-a-broken-gtm-strategy-here-is-what-it-will-do",
+      "title": "AI Will Not Fix a Broken GTM Strategy. Here Is What It Will Do.",
+      "tags": [
+        "Artificial Intelligence",
+        "B2B",
+        "GTM",
+        "Strategy"
+      ]
+    },
+    {
+      "slug": "ai-in-dealership-service-where-fixed-operations-leak-profit-and-how-to-stop-it",
+      "title": "AI in Dealership Service: Where Fixed Operations Leak Profit and How to Stop It",
+      "tags": [
+        "Artificial Intelligence",
+        "Automotive",
+        "Operations"
+      ]
+    },
+    {
+      "slug": "beyond-persuasion-is-ai-engineering-a-systematic-threat-to-politics",
+      "title": "Beyond Persuasion: Is AI Engineering a Systematic Threat to Politics?",
+      "tags": [
+        "Artificial Intelligence"
+      ]
+    },
+    {
+      "slug": "product-management-is-dead-modern-business-killed-it",
+      "title": "Product Management is Dead. Modern Business Killed It.",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "the-new-divide-who-gets-to-shape-the-digital-world-and-who-gets-shaped-by-it",
+      "title": "The New Divide: Who Gets to Shape the Digital World, and Who Gets Shaped by It?",
+      "tags": [
+        "Innovation",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "why-product-management-in-the-middle-east-needs-its-own-playbook",
+      "title": "Why Product Management in the Middle East Needs Its Own Playbook",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "when-machines-paint-the-unfolding-debate-over-ai-generated-art",
+      "title": "When Machines Paint: The Unfolding Debate Over AI-Generated Art",
+      "tags": [
+        "Art",
+        "Artificial Intelligence",
+        "Legal"
+      ]
+    },
+    {
+      "slug": "the-dark-side-of-big-tech-are-your-smart-devices-always-listening",
+      "title": "The Dark Side of Big Tech: Are Your Smart Devices Always Listening?",
+      "tags": [
+        "Big Tech",
+        "Privacy"
+      ]
+    },
+    {
+      "slug": "the-energy-cost-of-artificial-intelligence",
+      "title": "The Energy Cost of Artificial Intelligence",
+      "tags": [
+        "Artificial Intelligence"
+      ]
+    },
+    {
+      "slug": "quantum-computing-and-ai-the-next-frontier",
+      "title": "Quantum Computing and AI: The Next Frontier",
+      "tags": [
+        "Artificial Intelligence"
+      ]
+    },
+    {
+      "slug": "the-art-of-crafting-exceptional-product-experiences",
+      "title": "The Art of Crafting Exceptional Product Experiences",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "how-to-manage-product-scope-and-feature-creep",
+      "title": "How to Manage Product Scope and Feature Creep",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "the-rice-framework-a-valuable-tool-but-not-the-whole-picture",
+      "title": "The RICE Framework: A Valuable Tool, But Not the Whole Picture",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "digital-banking-and-product-management-lessons-from-the-kuwaiti-market",
+      "title": "Digital Banking and Product Management: Lessons from the Kuwaiti Market",
+      "tags": [
+        "Digital Banking",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "mastering-strategic-performance-indicators-in-product-management",
+      "title": "Mastering Strategic Performance Indicators in Product Management",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "how-to-integrate-ai-into-your-gtm-strategy-for-maximum-impact",
+      "title": "How to Integrate AI into Your GTM Strategy for Maximum Impact",
+      "tags": [
+        "Artificial Intelligence",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "real-time-monitoring-and-predictive-maintenance-the-backbone-of-smart-city-operations",
+      "title": "Real-Time Monitoring and Predictive Maintenance: The Backbone of Smart City Operations",
+      "tags": [
+        "Artificial Intelligence",
+        "Smart Cities"
+      ]
+    },
+    {
+      "slug": "leveraging-the-fibonacci-sequence-for-effective-project-estimation-in-agile-and-scrum",
+      "title": "Leveraging the Fibonacci Sequence for Effective Project Estimation in Agile and Scrum",
+      "tags": [
+        "Agile",
+        "Product Management",
+        "Project Management",
+        "Scrum"
+      ]
+    },
+    {
+      "slug": "building-fair-tech-how-pms-can-mitigate-ai-bias-in-their-products",
+      "title": "Building Fair Tech: How PMs Can Mitigate AI Bias in Their Products",
+      "tags": [
+        "Artificial Intelligence",
+        "Compliance",
+        "Ethics",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "what-they-dont-tell-you-about-product-launches",
+      "title": "What They Don’t Tell You About Product Launches",
+      "tags": [
+        "Entrepreneurship",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "the-imperative-of-data-driven-decision-making-in-product-management-an-analytical-perspective",
+      "title": "The Imperative of Data-Driven Decision Making in Product Management: An Analytical Perspective",
+      "tags": [
+        "Data Analytics",
+        "Data Driven Decision Making",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "the-unbalanced-scale-how-information-asymmetry-shapes-product-management",
+      "title": "The Unbalanced Scale: How Information Asymmetry Shapes Product Management",
+      "tags": [
+        "Economics",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "network-effects-the-economic-engine-of-product-growth",
+      "title": "Network Effects: The Economic Engine of Product Growth",
+      "tags": [
+        "Economics",
+        "Product Management",
+        "The Network Effect"
+      ]
+    },
+    {
+      "slug": "best-practices-for-effective-product-backlog-management",
+      "title": "Best Practices for Effective Product Backlog Management",
+      "tags": [
+        "Agile",
+        "Backlog",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "5-ways-to-transition-into-product-management",
+      "title": "5 Ways To Transition Into Product Management",
+      "tags": [
+        "Career Advice",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "how-to-build-an-esports-team-on-a-shoestring-budget",
+      "title": "How to Build an Esports Team on a Shoestring Budget",
+      "tags": [
+        "esports"
+      ]
+    },
+    {
+      "slug": "why-gaming-influencers-are-key-players-in-the-future-of-esports",
+      "title": "Why Gaming Influencers Are Key Players in the Future of Esports",
+      "tags": [
+        "esports",
+        "Gaming",
+        "Influencers",
+        "Media"
+      ]
+    },
+    {
+      "slug": "navigating-the-esports-industry-tips-for-professionals",
+      "title": "Navigating the Esports Industry: Tips for Professionals",
+      "tags": [
+        "esports"
+      ]
+    },
+    {
+      "slug": "the-roadmap-to-success-essential-traits-and-qualities-for-coos-in-the-years-ahead",
+      "title": "The Roadmap to Success: Essential Traits and Qualities for COOs in the Years Ahead",
+      "tags": [
+        "Business",
+        "Strategy"
+      ]
+    },
+    {
+      "slug": "mastering-product-management-your-ultimate-beginners-guide",
+      "title": "Mastering Product Management: Your Ultimate Beginner’s Guide",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "airlines-iata-the-openapi-hub",
+      "title": "Airlines, IATA, & The OpenAPI Hub",
+      "tags": [
+        "Digital Transformation",
+        "Innovation"
+      ]
+    },
+    {
+      "slug": "common-product-management-mistakes-to-avoid",
+      "title": "Common product management mistakes to avoid",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "the-significance-of-product-documentation",
+      "title": "The Significance of Product Documentation and Knowledge Sharing in Product Management",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "kanban-framework-overview",
+      "title": "Kanban Framework Overview",
+      "tags": [
+        "Agile",
+        "Kanban",
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "customer-acquisition-cost-cac-explained",
+      "title": "Customer Acquisition Cost (CAC) Explained",
+      "tags": [
+        "Customer Acquisition"
+      ]
+    },
+    {
+      "slug": "paretos-principle-and-becoming-a-more-effective-product-manager",
+      "title": "Pareto’s Principle And Becoming A More Effective Product Manager",
+      "tags": [
+        "Product Management"
+      ]
+    },
+    {
+      "slug": "empowering-your-digital-transformation-teams",
+      "title": "Empowering your Digital Transformation Teams",
+      "tags": [
+        "Digital",
+        "Innovation",
+        "Transformation"
+      ]
+    }
+  ]
+}

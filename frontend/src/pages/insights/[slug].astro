@@ -17,6 +17,7 @@ import { absoluteUrl } from '../../lib/urls';
 import { wrapContentTables } from '../../lib/contentTables';
 import { clampDescription, demoteBodyH1 } from '../../lib/seo';
 import { OG_CARD_SIZE, ogCardPath, resolveInsightHeroUrl } from '../../lib/og/urls';
+import { primaryTopic, topicByName, topicPath, topicsWithPages } from '../../lib/topics';
 
 export async function getStaticPaths() {
   const insights = await fetchInsights();
@@ -41,6 +42,16 @@ if (!insightData) {
 }
 
 const shareUrl = absoluteUrl(Astro.url.pathname);
+
+// Topics (lib/topics.ts): tags[0] is the main topic. Tags whose topic has its
+// own page link there; the rest fall back to the filtered /insights list.
+const hubSlugs = new Set(topicsWithPages(allInsights).map((t) => t.slug));
+const mainTopic = primaryTopic(insightData.tags);
+const mainTopicHub = mainTopic && hubSlugs.has(mainTopic.slug) ? mainTopic : undefined;
+function tagHref(tag: string): string {
+  const topic = topicByName(tag);
+  return topic && hubSlugs.has(topic.slug) ? topicPath(topic) : `/insights?tag=${encodeURIComponent(tag)}`;
+}
 
 const heroMedia = insightData.mainImage || insightData.thumbnailImage;
 const heroImageUrl = getMediaUrl(heroMedia);
@@ -199,6 +210,7 @@ const blogPosting = {
     "@type": "WebPage",
     "@id": shareUrl
   },
+  "articleSection": mainTopic?.name,
   "keywords": insightData.tags?.join(', ') || undefined
 };
 
@@ -219,6 +231,7 @@ const schema = graph(
   breadcrumbNode([
     { name: 'Home', url: '/' },
     { name: 'Insights', url: '/insights' },
+    ...(mainTopicHub ? [{ name: mainTopicHub.name, url: topicPath(mainTopicHub) }] : []),
     { name: insightData.name, url: `/insights/${insightData.slug}` },
   ])
 );
@@ -242,16 +255,27 @@ const schema = graph(
   <section class="section pt-32 pb-8">
     <div class="container-custom">
       <article class="max-w-3xl mx-auto">
-        <!-- Back Link -->
-        <a 
-          href="/insights" 
-          class="inline-flex items-center gap-2 text-foreground-secondary hover:text-foreground transition-colors mb-8"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Insights
-        </a>
+        <!-- Breadcrumb: Insights / main topic (matches the BreadcrumbList schema) -->
+        <nav aria-label="Breadcrumb" class="mb-8">
+          <ol class="flex flex-wrap items-center gap-2 text-foreground-secondary">
+            <li>
+              <a href="/insights" class="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Insights
+              </a>
+            </li>
+            {mainTopicHub && (
+              <>
+                <li aria-hidden="true" class="text-foreground-muted">/</li>
+                <li>
+                  <a href={topicPath(mainTopicHub)} class="hover:text-foreground transition-colors">{mainTopicHub.name}</a>
+                </li>
+              </>
+            )}
+          </ol>
+        </nav>
         
         <!-- Meta -->
         <div class="flex flex-wrap items-center gap-4 mb-6 text-sm text-foreground-secondary">
@@ -280,7 +304,7 @@ const schema = graph(
           <div class="flex flex-wrap gap-2 mb-6">
             {insightData.tags.map(tag => (
               <a 
-                href={`/insights?tag=${encodeURIComponent(tag)}`}
+                href={tagHref(tag)}
                 class="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm hover:bg-accent hover:text-white transition-colors"
               >
                 {tag}
