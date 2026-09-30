@@ -10,6 +10,7 @@ import { graph, personNode, websiteNode } from '../lib/schema';
 import MetricBento from '../components/MetricBento.astro';
 import HeroArtDesktop from '../components/home/HeroArtDesktop.astro';
 import HeroArtMobile from '../components/home/HeroArtMobile.astro';
+import SignalBackground from '../components/home/SignalBackground.astro';
 
 // Fetch content: prioritize featured items, fill remaining slots with recent non-featured
 const MAX_ITEMS = 3;
@@ -81,7 +82,10 @@ const schema = graph(
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <!-- Background Pattern -->
       <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 32px 32px;"></div>
-      
+
+      <!-- xl+ with a real pointer: light animated signal lines, dots and pulses -->
+      <SignalBackground />
+
       <!-- Below xl: kanban board background (gyro / looped motion) -->
       <HeroArtMobile />
       

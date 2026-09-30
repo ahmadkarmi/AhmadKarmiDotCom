@@ -1,0 +1,100 @@
+---
+// Light "signal network" behind the homepage hero, desktop only.
+//
+// Three faint flowing lines with a pulse of light travelling along each, and
+// nodes on the lines' anchor points, some sending out slow ripples. Purely
+// decorative (aria-hidden, pointer-events none), layered under the hero's
+// headline and desktop board art. Renders only at xl (where the hero switches
+// to its desktop layout; below xl the animated mobile board is the backdrop)
+// on hover-capable screens, so it never lands on phones or tablets.
+// Reduced motion keeps the static lines and dots.
+
+// Geometry sized for a full-viewport hero (roughly 16:10).
+const lines = [
+  { d: 'M-40 180 C 120 180, 200 105, 360 120 S 620 255, 780 210 S 1060 90, 1200 135 S 1400 225, 1480 195', dur: 11, delay: 0 },
+  { d: 'M-40 495 C 160 450, 300 540, 480 510 S 820 420, 1000 480 S 1320 555, 1480 495', dur: 14, delay: -5 },
+  { d: 'M-40 810 C 180 840, 320 750, 520 780 S 880 855, 1060 795 S 1360 735, 1480 780', dur: 9, delay: -2 },
+];
+
+// Anchor points of the curves above; `pulse` sets the ripple delay (seconds).
+const nodes = [
+  { x: 360, y: 120, pulse: 0 },
+  { x: 780, y: 210 },
+  { x: 1200, y: 135, pulse: 1.6 },
+  { x: 480, y: 510 },
+  { x: 1000, y: 480, pulse: 3.1 },
+  { x: 520, y: 780, pulse: 2.2 },
+  { x: 1060, y: 795 },
+];
+---
+
+<div
+  class="signal-bg pointer-events-none absolute inset-0 overflow-hidden hidden [@media(min-width:1280px)_and_(hover:hover)]:block"
+  aria-hidden="true"
+>
+  <svg class="h-full w-full text-accent" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    {lines.map((line) => (
+      <g>
+        <path d={line.d} fill="none" stroke="currentColor" stroke-opacity="0.09" stroke-width="1" />
+        <path
+          class="signal-pulse"
+          d={line.d}
+          pathLength="1000"
+          fill="none"
+          stroke="currentColor"
+          stroke-opacity="0.35"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          style={`animation-duration: ${line.dur}s; animation-delay: ${line.delay}s`}
+        />
+      </g>
+    ))}
+    {nodes.map((node) => (
+      <g>
+        {node.pulse !== undefined && (
+          <circle class="signal-ripple" cx={node.x} cy={node.y} r="4" fill="currentColor" style={`animation-delay: ${node.pulse}s`} />
+        )}
+        <circle cx={node.x} cy={node.y} r="3" fill="currentColor" fill-opacity="0.3" />
+      </g>
+    ))}
+  </svg>
+</div>
+
+<style>
+  .signal-bg {
+    /* Fade toward the edges so the network reads as atmosphere, not a frame. */
+    -webkit-mask-image: radial-gradient(ellipse 70% 75% at 50% 50%, #000 45%, transparent 100%);
+    mask-image: radial-gradient(ellipse 70% 75% at 50% 50%, #000 45%, transparent 100%);
+  }
+
+  /* A short dash on a 1000-unit path, travelling end to end. */
+  .signal-pulse {
+    stroke-dasharray: 80 920;
+    stroke-dashoffset: 1000;
+    animation: signal-travel linear infinite;
+  }
+
+  .signal-ripple {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: signal-ripple 3.6s ease-out infinite;
+  }
+
+  @keyframes signal-travel {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes signal-ripple {
+    0% { opacity: 0.35; transform: scale(0.8); }
+    100% { opacity: 0; transform: scale(4); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .signal-pulse,
+    .signal-ripple {
+      animation: none;
+      display: none;
+    }
+  }
+</style>
