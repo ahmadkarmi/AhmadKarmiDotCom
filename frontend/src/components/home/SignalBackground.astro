@@ -1,70 +1,98 @@
 ---
 // Light "signal network" behind the homepage hero, desktop only.
 //
-// Three faint flowing lines with a pulse of light travelling along each, and
-// nodes on the lines' anchor points, some sending out slow ripples. Purely
-// decorative (aria-hidden, pointer-events none), layered under the hero's
-// headline and desktop board art. Renders only at xl (where the hero switches
-// to its desktop layout; below xl the animated mobile board is the backdrop)
-// on hover-capable screens, so it never lands on phones or tablets.
-// Reduced motion keeps the static lines and dots.
+// Two bands of faint flowing lines, one in the free space above the hero
+// content and one below it, each with pulses travelling along the lines and
+// dots with slow ripples. The bands never cross the headline, buttons or
+// board art: a script measures the content's real bounds and fits each band
+// into the gap that is left, hiding a band when its gap is too thin. Without
+// the script no band is shown, so nothing can land on the content.
+//
+// Renders only at xl (the hero's desktop layout; below xl the animated mobile
+// board is the backdrop) on hover-capable screens, so never on phones or
+// tablets. Reduced motion keeps the static lines and dots.
 
-// Geometry sized for a full-viewport hero (roughly 16:10).
-const lines = [
-  { d: 'M-40 180 C 120 180, 200 105, 360 120 S 620 255, 780 210 S 1060 90, 1200 135 S 1400 225, 1480 195', dur: 11, delay: 0 },
-  { d: 'M-40 495 C 160 450, 300 540, 480 510 S 820 420, 1000 480 S 1320 555, 1480 495', dur: 14, delay: -5 },
-  { d: 'M-40 810 C 180 840, 320 750, 520 780 S 880 855, 1060 795 S 1360 735, 1480 780', dur: 9, delay: -2 },
-];
-
-// Anchor points of the curves above; `pulse` sets the ripple delay (seconds).
-const nodes = [
-  { x: 360, y: 120, pulse: 0 },
-  { x: 780, y: 210 },
-  { x: 1200, y: 135, pulse: 1.6 },
-  { x: 480, y: 510 },
-  { x: 1000, y: 480, pulse: 3.1 },
-  { x: 520, y: 780, pulse: 2.2 },
-  { x: 1060, y: 795 },
+// Each band is drawn in a 1440x160 box and scaled with `slice`, so keep the
+// artwork within y 40..120 where it survives cropping on short bands.
+const bands = [
+  {
+    key: 'top',
+    lines: [
+      { d: 'M-40 70 C 140 70, 220 44, 380 50 S 660 96, 820 84 S 1100 44, 1240 56 S 1420 84, 1480 76', dur: 12, delay: 0 },
+      { d: 'M-40 104 C 180 96, 320 116, 520 108 S 900 88, 1080 100 S 1360 116, 1480 106', dur: 16, delay: -6 },
+    ],
+    nodes: [
+      { x: 380, y: 50, pulse: 0 },
+      { x: 820, y: 84 },
+      { x: 1240, y: 56, pulse: 1.8 },
+      { x: 1080, y: 100 },
+    ],
+  },
+  {
+    key: 'bottom',
+    lines: [
+      { d: 'M-40 60 C 160 70, 300 44, 480 52 S 840 90, 1020 76 S 1320 46, 1480 60', dur: 10, delay: -3 },
+      { d: 'M-40 98 C 200 108, 360 86, 560 94 S 940 116, 1120 104 S 1380 90, 1480 98', dur: 14, delay: -8 },
+    ],
+    nodes: [
+      { x: 480, y: 52, pulse: 2.6 },
+      { x: 1020, y: 76, pulse: 0.9 },
+      { x: 560, y: 94 },
+    ],
+  },
 ];
 ---
 
 <div
   class="signal-bg pointer-events-none absolute inset-0 overflow-hidden hidden [@media(min-width:1280px)_and_(hover:hover)]:block"
   aria-hidden="true"
+  data-signal-bg
 >
-  <svg class="h-full w-full text-accent" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-    {lines.map((line) => (
-      <g>
-        <path d={line.d} fill="none" stroke="currentColor" stroke-opacity="0.09" stroke-width="1" />
-        <path
-          class="signal-pulse"
-          d={line.d}
-          pathLength="1000"
-          fill="none"
-          stroke="currentColor"
-          stroke-opacity="0.35"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          style={`animation-duration: ${line.dur}s; animation-delay: ${line.delay}s`}
-        />
-      </g>
-    ))}
-    {nodes.map((node) => (
-      <g>
-        {node.pulse !== undefined && (
-          <circle class="signal-ripple" cx={node.x} cy={node.y} r="4" fill="currentColor" style={`animation-delay: ${node.pulse}s`} />
-        )}
-        <circle cx={node.x} cy={node.y} r="3" fill="currentColor" fill-opacity="0.3" />
-      </g>
-    ))}
-  </svg>
+  {bands.map((band) => (
+    <svg
+      class="signal-band absolute inset-x-0 w-full text-accent"
+      data-band={band.key}
+      viewBox="0 0 1440 160"
+      preserveAspectRatio="xMidYMid slice"
+    >
+      {band.lines.map((line) => (
+        <g>
+          <path d={line.d} fill="none" stroke="currentColor" stroke-opacity="0.1" stroke-width="1" />
+          <path
+            class="signal-pulse"
+            d={line.d}
+            pathLength="1000"
+            fill="none"
+            stroke="currentColor"
+            stroke-opacity="0.38"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            style={`animation-duration: ${line.dur}s; animation-delay: ${line.delay}s`}
+          />
+        </g>
+      ))}
+      {band.nodes.map((node) => (
+        <g>
+          {node.pulse !== undefined && (
+            <circle class="signal-ripple" cx={node.x} cy={node.y} r="4" fill="currentColor" style={`animation-delay: ${node.pulse}s`} />
+          )}
+          <circle cx={node.x} cy={node.y} r="3" fill="currentColor" fill-opacity="0.3" />
+        </g>
+      ))}
+    </svg>
+  ))}
 </div>
 
 <style>
-  .signal-bg {
-    /* Fade toward the edges so the network reads as atmosphere, not a frame. */
-    -webkit-mask-image: radial-gradient(ellipse 70% 75% at 50% 50%, #000 45%, transparent 100%);
-    mask-image: radial-gradient(ellipse 70% 75% at 50% 50%, #000 45%, transparent 100%);
+  /* Soft fade at the left and right edges. */
+  .signal-band {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  }
+
+  /* Hidden until the script has fitted the band into a real gap. */
+  .signal-band:not([data-fitted]) {
+    display: none;
   }
 
   /* A short dash on a 1000-unit path, travelling end to end. */
@@ -98,3 +126,76 @@ const nodes = [
     }
   }
 </style>
+
+<script>
+  // Fit the two bands into the free space above and below the hero content.
+  const GAP = 24; // breathing room between a band and the content, in px
+  const MIN_BAND = 56; // below this a band would look cramped, so hide it
+  const MAX_BAND = 200; // beyond this the scaled lines get heavy
+
+  function contentBounds(hero: HTMLElement) {
+    const content = hero.querySelector<HTMLElement>(':scope > .container-custom');
+    if (!content) return null;
+    let top = Infinity;
+    let bottom = -Infinity;
+    // Union of every visible element, so floating parts of the board art that
+    // spill outside their grid cell are covered too.
+    for (const el of [content, ...Array.from(content.querySelectorAll<HTMLElement>('*'))]) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      top = Math.min(top, r.top);
+      bottom = Math.max(bottom, r.bottom);
+    }
+    return { top, bottom };
+  }
+
+  function fit(hero: HTMLElement, root: HTMLElement) {
+    if (getComputedStyle(root).display === 'none') return;
+    const heroRect = hero.getBoundingClientRect();
+    const bounds = contentBounds(hero);
+    if (!bounds) return;
+    const header = document.querySelector('header');
+    const headerBottom = header ? header.getBoundingClientRect().bottom : heroRect.top;
+
+    const slots = {
+      top: { start: Math.max(headerBottom, heroRect.top) + 8, end: bounds.top - GAP },
+      bottom: { start: bounds.bottom + GAP, end: heroRect.bottom - 8 },
+    };
+    root.querySelectorAll<SVGSVGElement>('[data-band]').forEach((band) => {
+      const slot = slots[band.dataset.band as 'top' | 'bottom'];
+      const room = slot.end - slot.start;
+      if (room < MIN_BAND) {
+        band.removeAttribute('data-fitted');
+        return;
+      }
+      // Cap the band on tall screens so the lines keep a delicate scale, and
+      // centre it in its gap.
+      const height = Math.min(room, MAX_BAND);
+      band.style.top = `${slot.start + (room - height) / 2 - heroRect.top}px`;
+      band.style.height = `${height}px`;
+      band.setAttribute('data-fitted', '');
+    });
+  }
+
+  function initSignalBackground() {
+    const root = document.querySelector<HTMLElement>('[data-signal-bg]');
+    const hero = root?.closest<HTMLElement>('[data-hero]');
+    if (!root || !hero || root.dataset.bound) return;
+    root.dataset.bound = 'true';
+
+    let frame = 0;
+    const refit = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => fit(hero, root));
+    };
+    refit();
+    new ResizeObserver(refit).observe(hero);
+    // Web fonts change the headline's height once they load, and the hero's
+    // entrance animations move items into their final place.
+    document.fonts?.ready.then(refit);
+    hero.addEventListener('animationend', refit);
+  }
+
+  // astro:page-load fires on the first load and after every client navigation.
+  document.addEventListener('astro:page-load', initSignalBackground);
+</script>
