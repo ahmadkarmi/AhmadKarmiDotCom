@@ -1,5 +1,5 @@
 ---
-// Desktop (xl+) hero artwork: a three-column delivery board.
+// Desktop (lg+) hero artwork: a three-column delivery board.
 //
 // Everything lives on a fixed 5:4 stage and is sized in container units
 // (1cqw = 1% of the stage width), so the whole composition scales as one
@@ -17,6 +17,11 @@
 //   cards are the same 34x14 card scaled to Done's column width, 26/34, just
 //   like the landed ticket), so at the end of a cycle every piece snaps back
 //   in the same frame and the loop has no visible seam.
+// - "Ahmad ships it": on the same 6s loop, a cursor labelled Ahmad hovers the
+//   finished ticket, presses, and carries it to Done. The ticket lifts and
+//   tilts while it is carried (with a shadow underneath) and a dashed drop
+//   slot opens at the top of Done. The cursor's keyframes use the ticket's
+//   keyframe stops and easing, so it stays on the ticket for the whole flight.
 // Only transform and opacity animate, so nothing here triggers layout or paint.
 ---
 
@@ -107,6 +112,9 @@
         </div>
       </div>
 
+      <!-- Drag: the slot that opens at the top of Done while the ticket is carried -->
+      <div class="drop-slot"></div>
+
       <!-- Conveyor: the ticket that ships (queue face, then Done face) -->
       <div class="tcard ticket">
         <div class="tface tface--queue">
@@ -120,6 +128,14 @@
             <div class="bar bar--green bw-50"></div>
           </div>
           <div class="bar bar--green-soft bw-100"></div>
+        </div>
+      </div>
+
+      <!-- Drag: Ahmad's cursor picks up each finished ticket and drops it in Done -->
+      <div class="drag-cursor">
+        <div class="drag-cursor-press">
+          <svg viewBox="0 0 24 24"><path d="M3 2l17 8.5-7.2 1.9L9.6 20z" /></svg>
+          <span class="drag-cursor-label">Ahmad</span>
         </div>
       </div>
     </div>
@@ -443,6 +459,80 @@
   .tcard--done-1 { left: 0; top: 0; }
   .tcard--done-2 { left: 0; top: 17.9cqw; }
 
+  /* ---- Drag ("Ahmad ships it") ---- */
+
+  /* Shadow under the ticket while it is carried; only its opacity animates. */
+  .ticket::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 2.8cqw;
+    box-shadow: 0 5cqw 9cqw -2cqw hsl(var(--foreground) / 0.3);
+    opacity: 0;
+  }
+
+  /* Done's top slot: the 34x14 card at Done's scale (0.7647). */
+  .drop-slot {
+    position: absolute;
+    left: 71cqw;
+    top: 32cqw;
+    width: 26cqw;
+    height: 10.7cqw;
+    border-radius: 2.14cqw;
+    border: 0.35cqw dashed hsl(var(--accent) / 0.45);
+    background: hsl(var(--accent) / 0.05);
+    opacity: 0;
+  }
+
+  /*
+   * A 10cqw box whose top-left corner is the cursor tip, so translate(%)
+   * steps are tenths of a cqw (see the WebKit note on keyframes below).
+   * Resting position (also the reduced-motion frame): beside Done.
+   */
+  .drag-cursor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10cqw;
+    height: 10cqw;
+    z-index: 5;
+    transform: translate(940%, 740%) translateZ(6cqw);
+    pointer-events: none;
+  }
+
+  .drag-cursor-press {
+    position: relative;
+    transform-origin: 0 0;
+  }
+
+  .drag-cursor svg {
+    display: block;
+    width: 4.4cqw;
+    height: 4.4cqw;
+    margin: -0.4cqw 0 0 -0.55cqw;
+    fill: hsl(var(--accent));
+    stroke: hsl(var(--background));
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0.6cqw 1cqw hsl(var(--foreground) / 0.22));
+  }
+
+  .drag-cursor-label {
+    position: absolute;
+    left: 3.2cqw;
+    top: 3.4cqw;
+    padding: 0.7cqw 1.6cqw;
+    border-radius: 1.2cqw;
+    background: hsl(var(--accent));
+    color: hsl(var(--background));
+    font-size: 2cqw;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    box-shadow: 0 0.8cqw 1.8cqw -0.4cqw hsl(var(--accent) / 0.45);
+  }
+
   /*
    * One 6s cycle, shared by every conveyor piece. Moves keep a readable
    * ~1.4s; the only "rest" is the next card loading, and its bar never
@@ -475,17 +565,57 @@
     .queue-new { animation: queue-new-in 6s linear var(--conveyor-start) infinite both; }
     .done-stack-move { animation: stack-push 6s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
     .done-oldest { animation: oldest-out 6s linear var(--conveyor-start) infinite both; }
+    .ticket::before { animation: lift-shadow 6s ease-in-out var(--conveyor-start) infinite both; }
+    .drop-slot { animation: slot-open 6s ease-in-out var(--conveyor-start) infinite both; }
+    .drag-cursor { animation: cursor-carry 6s cubic-bezier(0.65, 0, 0.35, 1) var(--conveyor-start) infinite both; }
+    .drag-cursor-press { animation: cursor-press 6s ease-out var(--conveyor-start) infinite both; }
 
     :global([data-hero-paused]) .hero-art * {
       animation-play-state: paused;
     }
   }
 
-  /* To Done's slot: 39cqw / 34cqw wide, -16cqw / 14cqw tall. */
+  /* To Done's slot: 39cqw / 34cqw wide, -16cqw / 14cqw tall. 9-13% is the
+     lift (scale up, slight tilt) before it is carried. */
   @keyframes ticket-ship {
-    0%, 13% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(55.8824%, -71.4286%) scale(0.88); }
-    37%, 100% { transform: translate(114.7059%, -114.2857%) scale(0.7647); }
+    0%, 9% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    13% { transform: translate(0, 0) scale(1.04) rotate(-2deg); }
+    25% { transform: translate(55.8824%, -71.4286%) scale(0.9) rotate(-2deg); }
+    37%, 100% { transform: translate(114.7059%, -114.2857%) scale(0.7647) rotate(0deg); }
+  }
+
+  @keyframes lift-shadow {
+    0%, 9% { opacity: 0; }
+    13%, 31% { opacity: 1; }
+    37%, 100% { opacity: 0; }
+  }
+
+  @keyframes slot-open {
+    0%, 13% { opacity: 0; }
+    18%, 33% { opacity: 1; }
+    37%, 100% { opacity: 0; }
+  }
+
+  /*
+   * Cursor tip in stage units, as tenths of a cqw (the box is 10cqw).
+   * 0-9% hovers the grab point on the finished ticket (53, 56.5); 13-37% rides
+   * that point to Done using the ticket's own stops and easing (grab point =
+   * ticket translate + scale x (21, 8.5)); 41-58% drifts clear of Done to
+   * rest (94, 74); 82-100% returns to the next ticket, which is in the slot
+   * by 48%.
+   */
+  @keyframes cursor-carry {
+    0%, 13% { transform: translate(530%, 565%) translateZ(6cqw); }
+    25% { transform: translate(699%, 457%) translateZ(6cqw); }
+    37%, 41% { transform: translate(871%, 385%) translateZ(6cqw); }
+    58%, 82% { transform: translate(940%, 740%) translateZ(6cqw); }
+    100% { transform: translate(530%, 565%) translateZ(6cqw); }
+  }
+
+  @keyframes cursor-press {
+    0%, 6% { transform: scale(1); }
+    9%, 37% { transform: scale(0.86); }
+    41%, 100% { transform: scale(1); }
   }
 
   @keyframes face-out {

@@ -10,7 +10,7 @@ import { graph, personNode, websiteNode } from '../lib/schema';
 import MetricBento from '../components/MetricBento.astro';
 import HeroArtDesktop from '../components/home/HeroArtDesktop.astro';
 import HeroArtMobile from '../components/home/HeroArtMobile.astro';
-import SignalBackground from '../components/home/SignalBackground.astro';
+import HeroRoadmap from '../components/home/HeroRoadmap.astro';
 
 // Fetch content: prioritize featured items, fill remaining slots with recent non-featured
 const MAX_ITEMS = 3;
@@ -78,23 +78,23 @@ const schema = graph(
   schema={schema}
 >
   <!-- Hero Section: The Cover Story -->
-  <section data-hero class="relative box-border flex flex-col justify-end md:justify-end xl:justify-center pb-[calc(2rem+env(safe-area-inset-bottom,0px)+0.75rem)] md:pb-[100px] xl:pb-20 overflow-hidden" style="padding-top: calc(var(--header-h, 64px) + 1rem); height: 100vh; height: 100svh;">
+  <section data-hero class="relative box-border flex flex-col justify-end md:justify-end lg:justify-center pb-[calc(2rem+env(safe-area-inset-bottom,0px)+0.75rem)] md:pb-[100px] lg:pb-20 overflow-hidden" style="padding-top: calc(var(--header-h, 64px) + 1rem); height: 100vh; height: 100svh;">
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <!-- Background Pattern -->
       <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 32px 32px;"></div>
 
-      <!-- xl+ with a real pointer: light animated signal lines, dots and pulses -->
-      <SignalBackground />
+      <!-- lg+: faint roadmap behind the board, fitted into the free space by script -->
+      <HeroRoadmap />
 
-      <!-- Below xl: kanban board background (gyro / looped motion) -->
+      <!-- Below lg: kanban board background (looped motion) -->
       <HeroArtMobile />
       
       <!-- Mobile gradient overlay for better text readability -->
-      <div class="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/70 md:from-background/25 md:to-background/50 xl:hidden"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/70 md:from-background/25 md:to-background/50 lg:hidden"></div>
     </div>
     
-    <div class="container-custom relative z-10 grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-0 items-end md:items-center">
-      <div class="xl:col-span-7 xl:pr-8">
+    <div class="container-custom relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-0 items-end md:items-center">
+      <div class="lg:col-span-7 lg:pr-8">
         <!-- Status / Date Line -->
         <div class="flex items-center gap-3 md:gap-4 mb-4 md:mb-6 lg:mb-8 opacity-0 animate-fade-in">
           <span class={`w-2 h-2 rounded-full ${availabilityColor} animate-pulse`}></span>
@@ -104,13 +104,13 @@ const schema = graph(
         </div>
         
         <!-- Headline -->
-        <h1 class="font-display text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-display-xl text-foreground mb-4 md:mb-6 lg:mb-8 tracking-tight leading-[1.15] md:leading-[1.05] lg:leading-[0.95] text-balance opacity-0 animate-slide-up animation-delay-100">
+        <h1 class="font-display text-4xl sm:text-5xl md:text-5xl lg:text-display-xl text-foreground mb-4 md:mb-6 lg:mb-8 tracking-tight leading-[1.15] md:leading-[1.05] lg:leading-[0.95] text-balance opacity-0 animate-slide-up animation-delay-100">
           <Fragment set:html={homePage?.heroTitle || `The <span class="italic text-accent font-medium">Science</span> <br /> of <span class="font-semibold">Scaling</span> <br /> <span class="font-sans font-light tracking-wide text-foreground-secondary">Digital Products.</span>`} />
         </h1>
         
         <!-- Subheadline / Editorial summary -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-8 max-w-4xl opacity-0 animate-slide-up animation-delay-200">
-          <p class="text-lg md:text-lg lg:text-xl font-light leading-relaxed text-foreground-secondary">
+          <p class="max-w-xl text-lg md:text-lg lg:text-xl font-light leading-relaxed text-foreground-secondary">
             {homePage?.heroSubtitle || "Decoding the complexity of growth. Precision strategy and product leadership for founders and enterprises."}
           </p>
           
@@ -131,7 +131,7 @@ const schema = graph(
       </div>
 
       <!-- Hero visual: delivery board, always fully in view and centred in its column -->
-      <div class="xl:col-span-5 hidden xl:flex items-center justify-center opacity-0 animate-fade-in animation-delay-500">
+      <div class="lg:col-span-5 hidden lg:flex items-center justify-center opacity-0 animate-fade-in animation-delay-500">
         <HeroArtDesktop />
       </div>
     </div>

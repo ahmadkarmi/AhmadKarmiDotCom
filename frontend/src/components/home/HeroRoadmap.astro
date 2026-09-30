@@ -1,0 +1,250 @@
+---
+// Faint product roadmap behind the desktop hero board ("Ahmad ships it").
+//
+// Board in front, roadmap behind: a week grid, month labels, a few initiative
+// bars and a Today marker. It lives in the hero's background layer and never
+// sits under the headline or buttons: a script measures the text column and
+// the board and fits the roadmap into the space to the right of the text,
+// with bars only in the free bands above and below the board. A bar that
+// does not fit its band is hidden, and without the script nothing shows.
+//
+// Motion is keyed to the board's 6s conveyor (HeroArtDesktop.astro): the
+// Today marker and the current initiative's progress step forward as each
+// ticket lands in Done (37% of every 6s cycle), over a 36s loop of six ships.
+// Only transform and opacity animate. lg+ only; reduced motion shows a still
+// roadmap.
+---
+
+<div class="roadmap hidden lg:block" aria-hidden="true" data-hero-roadmap>
+  <div class="grid-lines"></div>
+  <div class="band band--top" data-band="top">
+    <span class="month" style="left: 8%">Oct</span>
+    <span class="month" style="left: 40%">Nov</span>
+    <span class="month" style="left: 72%">Dec</span>
+    <span class="bar bar--accent" style="top: 26px; left: 10%; width: 46%">
+      <span class="bar-fill"></span><span class="bar-label">AI personalisation</span>
+    </span>
+    <span class="bar bar--violet" style="top: 56px; left: 44%; width: 40%"><span class="bar-label">Loyalty v2</span></span>
+    <div class="today"><span class="today-step"><span class="today-pill">Today</span></span></div>
+  </div>
+  <div class="band band--bottom" data-band="bottom">
+    <span class="bar bar--green" style="bottom: 44px; left: 4%; width: 34%"><span class="bar-label">Search ranking</span></span>
+    <span class="bar bar--amber" style="bottom: 14px; left: 22%; width: 32%"><span class="bar-label">Notifications</span></span>
+    <div class="today"><span class="today-step"></span></div>
+  </div>
+</div>
+
+<style>
+  .roadmap {
+    position: absolute;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%);
+    mask-image: linear-gradient(90deg, transparent, #000 16%);
+  }
+
+  /* Hidden until the script has fitted it to the real layout. */
+  .roadmap:not([data-fitted]) {
+    visibility: hidden;
+  }
+
+  .grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg,
+      hsl(var(--foreground) / 0.055) 0 1px,
+      transparent 1px 4.5%
+    );
+  }
+
+  .band {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+
+  .month {
+    position: absolute;
+    top: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--foreground-muted) / 0.7);
+  }
+
+  .bar {
+    position: absolute;
+    height: 22px;
+    border-radius: 7px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .bar-label {
+    position: relative;
+    padding-left: 9px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .bar--accent { background: hsl(var(--accent) / 0.1); color: hsl(var(--accent) / 0.85); }
+  .bar--violet { background: rgb(139 92 246 / 0.09); color: rgb(109 75 214 / 0.85); }
+  .bar--green { background: rgb(34 197 94 / 0.1); color: rgb(21 128 61 / 0.85); }
+  .bar--amber { background: rgb(245 158 11 / 0.1); color: rgb(180 83 9 / 0.85); }
+
+  /* Progress of the current initiative; steps up with each ship. */
+  .bar-fill {
+    position: absolute;
+    inset: 0;
+    background: hsl(var(--accent) / 0.12);
+    transform-origin: 0 50%;
+    transform: scaleX(0.6);
+  }
+
+  /* Today: a vertical rule drawn only inside the bands (never across the
+     board). Its stepper box is one step wide (4.5% of the roadmap), so
+     translateX(100%) moves it exactly one week column. The bottom-band bars
+     end by 56% so they stay clear of the fixed Ask K.AI button. */
+  .today {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 24%;
+    width: 4.5%;
+  }
+
+  .today-step {
+    position: absolute;
+    inset: 0;
+    border-left: 1.5px solid hsl(var(--accent) / 0.5);
+  }
+
+  .today-pill {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    transform: translateX(-50%);
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: hsl(var(--accent));
+    color: hsl(var(--background));
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Same start delay as the conveyor (--conveyor-start in HeroArtDesktop). */
+    .today-step { animation: today-step 36s cubic-bezier(0.65, 0, 0.35, 1) 0.2s infinite both; }
+    .bar-fill { animation: initiative-progress 36s cubic-bezier(0.65, 0, 0.35, 1) 0.2s infinite both; }
+
+    :global([data-hero-paused]) .roadmap * {
+      animation-play-state: paused;
+    }
+  }
+
+  /*
+   * Six 6s cycles. In each, the ticket lands at 37% (2.22s), so the step runs
+   * over 37-45% of that cycle: k*16.667% + 6.17% to k*16.667% + 7.5%.
+   * After the sixth ship the marker fades out and restarts at week one.
+   */
+  @keyframes today-step {
+    0% { transform: translateX(0); opacity: 0; }
+    3%, 6.17% { transform: translateX(0); opacity: 1; }
+    7.5%, 22.83% { transform: translateX(100%); }
+    24.17%, 39.5% { transform: translateX(200%); }
+    40.83%, 56.17% { transform: translateX(300%); }
+    57.5%, 72.83% { transform: translateX(400%); }
+    74.17%, 89.5% { transform: translateX(500%); opacity: 1; }
+    92%, 100% { transform: translateX(500%); opacity: 0; }
+  }
+
+  @keyframes initiative-progress {
+    0%, 6.17% { transform: scaleX(0.35); }
+    7.5%, 22.83% { transform: scaleX(0.45); }
+    24.17%, 39.5% { transform: scaleX(0.55); }
+    40.83%, 56.17% { transform: scaleX(0.65); }
+    57.5%, 72.83% { transform: scaleX(0.75); }
+    74.17%, 89.5% { transform: scaleX(0.85); }
+    92%, 100% { transform: scaleX(0.35); }
+  }
+</style>
+
+<script>
+  const GAP_TEXT = 40; // px between the text column and the roadmap
+  const GAP_BOARD = 16; // px between a band and the board
+  const MIN_WIDTH = 260; // narrower than this, the roadmap reads as clutter
+
+  function union(root: Element) {
+    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+    for (const el of [root, ...Array.from(root.querySelectorAll('*'))]) {
+      const q = el.getBoundingClientRect();
+      if (!q.width || !q.height) continue;
+      l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom);
+    }
+    return { l, t, r, b };
+  }
+
+  function fit(hero: HTMLElement, road: HTMLElement) {
+    road.removeAttribute('data-fitted');
+    if (getComputedStyle(road).display === 'none') return;
+    const content = hero.querySelector<HTMLElement>(':scope > .container-custom');
+    const textCol = content?.children[0];
+    const stage = hero.querySelector<HTMLElement>('.hero-art .stage');
+    if (!textCol || !stage) return;
+
+    const h = hero.getBoundingClientRect();
+    const header = document.querySelector('header')?.getBoundingClientRect().bottom ?? h.top;
+    const text = union(textCol);
+    // The board tilts and its cursor roams, so pad the stage box a little.
+    const s = stage.getBoundingClientRect();
+    const pad = s.width * 0.04;
+    const board = { t: s.top - pad, b: s.bottom + pad };
+
+    const left = text.r + GAP_TEXT - h.left;
+    const top = Math.max(header, h.top) + 8 - h.top;
+    const width = h.width - left;
+    const height = h.height - top - 8;
+    if (width < MIN_WIDTH) return;
+    Object.assign(road.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` });
+
+    const bands = {
+      top: { y: 0, h: board.t - GAP_BOARD - (h.top + top) },
+      bottom: { y: board.b + GAP_BOARD - (h.top + top), h: height - (board.b + GAP_BOARD - (h.top + top)) },
+    };
+    road.querySelectorAll<HTMLElement>('[data-band]').forEach((band) => {
+      const slot = bands[band.dataset.band as 'top' | 'bottom'];
+      band.style.top = `${slot.y}px`;
+      band.style.height = `${Math.max(0, slot.h)}px`;
+      band.hidden = slot.h < 24;
+      // Hide any bar that would spill out of its band.
+      for (const bar of Array.from(band.querySelectorAll<HTMLElement>('.bar'))) {
+        const topPx = parseFloat(bar.style.top || 'NaN');
+        const bottomPx = parseFloat(bar.style.bottom || 'NaN');
+        const reach = Number.isNaN(topPx) ? bottomPx + 22 : topPx + 22;
+        bar.hidden = reach > slot.h;
+      }
+    });
+    road.setAttribute('data-fitted', '');
+  }
+
+  function init() {
+    const road = document.querySelector<HTMLElement>('[data-hero-roadmap]');
+    const hero = road?.closest<HTMLElement>('[data-hero]');
+    if (!road || !hero || road.dataset.bound) return;
+    road.dataset.bound = 'true';
+    let frame = 0;
+    const refit = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(() => fit(hero, road)); };
+    refit();
+    new ResizeObserver(refit).observe(hero);
+    document.fonts?.ready.then(refit);
+    // Entrance animations move the text into place after first paint.
+    hero.addEventListener('animationend', (e) => { if (!(e.target as Element).closest('.hero-art')) refit(); });
+  }
+
+  // astro:page-load fires on the first load and after every client navigation.
+  document.addEventListener('astro:page-load', init);
+</script>

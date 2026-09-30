@@ -1,11 +1,11 @@
 // Home hero motion. Deliberately tiny and dependency-free.
 //
-// - Desktop (xl+, fine pointer): the board tilts toward the cursor. One rAF
+// - Desktop (lg+, fine pointer): the board tilts toward the cursor. One rAF
 //   loop lerps toward the target and writes the board's inline transform,
 //   and stops as soon as it settles, so an idle page runs no frames. (Not a
 //   CSS custom property: those inherit, so every change re-styled all ~115
 //   elements on the board instead of just the board itself.)
-// - Below xl the board is pure CSS (a slow drift plus the conveyor loop); the
+// - Below lg the board is pure CSS (a slow drift plus the conveyor loop); the
 //   script only pauses it. There is deliberately no device-orientation mode:
 //   shifting columns sideways made cards cross the column dividers, and
 //   columns moving by different amounts made the conveyor hand-off jump.
@@ -33,7 +33,7 @@ function init() {
     const { signal } = controller;
 
     const board = hero.querySelector<HTMLElement>('[data-hero-board]');
-    const tiltQuery = matchMedia('(min-width: 1280px) and (hover: hover) and (pointer: fine)');
+    const tiltQuery = matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)');
 
     const target: Vec = { x: 0, y: 0 };
     const current: Vec = { x: 0, y: 0 };
