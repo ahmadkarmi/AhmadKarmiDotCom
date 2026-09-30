@@ -1,5 +1,5 @@
 ---
-// Below-xl hero background: the kanban board behind the headline.
+// Below-lg hero background: the kanban board behind the headline.
 //
 // The board is drawn in a 400x900 coordinate space that covers the hero like
 // `preserveAspectRatio="xMidYMid slice"`. Each column is its own small <svg>
@@ -44,11 +44,14 @@ const doneCard = (y: number, dx = 0) => `
   data-hero-mobile
   aria-hidden="true"
 >
-  <!-- Static: column dividers -->
-  <svg class="board-static" viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice">
+  <div class="mfade">
+  <!-- Static: column dividers, placed in board units like the columns -->
+  <div class="mcol" style="--x:0;--y:0;--w:400;--h:900">
+  <svg class="fill" viewBox="0 0 400 900" fill="none">
     <line x1="137" y1="25" x2="137" y2="880" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.15"/>
     <line x1="265" y1="25" x2="265" y2="880" stroke="currentColor" stroke-width="2" class="text-foreground" opacity="0.15"/>
   </svg>
+  </div>
 
   <!-- TO DO -->
   <div class="mcol mcol--todo" style="--x:14;--y:29;--w:117;--h:493">
@@ -142,20 +145,31 @@ const doneCard = (y: number, dx = 0) => `
       </div>
     </div>
   </div>
+  </div>
 </div>
 
 <style>
   #mobile-roadmap {
     container-type: size;
-    /* px per board unit, matching preserveAspectRatio="xMidYMid slice" */
-    --u: max(calc(100cqw / 400), calc(100cqh / 900));
+    /* px per board unit. Covers the hero like preserveAspectRatio="xMidYMid
+       slice", but never so large that the conveyor (board units ~235-675,
+       440 tall) no longer fits in the area below the header. Without that
+       cap, wide short screens (a narrowed desktop window, a phone held
+       sideways) blew the board up 2-2.5x and ran the conveyor off the top of
+       the screen. Portrait phones and tablets sit under the cap, unchanged. */
+    --hdr: var(--header-h, 64px);
+    --u: min(max(calc(100cqw / 400), calc(100cqh / 900)), calc((100cqh - var(--hdr) - 24px) / 440));
   }
 
-  .board-static {
+  /* When the cap leaves the board narrower than the screen, soften its left
+     and right edges into the background; when it covers the screen the fade
+     width resolves to 0 and nothing changes. */
+  .mfade {
+    --edge: min(56px, max(0px, (100cqw - 400 * var(--u)) / 2));
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
+    -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - 200 * var(--u)), #000 calc(50% - 200 * var(--u) + var(--edge)), #000 calc(50% + 200 * var(--u) - var(--edge)), transparent calc(50% + 200 * var(--u)));
+    mask-image: linear-gradient(90deg, transparent calc(50% - 200 * var(--u)), #000 calc(50% - 200 * var(--u) + var(--edge)), #000 calc(50% + 200 * var(--u) - var(--edge)), transparent calc(50% + 200 * var(--u)));
   }
 
   /* A layer at board box (--x, --y, --w, --h), centred like the slice. */
@@ -164,7 +178,9 @@ const doneCard = (y: number, dx = 0) => `
     --oy: var(--y);
     position: absolute;
     left: calc(50cqw + (var(--x) - 200) * var(--u));
-    top: calc(50cqh + (var(--y) - 450) * var(--u));
+    /* The conveyor's centre (unit 455) sits in the middle of the visible
+       area below the header, not of the whole hero. */
+    top: calc(var(--hdr) + (100cqh - var(--hdr)) / 2 + (var(--y) - 455) * var(--u));
     width: calc(var(--w) * var(--u));
     height: calc(var(--h) * var(--u));
   }
