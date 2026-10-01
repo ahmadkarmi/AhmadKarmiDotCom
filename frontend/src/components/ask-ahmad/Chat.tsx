@@ -140,6 +140,12 @@ type VoiceState = 'unsupported' | 'idle' | 'listening' | 'processing';
 
 type SRErrorKind = 'no-speech' | 'audio-capture' | 'not-allowed' | 'network' | 'aborted' | 'other';
 
+// Mouse/trackpad devices. Touch devices skip programmatic focus: on iOS it
+// pops (or half-pops) the keyboard and pans the page under the reader.
+function hasFinePointer(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
+}
+
 function track(event: string, params: Record<string, unknown> = {}): void {
   if (typeof window !== 'undefined' && typeof window.trackEvent === 'function') {
     window.trackEvent(event, params);
@@ -343,7 +349,7 @@ function HandoffCard({
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         rows={Math.min(12, Math.max(4, draft.split('\n').length))}
-        className="w-full text-xs leading-relaxed bg-background border border-border rounded-lg px-3 py-2 font-sans text-foreground focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 resize-none"
+        className="w-full text-base md:text-xs leading-relaxed bg-background border border-border rounded-lg px-3 py-2 font-sans text-foreground focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 resize-none"
       />
       <div className="flex gap-2 mt-3 flex-wrap">
         <button
@@ -378,6 +384,7 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
   const launcherEntrance = useRef(!skipEntrance);
   const [input, setInput] = useState('');
   const [hydrated, setHydrated] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevStatusRef = useRef<string>('ready');
@@ -462,7 +469,7 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
   useEffect(() => {
     const wasStreaming = prevStatusRef.current === 'streaming' || prevStatusRef.current === 'submitted';
     const isReady = status !== 'streaming' && status !== 'submitted';
-    if (wasStreaming && isReady && open) {
+    if (wasStreaming && isReady && open && hasFinePointer()) {
       // Defer to the next tick so the input's `disabled` flag is fully
       // cleared before we try to focus it.
       requestAnimationFrame(() => inputRef.current?.focus());
@@ -470,16 +477,77 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
     prevStatusRef.current = status;
   }, [status, open]);
 
+  // The launcher root (Widget.astro) sets the stacking context at z-60, under
+  // the cookie banner (z-90) and the article audio bar (z-65), which would
+  // otherwise sit on top of the open panel's input. Lift it while open.
   useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (open && isMobile) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
+    const root = overlayRef.current?.closest<HTMLElement>('[data-chat-root]');
+    if (!open || !root) return;
+    root.style.zIndex = '95';
+    return () => root.style.removeProperty('z-index');
+  }, [open]);
+
+  // Mobile scroll lock. iOS only honours overflow: hidden when it is on the
+  // root element too, and focusing the input can still scroll the page behind
+  // the panel, so put the reader back where they were on close.
+  useEffect(() => {
+    if (!open || !window.matchMedia('(max-width: 767px)').matches) return;
+    const html = document.documentElement;
+    const { body } = document;
+    const scrollY = window.scrollY;
+    const prev = [html.style.overflow, body.style.overflow, html.style.overscrollBehavior];
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    html.style.overscrollBehavior = 'none';
+    return () => {
+      [html.style.overflow, body.style.overflow, html.style.overscrollBehavior] = prev;
+      window.scrollTo({ top: scrollY, behavior: 'instant' });
+    };
+  }, [open]);
+
+  // Mobile keyboard. iOS Safari does not shrink the layout viewport when the
+  // keyboard opens; it pans the page instead, which pushes a full-screen fixed
+  // panel's header off the top and leaves its input under the keyboard. Pin
+  // the panel to the visual viewport (the area actually visible above the
+  // keyboard) so it simply gets shorter, as in a native chat app.
+  useEffect(() => {
+    const overlay = overlayRef.current;
+    const vv = window.visualViewport;
+    if (!open || !overlay || !vv) return;
+    const mobile = window.matchMedia('(max-width: 767px)');
+    const reset = () => {
+      overlay.style.removeProperty('top');
+      overlay.style.removeProperty('bottom');
+      overlay.style.removeProperty('height');
+    };
+    let frame = 0;
+    const sync = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (!mobile.matches) return reset();
+        // Pinch-zoomed: leave the panel where it is rather than shrink it.
+        if (vv.scale > 1.01) return;
+        const scroller = scrollRef.current;
+        const atBottom =
+          !!scroller && scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 48;
+        overlay.style.top = `${vv.offsetTop}px`;
+        overlay.style.bottom = 'auto';
+        overlay.style.height = `${vv.height}px`;
+        // Keep the latest message in view as the keyboard opens.
+        if (atBottom && scroller) scroller.scrollTop = scroller.scrollHeight;
+      });
+    };
+    sync();
+    vv.addEventListener('resize', sync);
+    vv.addEventListener('scroll', sync);
+    mobile.addEventListener('change', sync);
+    return () => {
+      cancelAnimationFrame(frame);
+      vv.removeEventListener('resize', sync);
+      vv.removeEventListener('scroll', sync);
+      mobile.removeEventListener('change', sync);
+      reset();
+    };
   }, [open]);
 
   // --- Voice input: feature detect + cleanup ---
@@ -583,7 +651,7 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
         // Defer focus so the input is editable before we drop the cursor.
         requestAnimationFrame(() => {
           const el = inputRef.current;
-          if (el) {
+          if (el && hasFinePointer()) {
             el.focus();
             el.setSelectionRange(el.value.length, el.value.length);
           }
@@ -691,6 +759,8 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
     });
     void sendMessage({ text: trimmed });
     setInput('');
+    // On touch, lower the keyboard on send so the answer has the full screen.
+    if (!hasFinePointer()) inputRef.current?.blur();
   }
 
   function escapeToEmail(reason: 'header' | 'inline') {
@@ -723,7 +793,10 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
   }
 
   return (
-    <div className="fixed inset-0 md:relative md:inset-auto z-[60] pointer-events-auto motion-safe:animate-fade-in-fast">
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 md:relative md:inset-auto z-[60] pointer-events-auto touch-manipulation motion-safe:animate-fade-in-fast"
+    >
       <div className="bg-background border-0 md:border md:border-border rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden flex flex-col w-full h-full md:w-[460px] md:h-[700px] md:max-h-[calc(100vh-6rem)] motion-safe:animate-panel-in origin-bottom-right">
         {/* Header */}
         <header className="px-5 py-4 border-b border-border/60 flex items-center justify-between flex-shrink-0 gap-3 bg-background">
@@ -764,7 +837,7 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
         </header>
 
         {/* Messages */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-6 space-y-6">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-5 py-6 space-y-6">
           {messages.length === 0 && (
             <div className="min-h-full flex flex-col justify-center motion-safe:animate-fade-up relative min-w-0">
               {/* Faint dot-grid backdrop — "graph paper" texture that reads
@@ -982,7 +1055,11 @@ export default function Chat({ initiallyOpen = false, skipEntrance = false }: Ch
               }
               disabled={isStreaming}
               readOnly={voiceState === 'listening'}
-              className={`flex-1 min-w-0 bg-transparent border-0 outline-none text-[15px] py-1.5 placeholder:text-foreground-muted disabled:opacity-50 ${
+              enterKeyHint="send"
+              autoComplete="off"
+              // 16px below md: iOS Safari zooms the page into any focused
+              // field with a smaller font size.
+              className={`flex-1 min-w-0 bg-transparent border-0 outline-none text-base md:text-[15px] py-1.5 placeholder:text-foreground-muted disabled:opacity-50 ${
                 voiceState === 'listening' ? 'italic text-foreground-muted' : ''
               }`}
             />
