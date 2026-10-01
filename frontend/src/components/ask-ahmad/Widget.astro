@@ -1,9 +1,61 @@
 ---
-import Chat from './Chat';
+// K.AI launcher. The page ships a plain HTML copy of the chat's own launcher
+// button; React and the chat load only on the first sign of intent (hover,
+// touch, keyboard focus or click) and then take its place. Before this, every
+// page view downloaded ~140KB of JavaScript in the first seconds of load just
+// to draw this button. A click before the chat has loaded is remembered and
+// opens it.
 const enabled = import.meta.env.PUBLIC_ASK_AHMAD_ENABLED === 'true';
 ---
 {enabled && (
-  <div class="fixed bottom-6 right-6 z-[60]" transition:persist="ask-ahmad">
-    <Chat client:idle />
+  <div class="fixed bottom-6 right-6 z-[60]" transition:persist="ask-ahmad" data-chat-root>
+    <button
+      type="button"
+      data-chat-launcher
+      class="group rounded-full bg-foreground text-background pl-2 pr-5 py-2 text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-accent transition-all duration-200 pointer-events-auto flex items-center gap-2.5 motion-safe:animate-fade-up"
+    >
+      <span class="w-7 h-7 rounded-full bg-background/10 flex items-center justify-center font-display text-xs font-semibold tracking-tight">
+        K
+      </span>
+      <span>Ask K.AI</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="13 6 19 12 13 18" />
+      </svg>
+    </button>
   </div>
 )}
+
+<script>
+  function bind() {
+    const root = document.querySelector<HTMLElement>('[data-chat-root]');
+    const launcher = root?.querySelector<HTMLButtonElement>('[data-chat-launcher]');
+    // The root persists across client navigations, so this runs once per visit.
+    if (!root || !launcher || root.dataset.bound) return;
+    root.dataset.bound = 'true';
+
+    let wantOpen = false;
+    let loading: Promise<void> | null = null;
+
+    const load = () => {
+      loading ??= import('./mount').then(({ mountChat }) => {
+        launcher.remove();
+        mountChat(root, wantOpen);
+      });
+      return loading;
+    };
+
+    // Warm up on intent, so the chat is usually ready before the click lands.
+    for (const type of ['pointerenter', 'touchstart', 'focus'] as const) {
+      launcher.addEventListener(type, () => void load(), { once: true, passive: true });
+    }
+    launcher.addEventListener('click', () => {
+      wantOpen = true;
+      launcher.setAttribute('aria-busy', 'true');
+      void load();
+    }, { once: true });
+  }
+
+  // astro:page-load fires on the first load and after every client navigation.
+  document.addEventListener('astro:page-load', bind);
+</script>

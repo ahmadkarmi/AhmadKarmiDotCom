@@ -1,4 +1,11 @@
 ---
+// Self-hosted variable fonts (same files Google Fonts serves): no extra
+// origins to connect to before text can render in its final font.
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource-variable/playfair-display/wght.css';
+import '@fontsource-variable/playfair-display/wght-italic.css';
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import playfairLatin from '@fontsource-variable/playfair-display/files/playfair-display-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
@@ -150,14 +157,10 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
       ? <meta name="robots" content="noindex, follow" />
       : <link rel="canonical" href={canonicalURL} />}
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" media="print" onload="this.media='all'" />
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
-    </noscript>
+    <!-- Fonts: self-hosted (see imports above). Preload the two Latin files
+         every page's first screen uses; italics and other scripts load on use. -->
+    <link rel="preload" as="font" type="font/woff2" href={playfairLatin} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={interLatin} crossorigin />
 
     <!-- Schema.org JSON-LD -->
     {schema && (
@@ -167,8 +170,7 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
     <!-- Astro View Transitions: smooth fade between pages -->
     <ClientRouter />
 
-    <!-- Google Analytics 4 (Deferred) -->
-    <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-1SKBRGQJRM"></script>
+    <!-- Google Analytics 4. gtag.js is injected after the load event (bottom of this script). -->
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -246,6 +248,28 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
         window.scrollTo({ top: 0, behavior: 'instant' });
         sendPageView();
       });
+
+      // gtag.js itself (~176KB, the largest script on the page) loads only
+      // once the page has finished loading, so it never competes with the
+      // first paint on a slow connection. The consent, config and page_view
+      // calls above wait in dataLayer and are sent when it arrives. Trade-off,
+      // accepted: a visit that ends before the load event is not counted.
+      (function () {
+        if (window.__gtagLoaderBound) return;
+        window.__gtagLoaderBound = true;
+        function loadGtag() {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-1SKBRGQJRM';
+          document.head.appendChild(s);
+        }
+        function schedule() {
+          if ('requestIdleCallback' in window) requestIdleCallback(loadGtag, { timeout: 2000 });
+          else setTimeout(loadGtag, 1);
+        }
+        if (document.readyState === 'complete') schedule();
+        else window.addEventListener('load', schedule, { once: true });
+      })();
     </script>
 
   </head>

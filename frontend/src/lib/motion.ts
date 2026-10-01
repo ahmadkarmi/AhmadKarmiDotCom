@@ -52,24 +52,36 @@ document.addEventListener('astro:before-swap', (event) => {
 
 function initReveals() {
   if (reduceMotion() || !('IntersectionObserver' in window)) return;
-  const pending = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]:not([data-reveal-state])'))
-    .filter((el) => el.getBoundingClientRect().top > window.innerHeight);
-  if (!pending.length) return;
+  const targets = document.querySelectorAll<HTMLElement>('[data-reveal]:not([data-reveal-state])');
+  if (!targets.length) return;
 
+  // The observer's first report says whether each element starts on screen,
+  // without measuring layout here (getBoundingClientRect on page load forced
+  // a synchronous reflow). On-screen elements are left alone; the rest are
+  // hidden while still off screen, then revealed when they scroll in.
+  const seen = new WeakSet<Element>();
   const observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        (entry.target as HTMLElement).dataset.revealState = 'shown';
-        observer.unobserve(entry.target);
+        const el = entry.target as HTMLElement;
+        if (!seen.has(el)) {
+          seen.add(el);
+          // Against the real viewport, not the margin-shrunk root: an element
+          // already in the bottom 8% of the screen must stay visible.
+          const below = entry.boundingClientRect.top > window.innerHeight;
+          if (entry.isIntersecting || !below) observer.unobserve(el);
+          else el.dataset.revealState = 'pending';
+          continue;
+        }
+        if (entry.isIntersecting) {
+          el.dataset.revealState = 'shown';
+          observer.unobserve(el);
+        }
       }
     },
     { rootMargin: '0px 0px -8% 0px' }
   );
-  for (const el of pending) {
-    el.dataset.revealState = 'pending';
-    observer.observe(el);
-  }
+  targets.forEach((el) => observer.observe(el));
 }
 
 // astro:page-load fires on the first load and after every client navigation.

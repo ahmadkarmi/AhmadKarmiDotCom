@@ -3,6 +3,7 @@ import type { Work } from '../lib/wordpress';
 import { getMediaUrl } from '../lib/wordpress';
 import { Image } from 'astro:assets';
 import avatarImage from '../assets/brand/avatar.jpg';
+import { CARD_SIZES, CARD_WIDTHS, widthsFor } from '../lib/responsiveImage';
 
 export interface Props {
   work: Work;
@@ -14,12 +15,18 @@ const media = work.coverImage || work.mainImage;
 const imageUrl = getMediaUrl(media);
 const imageWidth = media?.width || 800; // Fallback
 const imageHeight = media?.height || 450; // Fallback
-const cardImageWidth = Math.min(imageWidth, 900);
+const cardWidths = widthsFor(imageWidth, CARD_WIDTHS);
+const cardImageWidth = cardWidths[cardWidths.length - 1];
 const cardImageHeight = Math.round((cardImageWidth / imageWidth) * imageHeight);
 
 const clientLogoUrl = getMediaUrl(work.clientLogo);
-const clientLogoWidth = work.clientLogo?.width || 120;
-const clientLogoHeight = work.clientLogo?.height || 40;
+// Logos show at 24px tall (h-6); render them at 2x that, never larger. Some
+// WordPress logos are 2560px wide or 1766px tall, 40 to 60KB each.
+const LOGO_HEIGHT = 48;
+const logoSourceWidth = work.clientLogo?.width || 120;
+const logoSourceHeight = work.clientLogo?.height || 40;
+const clientLogoHeight = Math.min(LOGO_HEIGHT, logoSourceHeight);
+const clientLogoWidth = Math.round((clientLogoHeight / logoSourceHeight) * logoSourceWidth);
 
 function toPlainText(value?: string): string {
   if (!value) return '';
@@ -111,6 +118,8 @@ const descriptionText = truncate(toPlainText(work.brief) || toPlainText(work.det
           alt={work.name}
           width={cardImageWidth}
           height={cardImageHeight}
+          widths={cardWidths}
+          sizes={CARD_SIZES}
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />

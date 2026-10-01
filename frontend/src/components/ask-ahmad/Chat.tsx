@@ -365,8 +365,17 @@ function HandoffCard({
   );
 }
 
-export default function Chat() {
-  const [open, setOpen] = useState(false);
+interface ChatProps {
+  /** Mounted by a click on the static launcher (Widget.astro): open at once. */
+  initiallyOpen?: boolean;
+  /** Taking over from the static launcher: do not replay its entrance. */
+  skipEntrance?: boolean;
+}
+
+export default function Chat({ initiallyOpen = false, skipEntrance = false }: ChatProps = {}) {
+  const [open, setOpen] = useState(initiallyOpen);
+  // Cleared the first time the panel opens, so later closes animate as usual.
+  const launcherEntrance = useRef(!skipEntrance);
   const [input, setInput] = useState('');
   const [hydrated, setHydrated] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -643,6 +652,16 @@ export default function Chat() {
 
   const isStreaming = status === 'streaming' || status === 'submitted';
 
+  // A click on the static launcher counts as opening the chat.
+  useEffect(() => {
+    if (initiallyOpen) track('ask_ahmad_opened', { had_prior_conversation: messages.length > 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (open) launcherEntrance.current = true;
+  }, [open]);
+
   function openChat() {
     setOpen(true);
     track('ask_ahmad_opened', { had_prior_conversation: messages.length > 0 });
@@ -689,7 +708,7 @@ export default function Chat() {
       <button
         type="button"
         onClick={openChat}
-        className="group rounded-full bg-foreground text-background pl-2 pr-5 py-2 text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-accent transition-all duration-200 pointer-events-auto flex items-center gap-2.5 motion-safe:animate-fade-up"
+        className={`group rounded-full bg-foreground text-background pl-2 pr-5 py-2 text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-accent transition-all duration-200 pointer-events-auto flex items-center gap-2.5 ${launcherEntrance.current ? 'motion-safe:animate-fade-up' : ''}`}
       >
         <span className="w-7 h-7 rounded-full bg-background/10 flex items-center justify-center font-display text-xs font-semibold tracking-tight">
           K

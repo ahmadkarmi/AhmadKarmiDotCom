@@ -29,8 +29,8 @@
     /* 12px - Refined */
 
     /* Typography */
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-display: 'Playfair Display', serif;
+    --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    --font-display: 'Playfair Display Variable', 'Playfair Display', serif;
     --header-h: 64px;
   }
 

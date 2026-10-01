@@ -115,6 +115,10 @@ export default defineConfig({
     // by lib/urls.ts and by serialize() above, both of which special-case `/`.
     build: {
         format: 'directory',
+        // CSS goes inline in each page instead of separate render-blocking
+        // files: on mobile those cost a full round trip (~1s in PageSpeed)
+        // before the first paint. Costs ~17KB gzipped per page, uncached.
+        inlineStylesheets: 'always',
     },
     image: {
         domains: ['localhost', '127.0.0.1', 'admin.ahmadkarmi.com'],
