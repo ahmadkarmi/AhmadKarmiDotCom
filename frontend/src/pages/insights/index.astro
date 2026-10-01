@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import InsightsFilter from '../../components/InsightsFilter';
 import { fetchInsights } from '../../lib/wordpress';
 import { toCardData } from '../../lib/insightCard';
+import { getImage } from 'astro:assets';
+import avatarImage from '../../assets/brand/avatar.jpg';
 import { graph, breadcrumbNode, personNode, PERSON_ID, SITE_URL } from '../../lib/schema';
 import { TOPICS, assertTopicTags, articlesInTopic, topicPath, topicsWithPages } from '../../lib/topics';
 
@@ -23,7 +25,8 @@ if (insights.length === 0) {
 assertTopicTags(insights);
 
 // Strip everything the filter does not render, above all `body`.
-const cards = insights.map(toCardData);
+const cards = await Promise.all(insights.map(toCardData));
+const avatar = await getImage({ src: avatarImage, width: 48, height: 48, format: 'webp' });
 
 // Filter options in topic rank order. Topics with their own page link to it,
 // so the pills double as crawlable links into each topic hub.
@@ -71,10 +74,10 @@ const schema = graph(
   <section class="section pt-32 pb-8">
     <div class="container-custom">
       <div class="max-w-3xl">
-        <p class="text-accent font-medium mb-4 animate-fade-in">
+        <p class="text-accent font-medium mb-4">
           Blog
         </p>
-        <div class="flex items-center gap-4 mb-6 animate-slide-up">
+        <div class="flex items-center gap-4 mb-6">
           <h1 class="font-display text-display-lg text-foreground">
             Insights
           </h1>
@@ -87,7 +90,7 @@ const schema = graph(
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rss"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
           </a>
         </div>
-        <p class="text-foreground-secondary text-lg animate-slide-up animation-delay-200">
+        <p class="text-foreground-secondary text-lg">
           Thoughts on product management, digital transformation, technology trends, and lessons learned from building impactful products.
         </p>
       </div>
@@ -101,6 +104,7 @@ const schema = graph(
         client:load 
         insights={cards} 
         topics={topics}
+        avatarSrc={avatar.src}
       />
     </div>
   </section>

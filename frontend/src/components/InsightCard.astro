@@ -4,18 +4,22 @@ import avatarImage from '../assets/brand/avatar.jpg';
 import type { Insight } from '../lib/wordpress';
 import { getMediaUrl } from '../lib/wordpress';
 import { calculateReadTime } from '../lib/insightCard';
+import { CARD_SIZES, CARD_WIDTHS, widthsFor } from '../lib/responsiveImage';
 
 export interface Props {
   insight: Insight;
   index?: number;
+  /** Above the fold on load (first row of a grid): load now, not lazily. */
+  eager?: boolean;
 }
 
-const { insight, index = 0 } = Astro.props;
+const { insight, index = 0, eager = false } = Astro.props;
 const media = insight.mainImage || insight.thumbnailImage;
 const imageUrl = getMediaUrl(media);
 const imageWidth = media?.width || 800; // Fallback
 const imageHeight = media?.height || 400; // Fallback
-const cardImageWidth = Math.min(imageWidth, 900);
+const cardWidths = widthsFor(imageWidth, CARD_WIDTHS);
+const cardImageWidth = cardWidths[cardWidths.length - 1];
 const cardImageHeight = Math.round((cardImageWidth / imageWidth) * imageHeight);
 
 // Format date
@@ -82,6 +86,7 @@ const readTime = calculateReadTime(insight.body);
     <!-- Thumbnail -->
     <div
       class="relative w-full aspect-[2/1] rounded-md overflow-hidden border border-border/50 mb-4 bg-background-secondary/20 shadow-inner"
+      data-vt-img
     >
       {imageUrl ? (
         <Image 
@@ -89,8 +94,11 @@ const readTime = calculateReadTime(insight.body);
           alt={insight.name}
           width={cardImageWidth}
           height={cardImageHeight}
+          widths={cardWidths}
+          sizes={CARD_SIZES}
           class="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
-          loading="lazy"
+          loading={eager ? 'eager' : 'lazy'}
+          fetchpriority={eager && index === 0 ? 'high' : undefined}
         />
       ) : (
         <div class="absolute inset-0 flex items-center justify-center text-foreground-muted text-xs">

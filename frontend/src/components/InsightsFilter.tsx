@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
-import avatarImage from '../assets/brand/avatar.jpg';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import type { InsightCardData } from '../lib/insightCard';
 
 interface Props {
@@ -10,6 +10,9 @@ interface Props {
     // when it has one: the pill is then a real link crawlers can follow, and a
     // plain click still filters in place.
     topics: { name: string; href?: string }[];
+    // Author avatar resized at build time. The imported original is 138KB
+    // and is shown at 24px.
+    avatarSrc: string;
 }
 
 // Format date
@@ -23,8 +26,9 @@ function formatDate(dateString?: string): string {
     });
 }
 
-export default function InsightsFilter({ insights, topics }: Props) {
+export default function InsightsFilter({ insights, topics, avatarSrc }: Props) {
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
+    const gridRef = useRef<HTMLDivElement>(null);
 
     // Initialize from URL query param
     useEffect(() => {
@@ -37,14 +41,31 @@ export default function InsightsFilter({ insights, topics }: Props) {
 
     // Update URL when tag changes
     const handleTagSelect = (tag: string | null) => {
-        setSelectedTag(tag);
-        const newUrl = new URL(window.location.href);
-        if (tag) {
-            newUrl.searchParams.set('tag', tag);
-        } else {
-            newUrl.searchParams.delete('tag');
+        const apply = () => {
+            setSelectedTag(tag);
+            const newUrl = new URL(window.location.href);
+            if (tag) {
+                newUrl.searchParams.set('tag', tag);
+            } else {
+                newUrl.searchParams.delete('tag');
+            }
+            window.history.pushState({}, '', newUrl);
+        };
+
+        // Cards glide to their new places instead of jumping: a view
+        // transition with a name on every card, only while it runs (see
+        // [data-vt-filtering] in global.css). Browsers without view
+        // transitions, and reduced motion, just swap.
+        const grid = gridRef.current;
+        if (!grid || !document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            apply();
+            return;
         }
-        window.history.pushState({}, '', newUrl);
+        document.documentElement.dataset.vtFiltering = '';
+        const transition = document.startViewTransition(() => flushSync(apply));
+        transition.finished.finally(() => {
+            delete document.documentElement.dataset.vtFiltering;
+        });
     };
 
     // Filter insights based on selected tag
@@ -104,9 +125,9 @@ export default function InsightsFilter({ insights, topics }: Props) {
 
             {/* Insights Grid */}
             {filteredInsights.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredInsights.map((insight, index) => (
-                        <InsightCardReact key={insight.id} insight={insight} index={index} />
+                        <InsightCardReact key={insight.id} insight={insight} index={index} avatarSrc={avatarSrc} />
                     ))}
                 </div>
             ) : (
@@ -115,7 +136,7 @@ export default function InsightsFilter({ insights, topics }: Props) {
                         No articles found for "{selectedTag}". Try another category!
                     </p>
                     <button
-                        onClick={() => setSelectedTag(null)}
+                        onClick={() => handleTagSelect(null)}
                         className="mt-4 text-accent hover:underline"
                     >
                         View all articles
@@ -127,14 +148,15 @@ export default function InsightsFilter({ insights, topics }: Props) {
 }
 
 // React version of InsightCard for use in the filter component
-function InsightCardReact({ insight, index }: { insight: InsightCardData; index: number }) {
-    const { imageUrl, readTime } = insight;
+function InsightCardReact({ insight, index, avatarSrc }: { insight: InsightCardData; index: number; avatarSrc: string }) {
+    const { image, readTime } = insight;
 
     return (
         <a
             href={`/insights/${insight.slug}`}
             className="group flex flex-col h-full bg-white border border-border rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden hover:-translate-y-1"
-            style={{ animationDelay: `${index * 100}ms` }}
+            data-vt-card
+            style={{ ['--vt-card' as string]: `card-${insight.slug}` }}
         >
             {/* Card Header */}
             <div className="px-4 py-3 flex items-center justify-between border-b border-border/40 bg-background-secondary/5">
@@ -186,14 +208,19 @@ function InsightCardReact({ insight, index }: { insight: InsightCardData; index:
                 {/* Thumbnail */}
                 <div
                     className="relative w-full aspect-[2/1] rounded-md overflow-hidden border border-border/50 mb-4 bg-background-secondary/20 shadow-inner"
-                    style={{ viewTransitionName: `insight-${insight.slug}` }}
+                    data-vt-img
                 >
-                    {imageUrl ? (
+                    {image ? (
                         <img
-                            src={imageUrl}
+                            src={image.src}
+                            srcSet={image.srcset}
+                            sizes={image.sizes}
+                            width={image.width}
+                            height={image.height}
                             alt={insight.name}
                             className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
+                            decoding="async"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-foreground-muted text-xs">
@@ -218,7 +245,7 @@ function InsightCardReact({ insight, index }: { insight: InsightCardData; index:
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-3 border-t border-border/40 mt-auto">
                     <div className="flex items-center gap-2">
-                        <img src={avatarImage.src} alt="Ahmad Al-Karmi" width="24" height="24" loading="lazy" decoding="async" className="w-6 h-6 rounded-full object-cover" />
+                        <img src={avatarSrc} alt="Ahmad Al-Karmi" width="24" height="24" loading="lazy" decoding="async" className="w-6 h-6 rounded-full object-cover" />
                         <span className="text-xs text-foreground-secondary font-medium">Ahmad Al-Karmi</span>
                     </div>
                     <div className="text-[10px] font-mono text-foreground-muted">

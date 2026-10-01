@@ -8,6 +8,8 @@ interface Window {
   __searchModalPageLoadBound?: boolean;
   // BottomNav.astro
   __mobileSearchPageLoadBound?: boolean;
+  // Header.astro
+  __mobileMenuPageLoadBound?: boolean;
   // NewsletterForm.astro
   __newsletterFormInitBound?: boolean;
   kitScriptLoaded?: boolean;

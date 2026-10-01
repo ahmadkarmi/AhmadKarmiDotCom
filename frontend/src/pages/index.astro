@@ -104,7 +104,7 @@ const schema = graph(
         </div>
         
         <!-- Headline -->
-        <h1 class="font-display text-4xl sm:text-5xl md:text-5xl lg:text-display-xl text-foreground mb-4 md:mb-6 lg:mb-8 tracking-tight leading-[1.15] md:leading-[1.05] lg:leading-[0.95] text-balance opacity-0 animate-slide-up animation-delay-100">
+        <h1 class="font-display text-4xl sm:text-5xl md:text-5xl lg:text-display-xl text-foreground mb-4 md:mb-6 lg:mb-8 tracking-tight leading-[1.15] md:leading-[1.05] lg:leading-[0.95] text-balance">
           <Fragment set:html={homePage?.heroTitle || `The <span class="italic text-accent font-medium">Science</span> <br /> of <span class="font-semibold">Scaling</span> <br /> <span class="font-sans font-light tracking-wide text-foreground-secondary">Digital Products.</span>`} />
         </h1>
         
@@ -141,7 +141,7 @@ const schema = graph(
   <section class="section bg-background-secondary/30 relative border-y border-border/50 py-16 md:py-32">
     <div class="container-custom">
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-        <div>
+        <div data-reveal>
           <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">Proven Impact</p>
           <h2 class="font-display text-4xl md:text-5xl text-foreground">
             Results That Speak
@@ -175,7 +175,7 @@ const schema = graph(
   <section class="section">
     <div class="container-custom">
       <!-- Standard Header (matching other sections) -->
-      <div class="mb-12">
+      <div class="mb-12" data-reveal>
         <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">Capabilities</p>
         <h2 class="font-display text-4xl md:text-5xl text-foreground">
           Areas of Expertise
@@ -185,7 +185,7 @@ const schema = graph(
       <!-- Three Column Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Strategy -->
-        <div class="space-y-4">
+        <div class="space-y-4" data-reveal style="--reveal-delay: 0ms">
           <h3 class="font-semibold text-foreground text-lg border-b border-border pb-3">
             Strategy
           </h3>
@@ -200,7 +200,7 @@ const schema = graph(
         </div>
         
         <!-- Execution -->
-        <div class="space-y-4">
+        <div class="space-y-4" data-reveal style="--reveal-delay: 120ms">
           <h3 class="font-semibold text-foreground text-lg border-b border-border pb-3">
             Execution
           </h3>
@@ -215,7 +215,7 @@ const schema = graph(
         </div>
         
         <!-- Modern Tech -->
-        <div class="space-y-4">
+        <div class="space-y-4" data-reveal style="--reveal-delay: 240ms">
           <h3 class="font-semibold text-foreground text-lg border-b border-border pb-3">
             Modern Tech
           </h3>
@@ -237,7 +237,7 @@ const schema = graph(
     <section class="section bg-background-secondary/50 border-t border-border/50">
       <div class="container-custom">
         <div class="flex items-end justify-between mb-12">
-          <div>
+          <div data-reveal>
             <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">The Lab</p>
             <h2 class="font-display text-4xl md:text-5xl text-foreground">
               Products I've Built
@@ -276,7 +276,7 @@ const schema = graph(
     <section class="section">
       <div class="container-custom">
         <div class="flex items-end justify-between mb-12">
-          <div>
+          <div data-reveal>
             <p class="text-accent font-medium mb-3 uppercase tracking-wider text-sm">Thought Leadership</p>
             <h2 class="font-display text-4xl md:text-5xl text-foreground">
               Insights & Strategy
@@ -309,7 +309,7 @@ const schema = graph(
 
   <!-- Newsletter Signup Section -->
   <section id="newsletter" class="section">
-    <div class="container-custom">
+    <div class="container-custom" data-reveal>
       <NewsletterForm 
         title="Join the Newsletter" 
         description="Get insights on AI, product strategy, and digital growth delivered to your inbox. No spam, just actionable ideas." 

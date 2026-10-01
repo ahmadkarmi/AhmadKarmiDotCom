@@ -18,6 +18,8 @@ import { wrapContentTables } from '../../lib/contentTables';
 import { clampDescription, demoteBodyH1 } from '../../lib/seo';
 import { OG_CARD_SIZE, ogCardPath, resolveInsightHeroUrl } from '../../lib/og/urls';
 import { primaryTopic, topicByName, topicPath, topicsWithPages } from '../../lib/topics';
+import { HERO_SIZES, HERO_WIDTHS, widthsFor } from '../../lib/responsiveImage';
+import { addHeadingIds, MIN_TOC_HEADINGS } from '../../lib/toc';
 
 export async function getStaticPaths() {
   const insights = await fetchInsights();
@@ -57,7 +59,8 @@ const heroMedia = insightData.mainImage || insightData.thumbnailImage;
 const heroImageUrl = getMediaUrl(heroMedia);
 const heroSourceWidth = heroMedia?.width || 1200;
 const heroSourceHeight = heroMedia?.height || 600;
-const heroImageWidth = Math.min(heroSourceWidth, 1280);
+const heroWidths = widthsFor(heroSourceWidth, HERO_WIDTHS);
+const heroImageWidth = heroWidths[heroWidths.length - 1];
 const heroImageHeight = Math.round((heroImageWidth / heroSourceWidth) * heroSourceHeight);
 
 // Format date
@@ -188,7 +191,10 @@ const bodyHtmlRaw = !containsHtml || hasTable || hasSignals
   ? await marked.parse(bodyCandidate)
   : rawBody;
 // Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
-const { html: bodyHtml, videos: bodyVideos } = await enhanceContentVideos(wrapContentTables(demoteBodyH1(bodyHtmlRaw)));
+const { html: enhancedBodyHtml, videos: bodyVideos } = await enhanceContentVideos(wrapContentTables(demoteBodyH1(bodyHtmlRaw)));
+// Section ids for the table of contents (lib/toc.ts), shown on longer articles.
+const { html: bodyHtml, headings: tocHeadings } = addHeadingIds(enhancedBodyHtml);
+const showToc = tocHeadings.length >= MIN_TOC_HEADINGS;
 const hasBodyVideo = bodyHtml.includes('data-content-video');
 
 // JSON-LD: BlogPosting + breadcrumb. The author/publisher reference the
@@ -343,12 +349,15 @@ const schema = graph(
       <div class="max-w-4xl mx-auto">
         <div
           class="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-background-secondary"
+          data-vt-hero
         >
           <Image 
             src={heroImageUrl}
             alt={insightData.name}
             width={heroImageWidth}
             height={heroImageHeight}
+            widths={heroWidths}
+            sizes={HERO_SIZES}
             loading="eager"
             fetchpriority="high"
             class="absolute inset-0 w-full h-full object-cover"
@@ -362,6 +371,19 @@ const schema = graph(
   <section class="section pt-0">
     <div class="container-custom">
       <article class:list={["max-w-3xl mx-auto", listenEnabled && "pb-24"]}>
+        {showToc && (
+          <nav aria-labelledby="toc-title" class="mb-12 rounded-xl border border-border bg-background-secondary/40 p-5 md:p-6">
+            <p id="toc-title" class="text-xs font-semibold uppercase tracking-wider text-foreground-muted mb-4">In this article</p>
+            <ol class="space-y-2.5">
+              {tocHeadings.map((h, i) => (
+                <li class="flex gap-3">
+                  <span class="font-mono text-xs text-foreground-muted pt-1 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                  <a href={`#${h.id}`} class="text-foreground-secondary hover:text-accent transition-colors leading-snug">{h.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
         {insightData.body && (
           <div
             id="article-body"
@@ -369,7 +391,7 @@ const schema = graph(
             class="prose prose-lg max-w-none
                    prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-tight prose-headings:leading-tight prose-headings:font-semibold
                    prose-h1:text-3xl md:prose-h1:text-4xl prose-h1:mb-6 prose-h1:font-bold
-                   prose-h2:text-[1.85rem] md:prose-h2:text-[2.15rem] prose-h2:mt-14 prose-h2:mb-5 prose-h2:font-bold
+                   prose-h2:text-[1.85rem] md:prose-h2:text-[2.15rem] prose-h2:mt-14 prose-h2:mb-5 prose-h2:font-bold prose-h2:scroll-mt-28
                    prose-h3:text-[1.4rem] md:prose-h3:text-[1.6rem] prose-h3:mt-10 prose-h3:mb-3 prose-h3:font-semibold prose-h3:leading-snug
                    prose-p:text-foreground-secondary prose-p:leading-relaxed prose-p:mb-6
                    prose-a:text-accent prose-a:font-medium prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-accent-hover

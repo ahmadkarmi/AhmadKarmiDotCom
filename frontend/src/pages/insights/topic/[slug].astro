@@ -76,17 +76,17 @@ const otherTopics = hubs.filter((t) => t.slug !== topic.slug);
   <section class="section pt-32 pb-8">
     <div class="container-custom">
       <div class="max-w-3xl">
-        <nav aria-label="Breadcrumb" class="mb-4 animate-fade-in">
+        <nav aria-label="Breadcrumb" class="mb-4">
           <ol class="flex items-center gap-2 text-sm font-medium">
             <li><a href="/insights" class="text-accent hover:underline">Insights</a></li>
             <li aria-hidden="true" class="text-foreground-muted">/</li>
             <li aria-current="page" class="text-foreground-secondary">Topic</li>
           </ol>
         </nav>
-        <h1 class="font-display text-display-lg text-foreground mb-6 animate-slide-up">
+        <h1 class="font-display text-display-lg text-foreground mb-6">
           {topic.name}
         </h1>
-        <p class="text-foreground-secondary text-lg animate-slide-up animation-delay-200">
+        <p class="text-foreground-secondary text-lg">
           {topic.description}
         </p>
         <p class="text-sm text-foreground-muted mt-4">
@@ -101,7 +101,7 @@ const otherTopics = hubs.filter((t) => t.slug !== topic.slug);
     <div class="container-custom">
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {articles.map((insight, index) => (
-          <InsightCard insight={insight} index={index} />
+          <InsightCard insight={insight} index={index} eager={index < 3} />
         ))}
       </div>
     </div>

@@ -11,6 +11,7 @@
 
 import type { Insight } from './wordpress';
 import { getMediaUrl } from './wordpress';
+import { cardImageAttrs } from './responsiveImage';
 
 export interface InsightCardData {
     id?: number;
@@ -20,7 +21,8 @@ export interface InsightCardData {
     publishDate?: string;
     tags?: string[];
     featured?: boolean;
-    imageUrl: string | null;
+    /** Resized WebP with a srcset; the WordPress originals average ~260KB. */
+    image: { src: string; srcset: string; sizes: string; width: number; height: number } | null;
     readTime: number;
 }
 
@@ -33,7 +35,8 @@ export function calculateReadTime(text?: string): number {
 }
 
 /** Reduce a full Insight to only what the card renders. */
-export function toCardData(insight: Insight): InsightCardData {
+export async function toCardData(insight: Insight): Promise<InsightCardData> {
+    const media = insight.mainImage || insight.thumbnailImage;
     return {
         id: insight.id,
         slug: insight.slug,
@@ -42,7 +45,11 @@ export function toCardData(insight: Insight): InsightCardData {
         publishDate: insight.publishDate,
         tags: insight.tags,
         featured: insight.featured,
-        imageUrl: getMediaUrl(insight.mainImage) || getMediaUrl(insight.thumbnailImage) || null,
+        image: await cardImageAttrs(
+            getMediaUrl(insight.mainImage) || getMediaUrl(insight.thumbnailImage),
+            media?.width,
+            media?.height
+        ),
         readTime: calculateReadTime(insight.body),
     };
 }
