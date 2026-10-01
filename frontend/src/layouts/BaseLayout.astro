@@ -1,11 +1,4 @@
 ---
-// Self-hosted variable fonts (same files Google Fonts serves): no extra
-// origins to connect to before text can render in its final font.
-import '@fontsource-variable/inter/wght.css';
-import '@fontsource-variable/playfair-display/wght.css';
-import '@fontsource-variable/playfair-display/wght-italic.css';
-import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
-import playfairLatin from '@fontsource-variable/playfair-display/files/playfair-display-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
@@ -157,10 +150,13 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
       ? <meta name="robots" content="noindex, follow" />
       : <link rel="canonical" href={canonicalURL} />}
 
-    <!-- Fonts: self-hosted (see imports above). Preload the two Latin files
-         every page's first screen uses; italics and other scripts load on use. -->
-    <link rel="preload" as="font" type="font/woff2" href={playfairLatin} crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href={interLatin} crossorigin />
+    <!-- Fonts: self-hosted (public/fonts), and loaded so they never hold up the
+         first paint. Declaring them in the page CSS, or preloading them, made
+         the browser wait for ~86KB of fonts before painting any text, which
+         pushed mobile LCP from ~1.4s to ~2.5s in Lighthouse. Loaded like this,
+         text paints in a fallback font first and swaps when the fonts arrive. -->
+    <link rel="stylesheet" href="/fonts/fonts.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="/fonts/fonts.css" /></noscript>
 
     <!-- Schema.org JSON-LD -->
     {schema && (
