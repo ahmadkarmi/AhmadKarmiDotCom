@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Headless SEO (ahmadkarmi.com)
  * Description: Keeps the WordPress origin (admin.ahmadkarmi.com) out of search indexes and adds per-post SEO title/description overrides that the Astro frontend reads.
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 
 declare(strict_types=1);
@@ -73,5 +73,39 @@ add_action('acf/init', static function (): void {
         'position' => 'side',
         'menu_order' => 99,
         'show_in_rest' => 1,
+    ]);
+});
+
+// Writes only the SEO override fields. The core posts endpoint re-saves the
+// whole post, which bumps `modified` (the sitemap lastmod and article
+// updated date) and fires the Vercel deploy and K.AI ingest hooks in
+// trigger-vercel-deploy.php. A metadata change is not a content update.
+add_action('rest_api_init', static function (): void {
+    register_rest_route('ak/v1', '/seo/(?P<id>\d+)', [
+        'methods' => 'POST',
+        'permission_callback' => static fn (WP_REST_Request $request): bool => current_user_can('edit_post', (int) $request['id']),
+        'args' => [
+            'seo_title' => ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field'],
+            'seo_description' => ['type' => 'string', 'sanitize_callback' => 'sanitize_textarea_field'],
+        ],
+        'callback' => static function (WP_REST_Request $request) {
+            $id = (int) $request['id'];
+            if (!in_array(get_post_type($id), ['insight', 'work'], true) || !function_exists('update_field')) {
+                return new WP_Error('ak_seo_invalid_post', 'Not an insight or work item.', ['status' => 404]);
+            }
+
+            $keys = ['seo_title' => 'field_ak_seo_title', 'seo_description' => 'field_ak_seo_description'];
+            foreach ($keys as $name => $key) {
+                if ($request->has_param($name)) {
+                    update_field($key, (string) $request[$name], $id);
+                }
+            }
+
+            return [
+                'id' => $id,
+                'seo_title' => (string) get_field('seo_title', $id),
+                'seo_description' => (string) get_field('seo_description', $id),
+            ];
+        },
     ]);
 });
