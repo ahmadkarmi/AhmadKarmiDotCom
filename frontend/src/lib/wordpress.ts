@@ -583,6 +583,9 @@ export interface Work {
     clientLogo?: WPMedia;
     videoUrl?: string;
     gallery?: WPMedia[];
+    /** CMS `seo_title` / `seo_description` overrides; empty means use the defaults. */
+    seoTitle?: string;
+    seoDescription?: string;
 }
 
 export interface Insight {
@@ -598,6 +601,9 @@ export interface Insight {
     body?: string;
     mainImage?: WPMedia;
     thumbnailImage?: WPMedia;
+    /** CMS `seo_title` / `seo_description` overrides; empty means use the defaults. */
+    seoTitle?: string;
+    seoDescription?: string;
 }
 
 export interface HomePage {
@@ -1448,6 +1454,8 @@ function transformWork(post: any): Work {
         clientLogo: clientLogoFromAcf,
         videoUrl: acf.videoUrl,
         gallery,
+        seoTitle: toPlainText(acf.seo_title),
+        seoDescription: toPlainText(acf.seo_description),
     };
 }
 
@@ -1492,5 +1500,7 @@ function transformInsight(post: any): Insight {
         body: normalizeWpRichText(bodySource),
         mainImage: mainImageFromAcf || featuredMediaTransformed,
         thumbnailImage: thumbnailImageFromAcf,
+        seoTitle: toPlainText(acf.seo_title),
+        seoDescription: toPlainText(acf.seo_description),
     };
 }

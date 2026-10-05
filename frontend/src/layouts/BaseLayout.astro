@@ -12,6 +12,8 @@ import { PROFILES, X_HANDLE } from '../lib/profiles';
 
 export interface Props {
   title: string;
+  /** Search/share title override (CMS `seo_title`). Falls back to `title`; site search keeps `title`. */
+  seoTitle?: string;
   description?: string;
   ogImage?: string;
   ogType?: 'website' | 'article' | 'profile';
@@ -41,6 +43,7 @@ const DEFAULT_OG_H = 630;
 
 const {
   title,
+  seoTitle,
   description = 'Ahmad Al-Karmi, Senior Product Manager for Loyalty and Growth Products at Al Jazeera. AI-focused. Over 16 years shipping digital products from enterprise through consumer.',
   ogImage = DEFAULT_OG_IMAGE,
   ogType = 'website',
@@ -80,6 +83,7 @@ const ogImageType = (() => {
 })();
 
 const metaDescription = clampDescription(description);
+const fullTitle = `${seoTitle?.trim() || title} | Ahmad Al-Karmi`;
 
 const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
 ---
@@ -93,7 +97,7 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
     <link rel="alternate" type="application/rss+xml" title="Insights by Ahmad Al-Karmi" href="/rss.xml" />
 
     <!-- SEO -->
-    <title>{title} | Ahmad Al-Karmi</title>
+    <title>{fullTitle}</title>
     <meta content={title} data-pagefind-meta="title[content]" />
     <meta name="description" content={metaDescription} data-pagefind-meta="description[content]" />
     <meta content={fullSearchImage} data-pagefind-meta="image[content]" />
@@ -104,7 +108,7 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />
     {!noindex && <meta property="og:url" content={canonicalURL} />}
-    <meta property="og:title" content={`${title} | Ahmad Al-Karmi`} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={fullOgImage} />
@@ -131,7 +135,7 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={`${title} | Ahmad Al-Karmi`} />
+    <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={metaDescription} />
     {!noindex && <meta name="twitter:url" content={canonicalURL} />}
     <meta name="twitter:image" content={fullOgImage} />
@@ -140,7 +144,7 @@ const resolvedAlt = ogImageAlt ?? `${title} | Ahmad Al-Karmi`;
     <meta name="twitter:site" content={X_HANDLE} />
 
     <!-- LinkedIn / general -->
-    <meta name="linkedin:title" content={`${title} | Ahmad Al-Karmi`} />
+    <meta name="linkedin:title" content={fullTitle} />
     <meta name="linkedin:description" content={metaDescription} />
     <meta name="linkedin:image" content={fullOgImage} />
     

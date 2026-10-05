@@ -245,7 +245,8 @@ const schema = graph(
 ---
 <BaseLayout 
   title={insightData.name} 
-  description={insightData.description || insightData.body}
+  seoTitle={insightData.seoTitle}
+  description={insightData.seoDescription || insightData.description || insightData.body}
   ogImage={ogCardPath('insights', insightData.slug, insightData.modified || insightData.publishDate)}
   ogType="article"
   ogImageWidth={OG_CARD_SIZE.width}
