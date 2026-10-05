@@ -79,7 +79,7 @@ const detailsHtml = details.html;
 const bodyVideos = [...brief.videos, ...scope.videos, ...details.videos];
 const hasBodyVideo = [briefHtml, scopeHtml, detailsHtml].some((html) => html.includes('data-content-video'));
 
-const metaDescription = clampDescription(briefContent || detailsContent);
+const metaDescription = clampDescription(workData.seoDescription || briefContent || detailsContent);
 
 // WordPress `modified` is the honest freshness signal. The old fallback to the
 // build time made every deploy claim the project had just changed.
@@ -159,6 +159,7 @@ const schema = graph(
 
 <BaseLayout 
   title={workData.name} 
+  seoTitle={workData.seoTitle}
   description={metaDescription}
   ogImage={ogCardPath('portfolio', workData.slug, workData.modified || workData.publishDate)}
   ogType="article"
