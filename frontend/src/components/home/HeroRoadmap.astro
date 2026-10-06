@@ -42,9 +42,15 @@
     mask-image: linear-gradient(90deg, transparent, #000 16%);
   }
 
-  /* Hidden until the script has fitted it to the real layout. */
+  /* Hidden until the script has fitted it to the real layout, then faded
+     in (not popped) so it arrives with the board. */
   .roadmap:not([data-fitted]) {
     visibility: hidden;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .roadmap { transition: opacity 0.6s ease-out; }
   }
 
   .grid-lines {
@@ -80,6 +86,12 @@
     overflow: hidden;
     display: flex;
     align-items: center;
+  }
+
+  /* The script hides bars that do not fit their band; display: flex above
+     would otherwise override the hidden attribute. */
+  .bar[hidden] {
+    display: none;
   }
 
   .bar-label {
@@ -188,16 +200,24 @@
     return { l, t, r, b };
   }
 
-  function fit(hero: HTMLElement, road: HTMLElement) {
-    road.removeAttribute('data-fitted');
-    if (getComputedStyle(road).display === 'none') return;
-    const content = hero.querySelector<HTMLElement>(':scope > .container-custom');
-    const textCol = content?.children[0];
+  function parts(hero: HTMLElement) {
+    const textCol = hero.querySelector<HTMLElement>(':scope > .container-custom')?.children[0];
     const stage = hero.querySelector<HTMLElement>('.hero-art .stage');
-    if (!textCol || !stage) return;
+    return { textCol, stage };
+  }
+
+  function fit(hero: HTMLElement, road: HTMLElement) {
+    const hide = () => road.removeAttribute('data-fitted');
+    if (getComputedStyle(road).display === 'none') return hide();
+    const { textCol, stage } = parts(hero);
+    if (!textCol || !stage) return hide();
 
     const h = hero.getBoundingClientRect();
-    const header = document.querySelector('header')?.getBoundingClientRect().bottom ?? h.top;
+    // The header is fixed, so compare its height with the hero's page
+    // offset, not its viewport box: a refit while scrolled (font swap,
+    // resize, Back restoring scroll) must give the same layout as at the top.
+    const heroPageTop = h.top + window.scrollY;
+    const headerH = document.querySelector('header')?.offsetHeight ?? 0;
     const text = union(textCol);
     // The board tilts and its cursor roams, so pad the stage box a little.
     const s = stage.getBoundingClientRect();
@@ -205,10 +225,10 @@
     const board = { t: s.top - pad, b: s.bottom + pad };
 
     const left = text.r + GAP_TEXT - h.left;
-    const top = Math.max(header, h.top) + 8 - h.top;
+    const top = Math.max(headerH, heroPageTop) + 8 - heroPageTop;
     const width = h.width - left;
     const height = h.height - top - 8;
-    if (width < MIN_WIDTH) return;
+    if (width < MIN_WIDTH) return hide();
     Object.assign(road.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` });
 
     const bands = {
@@ -231,20 +251,46 @@
     road.setAttribute('data-fitted', '');
   }
 
+  let cleanup: (() => void) | undefined;
+
   function init() {
     const road = document.querySelector<HTMLElement>('[data-hero-roadmap]');
     const hero = road?.closest<HTMLElement>('[data-hero]');
     if (!road || !hero || road.dataset.bound) return;
     road.dataset.bound = 'true';
+    cleanup?.();
+
     let frame = 0;
     const refit = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(() => fit(hero, road)); };
     refit();
-    new ResizeObserver(refit).observe(hero);
+
+    // The text column reflows when the deferred web fonts swap in, without
+    // the hero itself changing size, so watch the pieces the fit depends on.
+    const { textCol, stage } = parts(hero);
+    const resize = new ResizeObserver(refit);
+    for (const el of [hero, textCol, stage]) if (el) resize.observe(el);
+    // fonts.css is applied after first paint, so fonts.ready can resolve
+    // before any font has started loading; loadingdone fires on each swap.
     document.fonts?.ready.then(refit);
-    // Entrance animations move the text into place after first paint.
-    hero.addEventListener('animationend', (e) => { if (!(e.target as Element).closest('.hero-art')) refit(); });
+    document.fonts?.addEventListener('loadingdone', refit);
+    // Entrance animations move the text and board into place after first paint.
+    const onAnimationEnd = (e: AnimationEvent) => { if (!(e.target as Element).closest('.hero-art')) refit(); };
+    hero.addEventListener('animationend', onAnimationEnd);
+
+    cleanup = () => {
+      cancelAnimationFrame(frame);
+      resize.disconnect();
+      document.fonts?.removeEventListener('loadingdone', refit);
+      hero.removeEventListener('animationend', onAnimationEnd);
+    };
   }
 
-  // astro:page-load fires on the first load and after every client navigation.
+  // Fit as soon as the script runs (module scripts run once the document is
+  // parsed). astro:page-load alone fires on window load, which waits for
+  // every font and image on the page: on a slow connection the roadmap
+  // stayed invisible for seconds after the hero painted, or seemed missing.
+  init();
+  // Client navigations back to the homepage swap in a fresh hero.
   document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => { cleanup?.(); cleanup = undefined; });
 </script>
