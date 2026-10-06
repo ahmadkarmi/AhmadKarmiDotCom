@@ -19,6 +19,10 @@
 //
 // The original in WordPress is never modified. Anything that cannot be
 // processed (other hosts, SVG, GIF, fetch failures) keeps its original tag.
+//
+// optimizeWpImage() is the same treatment for templates that render CMS
+// media directly (portfolio hero, gallery, client logo), so every image the
+// CMS supplies is served the same way regardless of how it was uploaded.
 
 import { getImage, inferRemoteSize } from 'astro:assets';
 import { decodeAttr, parseAttrs, serializeAttrs } from './contentVideo';
@@ -26,7 +30,7 @@ import { decodeAttr, parseAttrs, serializeAttrs } from './contentVideo';
 const WP_HOST = new URL(import.meta.env.PUBLIC_WP_URL || 'https://admin.ahmadkarmi.com').hostname;
 
 const QUALITY = 90;
-const WIDTHS = [640, 960, 1280, 1536];
+const WIDTHS = [640, 960, 1280, 1536, 1920, 2560];
 const LIGHTBOX_MAX_WIDTH = 2400;
 
 /** Article bodies sit in a max-w-3xl (768px) column. */
@@ -63,52 +67,88 @@ async function sourceFor(src: string): Promise<{ url: string; width: number; hei
     return { url: src, width: size.width, height: size.height };
 }
 
+export interface OptimizedImage {
+    src: string;
+    srcset: string;
+    sizes: string;
+    width: number;
+    height: number;
+    /** Large rendition for lightbox zoom, when requested. */
+    fullSrc?: string;
+}
+
+export interface OptimizeOptions {
+    /** Widest the image is ever shown, in CSS px. Defaults to the source width. */
+    displayWidth?: number;
+    /** Fixed display height in CSS px (logos); the width follows the aspect ratio. */
+    displayHeight?: number;
+    /** `sizes` attribute; defaults to the display width (full width below it, unless height-fixed). */
+    sizes?: string;
+    /** Also produce a large rendition for a lightbox. */
+    full?: boolean;
+}
+
+/**
+ * Responsive WebP renditions of a WordPress-hosted image, built from the
+ * original upload. Returns null when the URL cannot be processed (other
+ * hosts, SVG, GIF, fetch failure); callers then use the original URL.
+ */
+export async function optimizeWpImage(url: string | null | undefined, options: OptimizeOptions = {}): Promise<OptimizedImage | null> {
+    if (!url || !isOptimizable(url)) return null;
+    try {
+        const source = await sourceFor(url);
+        const scale = (w: number) => Math.round((w / source.width) * source.height);
+
+        const requested = options.displayHeight
+            ? Math.round((options.displayHeight * source.width) / source.height)
+            : options.displayWidth ?? source.width;
+        const displayWidth = Math.min(requested, source.width);
+
+        // Enough widths for a 2x screen at the display size, never upscaled.
+        // Small images (logos, thumbnails) get exact 1x and 2x renditions.
+        const fit = WIDTHS.filter((w) => w <= source.width && w <= displayWidth * 2);
+        const widths = displayWidth < WIDTHS[0] || !fit.length
+            ? Array.from(new Set([displayWidth, Math.min(source.width, displayWidth * 2)]))
+            : fit;
+        const width = Math.min(displayWidth, widths[widths.length - 1]);
+        const sizes = options.sizes
+            ?? (options.displayHeight ? `${displayWidth}px` : `(min-width: ${displayWidth + 32}px) ${displayWidth}px, 100vw`);
+
+        const fullWidth = Math.min(source.width, LIGHTBOX_MAX_WIDTH);
+        const [image, full] = await Promise.all([
+            getImage({ src: source.url, width, height: scale(width), widths, sizes, format: 'webp', quality: QUALITY }),
+            options.full
+                ? getImage({ src: source.url, width: fullWidth, height: scale(fullWidth), format: 'webp', quality: QUALITY })
+                : undefined,
+        ]);
+
+        return { src: image.src, srcset: image.srcSet.attribute, sizes, width, height: scale(width), fullSrc: full?.src };
+    } catch (error) {
+        console.warn(`[contentImages] Optimisation failed, using original: ${url}`, error);
+        return null;
+    }
+}
+
 async function optimizeImg(tag: string, rawAttrs: string, column: number): Promise<string> {
     const attrs = parseAttrs(rawAttrs);
     const rawSrc = attrs.get('src');
     if (typeof rawSrc !== 'string') return tag;
-    const src = decodeAttr(rawSrc);
-    if (!isOptimizable(src)) return tag;
 
-    try {
-        const source = await sourceFor(src);
-        const scale = (w: number) => Math.round((w / source.width) * source.height);
+    // The width the author inserted (e.g. WordPress "large" = 1024) caps how
+    // wide the image displays; the column caps it further.
+    const attrWidth = Number(attrs.get('width')) || column;
+    const image = await optimizeWpImage(decodeAttr(rawSrc), { displayWidth: Math.min(attrWidth, column), full: true });
+    if (!image) return tag;
 
-        // The width the author inserted (e.g. WordPress "large" = 1024) caps
-        // how wide the image displays; the column caps it further.
-        const attrWidth = Number(attrs.get('width')) || source.width;
-        const displayWidth = Math.min(attrWidth, source.width, column);
-
-        // Enough widths for a 2x screen at the display size, never upscaled.
-        const fit = WIDTHS.filter((w) => w <= source.width && w <= displayWidth * 2);
-        const widths = fit.length ? fit : [Math.min(source.width, displayWidth * 2)];
-        const width = Math.min(displayWidth, widths[widths.length - 1]);
-        const sizes = `(min-width: ${displayWidth + 32}px) ${displayWidth}px, 100vw`;
-
-        const [image, full] = await Promise.all([
-            getImage({ src: source.url, width, height: scale(width), widths, sizes, format: 'webp', quality: QUALITY }),
-            getImage({
-                src: source.url,
-                width: Math.min(source.width, LIGHTBOX_MAX_WIDTH),
-                height: scale(Math.min(source.width, LIGHTBOX_MAX_WIDTH)),
-                format: 'webp',
-                quality: QUALITY,
-            }),
-        ]);
-
-        attrs.set('src', image.src);
-        attrs.set('srcset', image.srcSet.attribute);
-        attrs.set('sizes', sizes);
-        attrs.set('width', String(width));
-        attrs.set('height', String(scale(width)));
-        attrs.set('data-full-src', full.src);
-        if (!attrs.has('loading')) attrs.set('loading', 'lazy');
-        if (!attrs.has('decoding')) attrs.set('decoding', 'async');
-        return `<img ${serializeAttrs(attrs)} />`;
-    } catch (error) {
-        console.warn(`[contentImages] Optimisation failed, using original: ${src}`, error);
-        return tag;
-    }
+    attrs.set('src', image.src);
+    attrs.set('srcset', image.srcset);
+    attrs.set('sizes', image.sizes);
+    attrs.set('width', String(image.width));
+    attrs.set('height', String(image.height));
+    if (image.fullSrc) attrs.set('data-full-src', image.fullSrc);
+    if (!attrs.has('loading')) attrs.set('loading', 'lazy');
+    if (!attrs.has('decoding')) attrs.set('decoding', 'async');
+    return `<img ${serializeAttrs(attrs)} />`;
 }
 
 /** Re-encode every WordPress-hosted <img> in rich text as responsive WebP. */
