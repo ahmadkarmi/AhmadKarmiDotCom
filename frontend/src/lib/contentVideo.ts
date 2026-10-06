@@ -28,9 +28,9 @@ const POSTER_WIDTH = 1600;
 const PLAY_ICON =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.96-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z" fill="currentColor"/></svg>';
 
-type Attrs = Map<string, string | true>;
+export type Attrs = Map<string, string | true>;
 
-function parseAttrs(source: string): Attrs {
+export function parseAttrs(source: string): Attrs {
     const attrs: Attrs = new Map();
     const re = /([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
     let m: RegExpExecArray | null;
@@ -41,13 +41,13 @@ function parseAttrs(source: string): Attrs {
     return attrs;
 }
 
-function serializeAttrs(attrs: Attrs): string {
+export function serializeAttrs(attrs: Attrs): string {
     return Array.from(attrs, ([name, value]) =>
         value === true ? name : `${name}="${String(value).replace(/"/g, '&quot;')}"`
     ).join(' ');
 }
 
-function decodeAttr(value: string): string {
+export function decodeAttr(value: string): string {
     return value.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'");
 }
 

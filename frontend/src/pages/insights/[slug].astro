@@ -15,6 +15,7 @@ import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
 import { wrapContentTables } from '../../lib/contentTables';
+import { optimizeContentImages } from '../../lib/contentImages';
 import { clampDescription, demoteBodyH1 } from '../../lib/seo';
 import { OG_CARD_SIZE, ogCardPath, resolveInsightHeroUrl } from '../../lib/og/urls';
 import { primaryTopic, topicByName, topicPath, topicsWithPages } from '../../lib/topics';
@@ -190,8 +191,9 @@ const bodyCandidate = containsHtml && (hasTable || hasSignals) ? unwrapHtmlWrapp
 const bodyHtmlRaw = !containsHtml || hasTable || hasSignals
   ? await marked.parse(bodyCandidate)
   : rawBody;
-// Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
-const { html: enhancedBodyHtml, videos: bodyVideos } = await enhanceContentVideos(wrapContentTables(demoteBodyH1(bodyHtmlRaw)));
+// Body images are re-encoded as responsive WebP (lib/contentImages.ts) and
+// body videos become lightweight click-to-play blocks (lib/contentVideo.ts).
+const { html: enhancedBodyHtml, videos: bodyVideos } = await enhanceContentVideos(wrapContentTables(await optimizeContentImages(demoteBodyH1(bodyHtmlRaw))));
 // Section ids for the table of contents (lib/toc.ts), shown on longer articles.
 const { html: bodyHtml, headings: tocHeadings } = addHeadingIds(enhancedBodyHtml);
 const showToc = tocHeadings.length >= MIN_TOC_HEADINGS;

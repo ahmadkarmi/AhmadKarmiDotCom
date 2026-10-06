@@ -11,6 +11,7 @@ import ContentVideo from '../../components/ContentVideo.astro';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
 import { wrapContentTables } from '../../lib/contentTables';
+import { optimizeContentImages, WORK_BODY_COLUMN } from '../../lib/contentImages';
 import { OG_CARD_SIZE, ogCardPath, resolveWorkHeroUrl } from '../../lib/og/urls';
 import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
 import { clampDescription, demoteBodyH1 } from '../../lib/seo';
@@ -69,9 +70,10 @@ const detailsRaw = /<\s*[a-z][\s\S]*>/i.test(detailsContent)
   ? detailsContent
   : await marked.parse(detailsContent);
 
-// Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
+// Body images are re-encoded as responsive WebP (lib/contentImages.ts) and
+// body videos become lightweight click-to-play blocks (lib/contentVideo.ts).
 const [brief, scope, details] = await Promise.all(
-  [briefRaw, scopeRaw, detailsRaw].map((html) => enhanceContentVideos(demoteBodyH1(html)))
+  [briefRaw, scopeRaw, detailsRaw].map(async (html) => enhanceContentVideos(await optimizeContentImages(demoteBodyH1(html), WORK_BODY_COLUMN)))
 );
 const briefHtml = brief.html;
 const scopeHtml = scope.html;

@@ -82,7 +82,9 @@ export default function BodyImageLightbox({ rootSelector = '[data-lightbox-root]
         if (clickedAt === -1) return;
         setSlides(images.map((el) => ({
             src: el.currentSrc || el.src,
-            fullSrc: fullSizeSrc(el.currentSrc || el.src),
+            // Optimised body images carry a large WebP rendition
+            // (lib/contentImages.ts); anything else is a raw WordPress file.
+            fullSrc: el.dataset.fullSrc || fullSizeSrc(el.currentSrc || el.src),
             alt: cleanAlt(el.alt || ''),
             caption: el.closest('figure')?.querySelector('figcaption')?.textContent?.trim() || '',
         })));
