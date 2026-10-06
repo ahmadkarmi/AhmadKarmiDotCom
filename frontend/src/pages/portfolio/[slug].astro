@@ -11,6 +11,7 @@ import ContentVideo from '../../components/ContentVideo.astro';
 import { graph, breadcrumbNode, personNode, PERSON_ID } from '../../lib/schema';
 import { absoluteUrl } from '../../lib/urls';
 import { wrapContentTables } from '../../lib/contentTables';
+import { optimizeContentImages, optimizeWpImage, WORK_BODY_COLUMN } from '../../lib/contentImages';
 import { OG_CARD_SIZE, ogCardPath, resolveWorkHeroUrl } from '../../lib/og/urls';
 import { enhanceContentVideos, videoObjectNodes } from '../../lib/contentVideo';
 import { clampDescription, demoteBodyH1 } from '../../lib/seo';
@@ -44,9 +45,28 @@ const clientLogoUrl = getMediaUrl(workData.clientLogo);
 // Hero for schema.org and search: main image (or featured), then cover.
 const heroImageUrl = resolveWorkHeroUrl(workData);
 
-const galleryImages = (workData.gallery || [])
+// CMS media is re-encoded as responsive WebP from the original upload
+// (lib/contentImages.ts), so an unoptimised upload never reaches visitors.
+// Anything that cannot be processed falls back to the original URL.
+const mobileHeroUrl = coverImageUrl || mainImageUrl;
+const desktopHeroUrl = mainImageUrl || coverImageUrl;
+const galleryMedia = (workData.gallery || [])
   .map((img) => ({ url: getMediaUrl(img) || '', alt: (img as any)?.alt_text || workData.name }))
   .filter((img) => Boolean(img.url));
+const [mobileHero, desktopHero, clientLogo, ...galleryOptimized] = await Promise.all([
+  optimizeWpImage(mobileHeroUrl, { displayWidth: 1024, sizes: '100vw' }),
+  optimizeWpImage(desktopHeroUrl, { displayWidth: 1280, sizes: '(min-width: 1280px) 1280px, 100vw' }),
+  optimizeWpImage(clientLogoUrl, { displayHeight: 40 }),
+  ...galleryMedia.map((img) =>
+    optimizeWpImage(img.url, { displayWidth: 1216, sizes: '(min-width: 1280px) 1216px, 100vw', full: true })
+  ),
+]);
+const galleryImages = galleryMedia.map((img, i) => {
+  const optimized = galleryOptimized[i];
+  return optimized
+    ? { ...img, url: optimized.src, srcset: optimized.srcset, sizes: optimized.sizes, fullUrl: optimized.fullSrc }
+    : img;
+});
 
 marked.setOptions({
   gfm: true,
@@ -69,9 +89,10 @@ const detailsRaw = /<\s*[a-z][\s\S]*>/i.test(detailsContent)
   ? detailsContent
   : await marked.parse(detailsContent);
 
-// Body videos become lightweight click-to-play blocks (see lib/contentVideo.ts).
+// Body images are re-encoded as responsive WebP (lib/contentImages.ts) and
+// body videos become lightweight click-to-play blocks (lib/contentVideo.ts).
 const [brief, scope, details] = await Promise.all(
-  [briefRaw, scopeRaw, detailsRaw].map((html) => enhanceContentVideos(demoteBodyH1(html)))
+  [briefRaw, scopeRaw, detailsRaw].map(async (html) => enhanceContentVideos(await optimizeContentImages(demoteBodyH1(html), WORK_BODY_COLUMN)))
 );
 const briefHtml = brief.html;
 const scopeHtml = scope.html;
@@ -190,18 +211,24 @@ const schema = graph(
       <div 
         class="absolute inset-0 lg:relative lg:container-custom lg:mt-8 w-full h-full lg:h-auto lg:aspect-[21/9] lg:rounded-2xl overflow-hidden bg-background-secondary lg:shadow-xl"
       >
-        <!-- Mobile: Use coverImage if available, fallback to mainImage -->
-        <img 
-          src={coverImageUrl || mainImageUrl}
-          alt={workData.name}
-          class="lg:hidden absolute inset-0 w-full h-full object-cover"
-        />
-        <!-- Desktop: Always use mainImage -->
-        <img 
-          src={mainImageUrl || coverImageUrl}
-          alt={workData.name}
-          class="hidden lg:block absolute inset-0 w-full h-full object-cover"
-        />
+        <!-- One <picture>, so only the rendition for this screen downloads:
+             coverImage (or mainImage) below lg, mainImage (or coverImage) from lg. -->
+        <picture>
+          <source
+            media="(min-width: 1024px)"
+            srcset={desktopHero?.srcset || desktopHeroUrl}
+            sizes={desktopHero?.sizes}
+          />
+          <img
+            src={mobileHero?.src || mobileHeroUrl}
+            srcset={mobileHero?.srcset}
+            sizes={mobileHero?.sizes}
+            alt={workData.name}
+            fetchpriority="high"
+            decoding="async"
+            class="absolute inset-0 w-full h-full object-cover"
+          />
+        </picture>
         <!-- Gradient overlay on mobile for readability -->
         <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/40 lg:hidden" />
       </div>
@@ -286,8 +313,14 @@ const schema = graph(
               <div class="flex items-center justify-between gap-3">
                 <span class="font-medium text-foreground">{workData.client}</span>
                 <img
-                  src={clientLogoUrl || '/brand/logo-mark.png'}
+                  src={clientLogo?.src || clientLogoUrl || '/brand/logo-mark.png'}
+                  srcset={clientLogo?.srcset}
+                  sizes={clientLogo?.sizes}
+                  width={clientLogo?.width}
+                  height={clientLogo?.height}
                   alt={workData.client}
+                  loading="lazy"
+                  decoding="async"
                   class="h-10 w-auto object-contain"
                 />
               </div>

@@ -2,7 +2,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 
 interface GalleryCarouselProps {
-    images: { url: string; alt?: string }[];
+    // srcset/sizes/fullUrl come from lib/contentImages.ts; fullUrl is the
+    // large rendition for the lightbox. Plain { url } still works.
+    images: { url: string; alt?: string; srcset?: string; sizes?: string; fullUrl?: string }[];
     className?: string;
 }
 
@@ -172,6 +174,8 @@ export default function GalleryCarousel({ images, className = '' }: GalleryCarou
                     >
                         <img
                             src={images[currentIndex].url}
+                            srcSet={images[currentIndex].srcset}
+                            sizes={images[currentIndex].sizes}
                             alt={images[currentIndex].alt || `Gallery image ${currentIndex + 1}`}
                             className="w-full h-full object-cover pointer-events-none"
                             loading="lazy"
@@ -399,7 +403,7 @@ export default function GalleryCarousel({ images, className = '' }: GalleryCarou
                                     }}
                                 >
                                     <img
-                                        src={images[lightboxIndex].url}
+                                        src={images[lightboxIndex].fullUrl || images[lightboxIndex].url}
                                         alt={images[lightboxIndex].alt || `Gallery image ${lightboxIndex + 1}`}
                                         draggable={false}
                                         className="max-w-full max-h-full object-contain select-none"
